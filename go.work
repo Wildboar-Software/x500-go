@@ -1,6 +1,9 @@
 go 1.23.4
 
-use ./teletex
-use ./nsap-address
-use ./x500
-use ./x500-dap-client
+use (
+  ./teletex
+  ./nsap-address
+  ./x500
+  ./x500-dap-client
+)
+

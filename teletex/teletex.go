@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 package teletex
 
 // Convert a single Teletex (T.61) character to its UTF-8 equivalent.
