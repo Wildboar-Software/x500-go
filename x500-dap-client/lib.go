@@ -1,13 +1,12 @@
-package x500_go
+package x500
 
 import (
 	"context"
 	"crypto/x509"
 	"encoding/asn1"
-	"errors"
-	"fmt"
 	"math/big"
 	"time"
+  "github.com/Wildboar-Software/x500-go/x500"
 )
 
 type OutcomeType = int
@@ -50,18 +49,18 @@ type AttributeOrValueProblem struct {
 // TODO: Use this?
 type X500OperationError struct {
 	ApplicationContext asn1.ObjectIdentifier
-	InvokeId           InvokeId
+	InvokeId           x500.InvokeId
 	Code               int
 	Problem            int                       // Present in many error types
-	MatchedObject      Name                      // Used by attributeError and nameError
-	AbandonedOperation InvokeId                  // Used by abandoned
-	Candidate          ContinuationReference     // Used by referral
-	ContextPrefix      DistinguishedName         // Used by dsaReferral
+	MatchedObject      x500.Name                      // Used by attributeError and nameError
+	AbandonedOperation x500.InvokeId                  // Used by abandoned
+	Candidate          x500.ContinuationReference     // Used by referral
+	ContextPrefix      x500.DistinguishedName         // Used by dsaReferral
 	AttributeProblems  []AttributeOrValueProblem // Used by updateError and attributeError
-	SecurityParameters SecurityParameters
-	Performer          DistinguishedName
+	SecurityParameters x500.SecurityParameters
+	Performer          x500.DistinguishedName
 	AliasDereferenced  bool
-	Notification       []Attribute
+	Notification       []x500.Attribute
 }
 
 // The parameters of an X.500 directory bind, as well as those of the underlying
@@ -74,27 +73,27 @@ type X500AssociateArgument struct {
 	OSIProtocolVersion1               bool
 	CallingPresentationSelector       []byte
 	CalledPresentationSelector        []byte
-	PresentationContextDefinitionList Context_list
+	PresentationContextDefinitionList x500.Context_list
 	TransferSyntaxName                asn1.ObjectIdentifier
 	PresentationContextIdentifier     int
 
 	// AARQ-apdu Fields
 	ACSEProtocolVersion1          bool
 	ApplicationContext            asn1.ObjectIdentifier
-	CalledAPTitle                 DistinguishedName
-	CalledAETitle                 GeneralName
-	CalledAPInvocationIdentifier  AP_invocation_identifier
-	CalledAEInvocationIdentifier  AE_invocation_identifier
-	CallingAPTitle                DistinguishedName
-	CallingAETitle                GeneralName
-	CallingAPInvocationIdentifier AP_invocation_identifier
-	CallingAEInvocationIdentifier AE_invocation_identifier
+	CalledAPTitle                 x500.DistinguishedName
+	CalledAETitle                 x500.GeneralName
+	CalledAPInvocationIdentifier  x500.AP_invocation_identifier
+	CalledAEInvocationIdentifier  x500.AE_invocation_identifier
+	CallingAPTitle                x500.DistinguishedName
+	CallingAETitle                x500.GeneralName
+	CallingAPInvocationIdentifier x500.AP_invocation_identifier
+	CallingAEInvocationIdentifier x500.AE_invocation_identifier
 	ImplementationInformation     string
 
 	// Fields from DirectoryBindArgument
 	V1          bool
 	V2          bool
-	Credentials *Credentials
+	Credentials *x500.Credentials
 }
 
 // Describes the result of a directory bind, using either IDM or OSI protocols,
@@ -111,59 +110,59 @@ type X500AssociateOutcome struct {
 	ModeSelector                      int // SHOULD always be 1
 	OSIProtocolVersion1               bool
 	RespondingPresentationSelector    *big.Int
-	PresentationContextDefinitionList Result_list
+	PresentationContextDefinitionList x500.Result_list
 	TransferSyntaxName                asn1.ObjectIdentifier
 	PresentationContextIdentifier     int
-	ProviderReason                    Provider_reason
+	ProviderReason                    x500.Provider_reason
 
 	// ACSE AARE-apdu and AAREerr-apdu Fields
 	ACSEProtocolVersion1              bool
 	ApplicationContext                asn1.ObjectIdentifier
-	ACSEResult                        Associate_result                                  // 0 if successful
-	AssociateSourceDiagnosticUser     Associate_source_diagnostic_acse_service_user     // Set to -1 if unset
-	AssociateSourceDiagnosticProvider Associate_source_diagnostic_acse_service_provider // Set to -1 if unset
+	ACSEResult                        x500.Associate_result                                  // 0 if successful
+	AssociateSourceDiagnosticUser     x500.Associate_source_diagnostic_acse_service_user     // Set to -1 if unset
+	AssociateSourceDiagnosticProvider x500.Associate_source_diagnostic_acse_service_provider // Set to -1 if unset
 
 	// ACSE uses separate responding AP-title and AE-qualifier fields, because
 	// it is assumed that every AE has a directory name.
 	// IDM uses GeneralName. Since a GeneralName is a superset, we use that
 	// instead.
-	RespondingAPTitle                DistinguishedName
-	RespondingAETitle                GeneralName
+	RespondingAPTitle                x500.DistinguishedName
+	RespondingAETitle                x500.GeneralName
 	RespondingAPInvocationIdentifier int
 	RespondingAEInvocationIdentifier int
 	ImplementationInformation        string
 
 	// Fields specific to the IDM protocol
-	AETitleError IdmBindError_aETitleError // Set to -1 if unset
+	AETitleError x500.IdmBindError_aETitleError // Set to -1 if unset
 
 	// Fields from DirectoryBindResult, directoryBindError
 	V1                         bool
 	V2                         bool
-	Credentials                Credentials     // NULL value if unset
+	Credentials                x500.Credentials     // NULL value if unset
 	PwdResponseTimeLeft        int             // -1 if unset
 	PwdResponseGracesRemaining int             // -1 if unset
 	PwdResponseError           int             // -1 if unset
-	ServiceError               ServiceProblem  // Set to -1 if unset
-	SecurityError              SecurityProblem // Set to -1 if unset
-	SecurityParameters         SecurityParameters
+	ServiceError               x500.ServiceProblem  // Set to -1 if unset
+	SecurityError              x500.SecurityProblem // Set to -1 if unset
+	SecurityParameters         x500.SecurityParameters
 }
 
 // A Remote Operation Service Element (ROSE) request
 type X500Request struct {
-	PresentationContextIdentifier Presentation_context_identifier
-	InvokeId                      InvokeId
-	OpCode                        Code
+	PresentationContextIdentifier x500.Presentation_context_identifier
+	InvokeId                      x500.InvokeId
+	OpCode                        x500.Code
 	Argument                      asn1.RawValue
 }
 
 // A Remote Operation Service Element (ROSE) abort
 type X500Abort struct {
-	PresentationContextIdentifierList Presentation_context_identifier_list
-	PresentationContextIdentifier     Presentation_context_identifier
-	AbortSource                       ABRT_source
-	ProviderReason                    Abort_reason
-	EventIdentifier                   Event_identifier
-	UserReason                        Abort // Only used by IDM Abort
+	PresentationContextIdentifierList x500.Presentation_context_identifier_list
+	PresentationContextIdentifier     x500.Presentation_context_identifier
+	AbortSource                       x500.ABRT_source
+	ProviderReason                    x500.Abort_reason
+	EventIdentifier                   x500.Event_identifier
+	UserReason                        x500.Abort // Only used by IDM Abort
 }
 
 // A Remote Operation Service Element (ROSE) outcome: a generalization over
@@ -172,9 +171,9 @@ type X500Abort struct {
 // lower layers, such as a TCP socket closure.
 type X500OpOutcome struct {
 	OutcomeType   OutcomeType
-	InvokeId      InvokeId      // This is always set for any outcome type.
-	OpCode        Code          // Only set if OutcomeType == OPERATION_OUTCOME_TYPE_RESULT
-	ErrCode       Code          // Only set if OutcomeType == OPERATION_OUTCOME_TYPE_ERROR
+	InvokeId      x500.InvokeId      // This is always set for any outcome type.
+	OpCode        x500.Code          // Only set if OutcomeType == OPERATION_OUTCOME_TYPE_RESULT
+	ErrCode       x500.Code          // Only set if OutcomeType == OPERATION_OUTCOME_TYPE_ERROR
 	Parameter     asn1.RawValue // The result or error.
 	RejectProblem RejectProblem // Only set if OutcomeType == OPERATION_OUTCOME_TYPE_REJECT
 	Abort         X500Abort     // Only set if OutcomeType == OPERATION_OUTCOME_TYPE_ABORT
@@ -184,21 +183,21 @@ type X500OpOutcome struct {
 // TODO: Rename to generalize over ROSE instead of X.500
 // A Remote Operation Service Element (ROSE) unbind request
 type X500UnbindRequest struct {
-	PresentationContextIdentifier Presentation_context_identifier
-	Reason                        Release_request_reason
+	PresentationContextIdentifier x500.Presentation_context_identifier
+	Reason                        x500.Release_request_reason
 }
 
 // A Remote Operation Service Element (ROSE) unbind outcome
 type X500UnbindOutcome struct {
-	PresentationContextIdentifier Presentation_context_identifier
-	Reason                        Release_response_reason
+	PresentationContextIdentifier x500.Presentation_context_identifier
+	Reason                        x500.Release_response_reason
 }
 
 // An Internet Directly-Mapped `startTLS` message outcome, which may be a
 // `tlsResponse` message or an error.
 type StartTLSOutcome struct {
 	err      error
-	response TLSResponse
+	response x500.TLSResponse
 }
 
 // Remote Operation Service Element (ROSE) per ITU-T Recommendation X.880.
@@ -234,37 +233,37 @@ type DirectoryAccessClient interface {
 	// DAP Operations
 
 	// Perform the `read` Directory Access Protocol (DAP) operation. The `result` returned may be `nil`.
-	Read(ctx context.Context, arg_data ReadArgumentData) (response X500OpOutcome, result *ReadResultData, err error)
+	Read(ctx context.Context, arg_data x500.ReadArgumentData) (response X500OpOutcome, result *x500.ReadResultData, err error)
 
 	// Perform the `compare` Directory Access Protocol (DAP) operation. The `result` returned may be `nil`.
-	Compare(ctx context.Context, arg_data CompareArgumentData) (resp X500OpOutcome, result *CompareResultData, err error)
+	Compare(ctx context.Context, arg_data x500.CompareArgumentData) (resp X500OpOutcome, result *x500.CompareResultData, err error)
 
 	// Perform the `abandon` Directory Access Protocol (DAP) operation. The `result` returned may be `nil`.
-	Abandon(ctx context.Context, arg_data AbandonArgumentData) (resp X500OpOutcome, result *AbandonResultData, err error)
+	Abandon(ctx context.Context, arg_data x500.AbandonArgumentData) (resp X500OpOutcome, result *x500.AbandonResultData, err error)
 
 	// Perform the `list` Directory Access Protocol (DAP) operation. The `info` returned may be `nil`.
-	List(ctx context.Context, arg_data ListArgumentData) (resp X500OpOutcome, info *ListResultData_listInfo, err error)
+	List(ctx context.Context, arg_data x500.ListArgumentData) (resp X500OpOutcome, info *x500.ListResultData_listInfo, err error)
 
 	// Perform the `search` Directory Access Protocol (DAP) operation. The `info` returned may be `nil`.
-	Search(ctx context.Context, arg_data SearchArgumentData) (resp X500OpOutcome, info *SearchResultData_searchInfo, err error)
+	Search(ctx context.Context, arg_data x500.SearchArgumentData) (resp X500OpOutcome, info *x500.SearchResultData_searchInfo, err error)
 
 	// Perform the `addEntry` Directory Access Protocol (DAP) operation. The `result` returned may be `nil`.
-	AddEntry(ctx context.Context, arg_data AddEntryArgumentData) (resp X500OpOutcome, result *AddEntryResultData, err error)
+	AddEntry(ctx context.Context, arg_data x500.AddEntryArgumentData) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
 
 	// Perform the `removeEntry` Directory Access Protocol (DAP) operation. The `result` returned may be `nil`.
-	RemoveEntry(ctx context.Context, arg_data RemoveEntryArgumentData) (resp X500OpOutcome, result *RemoveEntryResultData, err error)
+	RemoveEntry(ctx context.Context, arg_data x500.RemoveEntryArgumentData) (resp X500OpOutcome, result *x500.RemoveEntryResultData, err error)
 
 	// Perform the `modifyEntry` Directory Access Protocol (DAP) operation. The `result` returned may be `nil`.
-	ModifyEntry(ctx context.Context, arg_data ModifyEntryArgumentData) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
+	ModifyEntry(ctx context.Context, arg_data x500.ModifyEntryArgumentData) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
 
 	// Perform the `modifyDN` Directory Access Protocol (DAP) operation. The `result` returned may be `nil`.
-	ModifyDN(ctx context.Context, arg_data ModifyDNArgumentData) (resp X500OpOutcome, result *ModifyDNResultData, err error)
+	ModifyDN(ctx context.Context, arg_data x500.ModifyDNArgumentData) (resp X500OpOutcome, result *x500.ModifyDNResultData, err error)
 
 	// Perform the `changePassword` Directory Access Protocol (DAP) operation. The `result` returned may be `nil`.
-	ChangePassword(ctx context.Context, arg_data ChangePasswordArgumentData) (resp X500OpOutcome, result *ChangePasswordResultData, err error)
+	ChangePassword(ctx context.Context, arg_data x500.ChangePasswordArgumentData) (resp X500OpOutcome, result *x500.ChangePasswordResultData, err error)
 
 	// Perform the `administerPassword` Directory Access Protocol (DAP) operation. The `result` returned may be `nil`.
-	AdministerPassword(ctx context.Context, arg_data AdministerPasswordArgumentData) (resp X500OpOutcome, result *AdministerPasswordResultData, err error)
+	AdministerPassword(ctx context.Context, arg_data x500.AdministerPasswordArgumentData) (resp X500OpOutcome, result *x500.AdministerPasswordResultData, err error)
 
 	// Higher-Level DAP API
 
@@ -275,77 +274,77 @@ type DirectoryAccessClient interface {
 	// An error will be returned if no signing key or no signing cert is configured.
 	// The `requesterDN` is _your_ DN. The `recipientDN` is the application entity
 	// title of the DSA.
-	BindStrongly(ctx context.Context, requesterdn DN, recipientdn DN, acPath *AttributeCertificationPath) (resp X500AssociateOutcome, err error)
+	BindStrongly(ctx context.Context, requesterdn DN, recipientdn DN, acPath *x500.AttributeCertificationPath) (resp X500AssociateOutcome, err error)
 
 	// Bind using the `PLAIN` Simple Authentication and Security Layer (SASL) Mechanism
 	BindPlainly(ctx context.Context, username string, password string) (resp X500AssociateOutcome, err error)
 
 	// Read selected user attributes from an entry named by a distinguished name.
 	// `result` may be `nil`
-	ReadSimple(ctx context.Context, dn DN, userAttributes []asn1.ObjectIdentifier) (response X500OpOutcome, result *ReadResultData, err error)
+	ReadSimple(ctx context.Context, dn DN, userAttributes []asn1.ObjectIdentifier) (response X500OpOutcome, result *x500.ReadResultData, err error)
 
 	// Remove an entry named by the distinguished name `dn` using the
 	// `removeEntry` X.500 Directory Access Protocol (DAP) operation.
-	RemoveEntryByDN(ctx context.Context, dn DN) (resp X500OpOutcome, result *RemoveEntryResultData, err error)
+	RemoveEntryByDN(ctx context.Context, dn DN) (resp X500OpOutcome, result *x500.RemoveEntryResultData, err error)
 
 	// Abandon an X.500 Directory operation by its invoke ID.
-	AbandonById(ctx context.Context, invokeId int) (resp X500OpOutcome, result *AbandonResultData, err error)
+	AbandonById(ctx context.Context, invokeId int) (resp X500OpOutcome, result *x500.AbandonResultData, err error)
 
 	// List up to `limit` subordinates underneath the entry named by the
 	// distinguished name `dn`.
-	ListByDN(ctx context.Context, dn DN, limit int) (resp X500OpOutcome, info *ListResultData_listInfo, err error)
+	ListByDN(ctx context.Context, dn DN, limit int) (resp X500OpOutcome, info *x500.ListResultData_listInfo, err error)
 
 	// Add a new entry having distinguished name `dn` and composed of attributes
 	// `attrs`. If you need to use the `targetSystem` field to add an entry in
 	// another DSA and establish a hierarchical operational binding, you will
 	// need to use the lower-level [AddEntry] method.
-	AddEntrySimple(ctx context.Context, dn DN, attrs []Attribute) (resp X500OpOutcome, result *AddEntryResultData, err error)
+	AddEntrySimple(ctx context.Context, dn DN, attrs []x500.Attribute) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
 
 	// Invoke the `changePassword` operation on the entry named by distinguished
 	// name `dn` using unencrypted values `old` and `new` for `oldPwd` and
 	// `newPwd` respectively.
-	ChangePasswordSimple(ctx context.Context, dn DN, old string, new string) (resp X500OpOutcome, result *ChangePasswordResultData, err error)
+	ChangePasswordSimple(ctx context.Context, dn DN, old string, new string) (resp X500OpOutcome, result *x500.ChangePasswordResultData, err error)
 
 	// Invoke the `administerPassword` operation on the entry named by
 	// distinguished name `dn` using the unencrypted value `new` for `newPwd`.
-	AdministerPasswordSimple(ctx context.Context, dn DN, new string) (resp X500OpOutcome, result *AdministerPasswordResultData, err error)
+	AdministerPasswordSimple(ctx context.Context, dn DN, new string) (resp X500OpOutcome, result *x500.AdministerPasswordResultData, err error)
 }
 
-type DN = DistinguishedName
+type DN = x500.DistinguishedName
 
 type Subschema struct {
-	AttributeTypes   *[]AttributeTypeDescription
-	ObjectClasses    *[]ObjectClassDescription
-	NameForms        *[]NameFormDescription
-	StructureRules   *[]DITStructureRuleDescription
-	ContentRules     *[]DITContentRuleDescription
-	Friendships      *[]FriendsDescription
-	MatchingRules    *[]MatchingRuleDescription
-	MatchingRuleUses *[]MatchingRuleUseDescription
-	SyntaxNames      *[]LdapSyntaxDescription
-	ContextUses      *[]DITContextUseDescription
-	ContextTypes     *[]ContextDescription
+	AttributeTypes   *[]x500.AttributeTypeDescription
+	ObjectClasses    *[]x500.ObjectClassDescription
+	NameForms        *[]x500.NameFormDescription
+	StructureRules   *[]x500.DITStructureRuleDescription
+	ContentRules     *[]x500.DITContentRuleDescription
+	Friendships      *[]x500.FriendsDescription
+	MatchingRules    *[]x500.MatchingRuleDescription
+	MatchingRuleUses *[]x500.MatchingRuleUseDescription
+	SyntaxNames      *[]x500.LdapSyntaxDescription
+	ContextUses      *[]x500.DITContextUseDescription
+	ContextTypes     *[]x500.ContextDescription
 }
 
 type DSAInfo struct {
 	VendorName              string
 	VendorVersion           string
 	FullVendorVersion       string
-	MyAccessPoint           AccessPoint
-	SuperiorKnowledge       []AccessPoint
-	DITBridgeKnowledge      []DitBridgeKnowledge
-	SubschemaSubentry       DistinguishedName
+	MyAccessPoint           x500.AccessPoint
+	SuperiorKnowledge       []x500.AccessPoint
+	DITBridgeKnowledge      []x500.DitBridgeKnowledge
+	SubschemaSubentry       x500.DistinguishedName
 	SupportedControls       asn1.ObjectIdentifier
 	SupportedExtensions     asn1.ObjectIdentifier
 	SupportedFeatures       asn1.ObjectIdentifier
 	SupportedLDAPVersion    int
-	DynamicSubtrees         []DistinguishedName
+	DynamicSubtrees         []x500.DistinguishedName
 	AltServers              []string
 	SupportedSASLMechanisms []string
-	NamingContexts          []DistinguishedName
+	NamingContexts          []x500.DistinguishedName
 
 	// A catch-all, which includes all attributes (user and operational)
-	RootDSEAttributes []Attribute
+	RootDSEAttributes []x500.Attribute
 }
 
 // This type describes an entry of object classes person, residentialPerson,
@@ -428,7 +427,7 @@ type CreateDomainOptions struct {
 	description                []string
 	businessCategory           []string
 	seeAlso                    []DN
-	searchGuide                []Guide
+	searchGuide                []x500.Guide
 	userPassword               []string
 	localityName               []string
 	stateOrProvinceName        []string
@@ -445,7 +444,7 @@ type CreateOrganizationOptions struct {
 	description                []string
 	businessCategory           []string
 	seeAlso                    []DN
-	searchGuide                []Guide
+	searchGuide                []x500.Guide
 	userPassword               string
 	stateOrProvinceName        string
 	localityName               string
@@ -492,20 +491,20 @@ type BecomeISOTagInfoOptions struct {
 	contentUrl  []string
 	uii         asn1.BitString
 	uiiInUrn    string
-	tagLocation *UtmCoordinates
+	tagLocation *x500.UtmCoordinates
 }
 
 type BecomeISOTagTypeOptions struct {
 	tagOid    asn1.ObjectIdentifier
 	tagAfi    byte
-	uiiFormat *UiiFormat
+	uiiFormat *x500.UiiFormat
 }
 
 type BecomeEPCTaginfoOptions struct {
 	epc         asn1.BitString
 	epcInUrn    string
 	contentUrl  []string
-	tagLocation *UtmCoordinates
+	tagLocation *x500.UtmCoordinates
 }
 
 type BecomePosixAccountOptions struct {
@@ -548,192 +547,166 @@ type BecomeNaturalPersonOptions struct {
 type SchemaAwareDirectoryAccessClient interface {
 	// Create Specific Entries
 
-	CreateSubentry(ctx context.Context, superior DN, name string, subtreeSpec []SubtreeSpecification) (resp X500OpOutcome, result *AddEntryResultData, err error)
+	CreateSubentry(ctx context.Context, superior DN, name string, subtreeSpec []x500.SubtreeSpecification) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
 	// If name is not "", the friendlyCountry object class is used.
-	CreatePerson(ctx context.Context, superior DN, cn, surname string, opts *CreatePersonOptions) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateOrgPerson(ctx context.Context, superior DN, cn, surname string, opts *CreatePersonOptions) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateResPerson(ctx context.Context, dn DN, cn, surname string, opts *CreatePersonOptions) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateInetOrgPerson(ctx context.Context, dn DN, cn, surname string, opts *CreatePersonOptions) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreatePilotPerson(ctx context.Context, dn DN, cn, surname string, opts *CreatePersonOptions) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateCountry(ctx context.Context, superior DN, iso2Code, desc, name string) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateStateOrProvince(ctx context.Context, superior DN, name, desc string) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateLocality(ctx context.Context, superior DN, name, desc string) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateOrganization(ctx context.Context, superior DN, name string, opts *CreateOrganizationOptions) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateOrgUnit(ctx context.Context, superior DN, name string, opts *CreateOrganizationOptions) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateOrgRole(ctx context.Context, superior DN, name, desc string, members []DN) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateProcess(ctx context.Context, superior DN, name, desc string) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateAppEntity(ctx context.Context, superior DN, name string, addr PresentationAddress, desc string) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateDSA(ctx context.Context, superior DN, name string, addr PresentationAddress, desc string) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateDevice(ctx context.Context, superior DN, name, serial, desc string, owner DN) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateDMD(ctx context.Context, superior DN, name, desc string) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateOIDRoot(ctx context.Context, superior DN, arc1, arc2, arc3 int, aliasedEntry DN) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateOIDArc(ctx context.Context, superior DN, arc int, aliasedEntry DN) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateGroupOfUrlsEntry(ctx context.Context, superior DN, name, desc, org string, members []string, owner DN) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateAliasEntry(ctx context.Context, dn, aliasedEntry DN) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateCRLDPEntry(ctx context.Context, superior DN, name string, crl, eepk, authority, delta *x509.RevocationList) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateDomain(ctx context.Context, superior DN, dc string, opts *CreateDomainOptions) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateAccount(ctx context.Context, superior DN, uid string, opts *CreateAccountOptions) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateDocument(ctx context.Context, superior DN, docid string, opts *CreateDocumentOptions) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateDocumentSeries(ctx context.Context, superior DN, name string, opts *CreateDocumentSeriesOptions) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateRoom(ctx context.Context, superior DN, name, number, desc, phone string, seeAlso []DN) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreatePosixGroup(ctx context.Context, superior DN, gid int, name, desc, userpwd string, members []string) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateIPService(ctx context.Context, superior DN, name, transport string, port int, manager DN) (resp X500OpOutcome, result *AddEntryResultData, err error)
-	CreateIPNetwork(ctx context.Context, superior DN, name, ip, netmask, loc, desc string) (resp X500OpOutcome, result *AddEntryResultData, err error)
+	CreatePerson(ctx context.Context, superior DN, cn, surname string, opts *CreatePersonOptions) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateOrgPerson(ctx context.Context, superior DN, cn, surname string, opts *CreatePersonOptions) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateResPerson(ctx context.Context, dn DN, cn, surname string, opts *CreatePersonOptions) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateInetOrgPerson(ctx context.Context, dn DN, cn, surname string, opts *CreatePersonOptions) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreatePilotPerson(ctx context.Context, dn DN, cn, surname string, opts *CreatePersonOptions) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateCountry(ctx context.Context, superior DN, iso2Code, desc, name string) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateStateOrProvince(ctx context.Context, superior DN, name, desc string) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateLocality(ctx context.Context, superior DN, name, desc string) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateOrganization(ctx context.Context, superior DN, name string, opts *CreateOrganizationOptions) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateOrgUnit(ctx context.Context, superior DN, name string, opts *CreateOrganizationOptions) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateOrgRole(ctx context.Context, superior DN, name, desc string, members []DN) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateProcess(ctx context.Context, superior DN, name, desc string) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateAppEntity(ctx context.Context, superior DN, name string, addr x500.PresentationAddress, desc string) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateDSA(ctx context.Context, superior DN, name string, addr x500.PresentationAddress, desc string) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateDevice(ctx context.Context, superior DN, name, serial, desc string, owner DN) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateDMD(ctx context.Context, superior DN, name, desc string) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateOIDRoot(ctx context.Context, superior DN, arc1, arc2, arc3 int, aliasedEntry DN) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateOIDArc(ctx context.Context, superior DN, arc int, aliasedEntry DN) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateGroupOfUrlsEntry(ctx context.Context, superior DN, name, desc, org string, members []string, owner DN) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateAliasEntry(ctx context.Context, dn, aliasedEntry DN) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateCRLDPEntry(ctx context.Context, superior DN, name string, crl, eepk, authority, delta *x509.RevocationList) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateDomain(ctx context.Context, superior DN, dc string, opts *CreateDomainOptions) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateAccount(ctx context.Context, superior DN, uid string, opts *CreateAccountOptions) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateDocument(ctx context.Context, superior DN, docid string, opts *CreateDocumentOptions) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateDocumentSeries(ctx context.Context, superior DN, name string, opts *CreateDocumentSeriesOptions) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateRoom(ctx context.Context, superior DN, name, number, desc, phone string, seeAlso []DN) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreatePosixGroup(ctx context.Context, superior DN, gid int, name, desc, userpwd string, members []string) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateIPService(ctx context.Context, superior DN, name, transport string, port int, manager DN) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
+	CreateIPNetwork(ctx context.Context, superior DN, name, ip, netmask, loc, desc string) (resp X500OpOutcome, result *x500.AddEntryResultData, err error)
 
 	// Add Specific Auxiliary Object Classes
 
-	BecomePasswordAdminSubentry(ctx context.Context, dn DN, pwdAttribute AttributeType, opts *PasswordPolicyOptions) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeSubschemaSubentry(ctx context.Context, dn DN, schema *Subschema) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeServiceAdminSubentry(ctx context.Context, dn DN, searchRules []SearchRuleDescription) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeContextAssertionDefaultSubentry(ctx context.Context, dn DN, cads []TypeAndContextAssertion) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomePMIUser(ctx context.Context, dn DN, ac *AttributeCertificate) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomePMIAA(ctx context.Context, dn DN, aaCert *AttributeCertificate, crls *CRLOptions) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomePMISOA(ctx context.Context, dn DN, adc *AttributeCertificate, crls *CRLOptions) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeAttCertCRLDistPoint(ctx context.Context, dn DN, crls *CRLOptions) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomePKIUser(ctx context.Context, dn DN, userCert *x509.Certificate) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomePKICA(ctx context.Context, dn DN, cacert *x509.Certificate, opts *CRLOptions) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomePMIDelegationPath(ctx context.Context, dn DN, path []AttCertPath) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomePrivilegePolicy(ctx context.Context, dn DN, policies []PolicySyntax) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeProtectedPrivilegePolicy(ctx context.Context, dn DN, policies []AttributeCertificate) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeDeltaCRL(ctx context.Context, dn DN, deltaCRLs []x509.RevocationList) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeCPCPS(ctx context.Context, dn DN, statements []InfoSyntax, policies []PolicySyntax) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomePKICertPath(ctx context.Context, dn DN, paths []PkiPath) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeStrongAuthenticationUser(ctx context.Context, dn DN, usercerts []x509.Certificate) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeUserSecurityInfo(ctx context.Context, dn DN, supportedAlgs []SupportedAlgorithm) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeUserPwdClass(ctx context.Context, dn DN, pwd UserPwd) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeCertificationAuthority(ctx context.Context, dn DN, cert x509.Certificate, crls *CRLOptions) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeISOTagInfo(ctx context.Context, dn DN, opts *BecomeISOTagInfoOptions) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeISOTagType(ctx context.Context, dn DN, opts *BecomeISOTagTypeOptions) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeEPCTagInfo(ctx context.Context, dn DN, opts *BecomeEPCTaginfoOptions) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeEPCTagType(ctx context.Context, dn DN, format UiiFormat) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomePosixAccount(ctx context.Context, dn DN, opts *BecomePosixAccountOptions) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeShadowAccount(ctx context.Context, dn DN, opts *BecomeShadowAccount) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeIEEE802Device(ctx context.Context, dn DN, macAddress string) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeIPHost(ctx context.Context, dn DN, cn, ip, desc, loc string, manager DN) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	BecomeNaturalPerson(ctx context.Context, dn DN, opts *BecomeNaturalPersonOptions) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
+	BecomePasswordAdminSubentry(ctx context.Context, dn DN, pwdAttribute x500.AttributeType, opts *PasswordPolicyOptions) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeSubschemaSubentry(ctx context.Context, dn DN, schema *Subschema) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeServiceAdminSubentry(ctx context.Context, dn DN, searchRules []x500.SearchRuleDescription) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeContextAssertionDefaultSubentry(ctx context.Context, dn DN, cads []x500.TypeAndContextAssertion) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomePMIUser(ctx context.Context, dn DN, ac *x500.AttributeCertificate) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomePMIAA(ctx context.Context, dn DN, aaCert *x500.AttributeCertificate, crls *CRLOptions) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomePMISOA(ctx context.Context, dn DN, adc *x500.AttributeCertificate, crls *CRLOptions) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeAttCertCRLDistPoint(ctx context.Context, dn DN, crls *CRLOptions) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomePKIUser(ctx context.Context, dn DN, userCert *x509.Certificate) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomePKICA(ctx context.Context, dn DN, cacert *x509.Certificate, opts *CRLOptions) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomePMIDelegationPath(ctx context.Context, dn DN, path []x500.AttCertPath) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomePrivilegePolicy(ctx context.Context, dn DN, policies []x500.PolicySyntax) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeProtectedPrivilegePolicy(ctx context.Context, dn DN, policies []x500.AttributeCertificate) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeDeltaCRL(ctx context.Context, dn DN, deltaCRLs []x509.RevocationList) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeCPCPS(ctx context.Context, dn DN, statements []x500.InfoSyntax, policies []x500.PolicySyntax) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomePKICertPath(ctx context.Context, dn DN, paths []x500.PkiPath) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeStrongAuthenticationUser(ctx context.Context, dn DN, usercerts []x509.Certificate) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeUserSecurityInfo(ctx context.Context, dn DN, supportedAlgs []x500.SupportedAlgorithm) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeUserPwdClass(ctx context.Context, dn DN, pwd x500.UserPwd) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeCertificationAuthority(ctx context.Context, dn DN, cert x509.Certificate, crls *CRLOptions) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeISOTagInfo(ctx context.Context, dn DN, opts *BecomeISOTagInfoOptions) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeISOTagType(ctx context.Context, dn DN, opts *BecomeISOTagTypeOptions) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeEPCTagInfo(ctx context.Context, dn DN, opts *BecomeEPCTaginfoOptions) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeEPCTagType(ctx context.Context, dn DN, format x500.UiiFormat) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomePosixAccount(ctx context.Context, dn DN, opts *BecomePosixAccountOptions) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeShadowAccount(ctx context.Context, dn DN, opts *BecomeShadowAccount) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeIEEE802Device(ctx context.Context, dn DN, macAddress string) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeIPHost(ctx context.Context, dn DN, cn, ip, desc, loc string, manager DN) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	BecomeNaturalPerson(ctx context.Context, dn DN, opts *BecomeNaturalPersonOptions) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
 
 	// Methods for Viewing Schema
 
 	GetSubschema(ctx context.Context, dn DN) (resp X500OpOutcome, result *Subschema, err error)
-	ListAttributeTypes(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]AttributeTypeDescription, err error)
-	ListObjectClasses(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]ObjectClassDescription, err error)
-	ListNameForms(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]NameFormDescription, err error)
-	ListStructureRules(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]DITStructureRuleDescription, err error)
-	ListContentRules(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]DITContentRuleDescription, err error)
-	ListFriendships(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]FriendsDescription, err error)
-	ListMatchingRules(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]MatchingRuleDescription, err error)
-	ListMatchingRuleUses(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]MatchingRuleUseDescription, err error)
-	ListSyntaxNames(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]LdapSyntaxDescription, err error)
-	ListContextUses(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]DITContextUseDescription, err error)
-	ListSearchRules(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]SearchRuleDescription, err error)
-	ListSubentries(ctx context.Context, dn DN) (resp X500OpOutcome, result *ListResultData, err error)
+	ListAttributeTypes(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]x500.AttributeTypeDescription, err error)
+	ListObjectClasses(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]x500.ObjectClassDescription, err error)
+	ListNameForms(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]x500.NameFormDescription, err error)
+	ListStructureRules(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]x500.DITStructureRuleDescription, err error)
+	ListContentRules(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]x500.DITContentRuleDescription, err error)
+	ListFriendships(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]x500.FriendsDescription, err error)
+	ListMatchingRules(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]x500.MatchingRuleDescription, err error)
+	ListMatchingRuleUses(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]x500.MatchingRuleUseDescription, err error)
+	ListSyntaxNames(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]x500.LdapSyntaxDescription, err error)
+	ListContextUses(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]x500.DITContextUseDescription, err error)
+	ListSearchRules(ctx context.Context, dn DN) (resp X500OpOutcome, result *[]x500.SearchRuleDescription, err error)
+	ListSubentries(ctx context.Context, dn DN) (resp X500OpOutcome, result *x500.ListResultData, err error)
 
 	// Group Management
 
-	GroupAdd(ctx context.Context, group, member DN, uid *asn1.BitString) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	GroupRemove(ctx context.Context, group, member DN, uid *asn1.BitString) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	GroupCheckMember(ctx context.Context, group, member DN, uid *asn1.BitString) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
+	GroupAdd(ctx context.Context, group, member DN, uid *asn1.BitString) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	GroupRemove(ctx context.Context, group, member DN, uid *asn1.BitString) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	GroupCheckMember(ctx context.Context, group, member DN, uid *asn1.BitString) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
 
 	// PKI and PMI Management
 
-	AddPublicKeyCertificate(ctx context.Context, dn DN, cert x509.Certificate) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	AddAttributeCertificate(ctx context.Context, dn DN, acert AttributeCertificate) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
+	AddPublicKeyCertificate(ctx context.Context, dn DN, cert x509.Certificate) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	AddAttributeCertificate(ctx context.Context, dn DN, acert x500.AttributeCertificate) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
 
 	// Administrative Role Management
 
-	AddAdministrativeRole(ctx context.Context, dn DN, role asn1.ObjectIdentifier) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	RemoveAdministrativeRole(ctx context.Context, dn DN, role asn1.ObjectIdentifier) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
+	AddAdministrativeRole(ctx context.Context, dn DN, role asn1.ObjectIdentifier) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	RemoveAdministrativeRole(ctx context.Context, dn DN, role asn1.ObjectIdentifier) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
 
 	// Entry Modifications
 
-	AddAttribute(ctx context.Context, dn DN, attr Attribute) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	RemoveAttribute(ctx context.Context, dn DN, attr AttributeType) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	AddValues(ctx context.Context, dn DN, values Attribute) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	RemoveValues(ctx context.Context, dn DN, values Attribute) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	AlterValues(ctx context.Context, dn DN, attrtype AttributeType, addend int) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	ResetValue(ctx context.Context, dn DN, attr AttributeType) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	ReplaceValues(ctx context.Context, dn DN, attr Attribute) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
+	AddAttribute(ctx context.Context, dn DN, attr x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	RemoveAttribute(ctx context.Context, dn DN, attr x500.AttributeType) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	AddValues(ctx context.Context, dn DN, values x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	RemoveValues(ctx context.Context, dn DN, values x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	AlterValues(ctx context.Context, dn DN, attrtype x500.AttributeType, addend int) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	ResetValue(ctx context.Context, dn DN, attr x500.AttributeType) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	ReplaceValues(ctx context.Context, dn DN, attr x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
 
 	// Specific Modification Types
 
-	AddCollectiveExclusions(ctx context.Context, dn DN, attr AttributeType) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	SetAliasedEntryName(ctx context.Context, src, dest DN) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	AddPermission(ctx context.Context, dn DN, operation, object string) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	AddHierarchicalParent(ctx context.Context, dn, parent DistinguishedName) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
+	AddCollectiveExclusions(ctx context.Context, dn DN, attr x500.AttributeType) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	SetAliasedEntryName(ctx context.Context, src, dest DN) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	AddPermission(ctx context.Context, dn DN, operation, object string) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	AddHierarchicalParent(ctx context.Context, dn, parent x500.DistinguishedName) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
 
 	// General Entry Modifications
 
-	AddObjectClass(ctx context.Context, dn DN, oc asn1.ObjectIdentifier) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	RemoveObjectClass(ctx context.Context, dn DN, oc asn1.ObjectIdentifier) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
+	AddObjectClass(ctx context.Context, dn DN, oc asn1.ObjectIdentifier) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	RemoveObjectClass(ctx context.Context, dn DN, oc asn1.ObjectIdentifier) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
 
 	// Operational Attribute Modifications
-	SetCreateTimestamp(ctx context.Context, dn DN, ts time.Time) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	SetModifyTimestamp(ctx context.Context, dn DN, ts time.Time) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	SetCreatorsName(ctx context.Context, dn, creator DN) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
-	SetModifiersName(ctx context.Context, dn, modifier DN) (resp X500OpOutcome, result *ModifyEntryResultData, err error)
+	SetCreateTimestamp(ctx context.Context, dn DN, ts time.Time) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	SetModifyTimestamp(ctx context.Context, dn DN, ts time.Time) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	SetCreatorsName(ctx context.Context, dn, creator DN) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	SetModifiersName(ctx context.Context, dn, modifier DN) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
 
 	// Miscellaneous Utilities
 	GetDSAinfo(ctx context.Context) (info DSAInfo, err error)
 }
 
-// // Creates a [PresentationAddress] using an N-address formatted according to
-// // ITU-T Recommendation X.519 (2019), Section 11.3.1.
-// func NewLDAPPresentationAddress(hostname string, port int) PresentationAddress {
-
-// }
-
-// // Creates a [PresentationAddress] using an N-address formatted according to
-// // ITU-T Recommendation X.519 (2019), Section 11.3.2.
-// func NewIDMPresentationAddress(hostname string, port int) PresentationAddress {
-
-// }
-
-// // Creates a [PresentationAddress] using an N-address formatted according to
-// // ITU-T Recommendation X.519 (2019), Section 11.3.3.
-// func NewITOTPresentationAddress(hostname string, port int, t, s, p []byte) PresentationAddress {
-
-// }
-
-// // Creates a [PresentationAddress] using an N-address formatted according to
-// // ITU-T Recommendation X.519 (2019), Section 11.3.4.
-// func NewURLPresentationAddress(url string) PresentationAddress {
-
-// }
-
-// TODO: PresentationAddress.GetURL()
-
 type CommonArgumentsInterface interface {
-	GetServiceControls() ServiceControls
-	GetSecurityParameters() *SecurityParameters
+	GetServiceControls() x500.ServiceControls
+	GetSecurityParameters() *x500.SecurityParameters
 	GetRequestor() *DN
-	GetOperationProgress() OperationProgress
+	GetOperationProgress() x500.OperationProgress
 	GetAliasedRDNs() int
 	GetCriticalExtensions() *asn1.BitString
-	GetReferenceType() ReferenceType
+	GetReferenceType() x500.ReferenceType
 	GetEntryOnly() bool
-	GetExclusions() *Exclusions
+	GetExclusions() *x500.Exclusions
 	GetNameResolveOnMaster() bool
-	GetOperationContexts() *ContextSelection
-	GetFamilyGrouping() FamilyGrouping
+	GetOperationContexts() *x500.ContextSelection
+	GetFamilyGrouping() x500.FamilyGrouping
 }
 
 type CommonResultsInterface interface {
-	GetSecurityParameters() *SecurityParameters
+	GetSecurityParameters() *x500.SecurityParameters
 	GetPerformer() *DN
 	GetAliasDereferenced() bool
-	GetNotification() []Attribute
+	GetNotification() []x500.Attribute
 }
 
 type AccessPointInterface interface {
-	GetAETitle() Name
-	GetAddress() PresentationAddress
-	GetProtocolInformation() []ProtocolInformation
+	GetAETitle() x500.Name
+	GetAddress() x500.PresentationAddress
+	GetProtocolInformation() []x500.ProtocolInformation
 }
 
 type AVMPcommonComponentsInterface interface {
-	GetVersion() AVMPversion
+	GetVersion() x500.AVMPversion
 	GetTimestamp() time.Time
-	GetAVMPSequence() AVMPsequence
+	GetAVMPSequence() x500.AVMPsequence
 }
 
 type SchemaElement interface {

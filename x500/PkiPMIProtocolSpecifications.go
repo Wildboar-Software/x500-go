@@ -1,4 +1,4 @@
-package x500_go
+package x500
 
 import (
 	"crypto/x509"

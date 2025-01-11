@@ -1,9 +1,10 @@
-package x500_go
+package x500
 
 import (
 	"encoding/asn1"
 	"errors"
 	"fmt"
+  "github.com/Wildboar-Software/x500-go/teletex"
 )
 
 func ASN1RawValueToStr(value asn1.RawValue) (output string, err error) {
@@ -142,7 +143,7 @@ func DirectoryStringToString(ds asn1.RawValue) (s string, err error) {
 	case asn1.TagPrintableString:
 		return string(ds.Bytes), nil
 	case asn1.TagT61String:
-		return TeletexToUTF8(ds.Bytes), nil
+		return teletex.TeletexToUTF8(ds.Bytes), nil
 	case asn1.TagBMPString:
 		// Why, yes, I would LOVE to marshal a value just to immediately
 		// unmarshal it to a string, because I do not want to re-implement the

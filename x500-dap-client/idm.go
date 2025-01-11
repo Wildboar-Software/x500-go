@@ -1,4 +1,4 @@
-package x500_go
+package x500
 
 import (
 	"context"
@@ -21,6 +21,7 @@ import (
 	"runtime"
 	"sync"
 	"time"
+  "github.com/Wildboar-Software/x500-go/x500"
 )
 
 const BIND_RESPONSE_RECEIVE_BUFFER_SIZE = 4096
@@ -77,9 +78,9 @@ type IDMProtocolStack struct {
 	bound             bool
 	bindOutcome       chan X500AssociateOutcome
 	SigningKey        *crypto.Signer
-	SigningCert       *CertificationPath
-	ResultsSigning    ProtectionRequest
-	ErrorSigning      ErrorProtectionRequest
+	SigningCert       *x500.CertificationPath
+	ResultsSigning    x500.ProtectionRequest
+	ErrorSigning      x500.ErrorProtectionRequest
 	TlsConfig         *tls.Config
 	StartTLSPolicy    StartTLSChoice
 	derAccepted       bool // TODO: Remove?
@@ -90,11 +91,11 @@ type IDMProtocolStack struct {
 }
 
 type IDMClientConfig struct {
-	ResultSigning  ProtectionRequest
-	ErrorSigning   ErrorProtectionRequest
+	ResultSigning  x500.ProtectionRequest
+	ErrorSigning   x500.ErrorProtectionRequest
 	TlsConfig      *tls.Config
 	SigningKey     *crypto.Signer
-	SigningCert    *CertificationPath
+	SigningCert    *x500.CertificationPath
 	StartTLSPolicy StartTLSChoice
 	UseIDMv1       bool
 	Errchan        chan error
@@ -104,8 +105,8 @@ func IDMClient(socket Socket, options *IDMClientConfig) *IDMProtocolStack {
 	if options == nil {
 		errchan := make(chan error)
 		options = &IDMClientConfig{
-			ResultSigning:  ProtectionRequest_None,
-			ErrorSigning:   ProtectionRequest_None,
+			ResultSigning:  x500.ProtectionRequest_None,
+			ErrorSigning:   x500.ProtectionRequest_None,
 			TlsConfig:      nil,
 			SigningKey:     nil,
 			SigningCert:    nil,
@@ -164,7 +165,7 @@ func (stack *IDMProtocolStack) CloseTransport() error {
 	return err
 }
 
-func ConvertX500AssociateToIdmBind(arg X500AssociateArgument) (req IdmBind, err error) {
+func ConvertX500AssociateToIdmBind(arg X500AssociateArgument) (req x500.IdmBind, err error) {
 	bitLength := 0
 	var versions_byte byte = 0
 	if arg.V2 {
@@ -178,7 +179,7 @@ func ConvertX500AssociateToIdmBind(arg X500AssociateArgument) (req IdmBind, err 
 	if arg.Credentials != nil {
 		credbytes, err := asn1.Marshal(*arg.Credentials)
 		if err != nil {
-			return IdmBind{}, err
+			return x500.IdmBind{}, err
 		}
 		creds = asn1.RawValue{
 			Class:      asn1.ClassContextSpecific,
@@ -188,7 +189,7 @@ func ConvertX500AssociateToIdmBind(arg X500AssociateArgument) (req IdmBind, err 
 		}
 	}
 
-	bind_req := DirectoryBindArgument{
+	bind_req := x500.DirectoryBindArgument{
 		Versions: asn1.BitString{
 			BitLength: bitLength,
 			Bytes:     []byte{versions_byte},
@@ -197,10 +198,10 @@ func ConvertX500AssociateToIdmBind(arg X500AssociateArgument) (req IdmBind, err 
 	}
 	bind_req_bytes, err := asn1.MarshalWithParams(bind_req, "set")
 	if err != nil {
-		return IdmBind{}, err
+		return x500.IdmBind{}, err
 	}
-	req = IdmBind{
-		ProtocolID:     Id_idm_dap,
+	req = x500.IdmBind{
+		ProtocolID:     x500.Id_idm_dap,
 		CallingAETitle: arg.CallingAETitle,
 		CalledAETitle:  arg.CalledAETitle,
 		Argument: asn1.RawValue{
@@ -263,7 +264,7 @@ func (stack *IDMProtocolStack) readIDMv2Frame(startIndex uint32, frame *IDMFrame
 	return
 }
 
-func (stack *IDMProtocolStack) readPDU(pdu *IDM_PDU) (bytesRead uint32, err error) {
+func (stack *IDMProtocolStack) readPDU(pdu *x500.IDM_PDU) (bytesRead uint32, err error) {
 	var frames = make([]IDMFrame, 0)
 	var startIndex uint32 = 0
 	index := startIndex
@@ -327,12 +328,12 @@ func (stack *IDMProtocolStack) readPDU(pdu *IDM_PDU) (bytesRead uint32, err erro
 	return bytesRead, nil
 }
 
-func (stack *IDMProtocolStack) handleBindPDU(pdu IdmBind) {
+func (stack *IDMProtocolStack) handleBindPDU(pdu x500.IdmBind) {
 	stack.dispatchError(errors.New("server sent bind"))
 }
 
-func (stack *IDMProtocolStack) handleBindResultPDU(pdu IdmBindResult) {
-	var dirBindResult DirectoryBindResult
+func (stack *IDMProtocolStack) handleBindResultPDU(pdu x500.IdmBindResult) {
+	var dirBindResult x500.DirectoryBindResult
 	rest, err := asn1.UnmarshalWithParams(pdu.Result.Bytes, &dirBindResult, "set")
 	if err != nil {
 		stack.dispatchError(err)
@@ -378,7 +379,7 @@ func (stack *IDMProtocolStack) handleBindResultPDU(pdu IdmBindResult) {
 	transferSyntax := asn1.ObjectIdentifier{2, 1, 2, 1} // Distinguished Encoding Rules
 	outcome := X500AssociateOutcome{
 		OutcomeType:                OP_OUTCOME_RESULT,
-		ACSEResult:                 Associate_result_Accepted,
+		ACSEResult:                 x500.Associate_result_Accepted,
 		ApplicationContext:         pdu.ProtocolID, // Technically not an application context
 		TransferSyntaxName:         transferSyntax,
 		RespondingAETitle:          pdu.RespondingAETitle,
@@ -397,8 +398,8 @@ func (stack *IDMProtocolStack) handleBindResultPDU(pdu IdmBindResult) {
 	}
 }
 
-func (stack *IDMProtocolStack) handleBindErrorPDU(pdu IdmBindError) {
-	var dirBindErr DirectoryBindError_OPTIONALLY_PROTECTED_Parameter1
+func (stack *IDMProtocolStack) handleBindErrorPDU(pdu x500.IdmBindError) {
+	var dirBindErr x500.DirectoryBindError_OPTIONALLY_PROTECTED_Parameter1
 	optProtDirBindErr := asn1.RawValue{}
 	var rest []byte
 	var err error
@@ -418,7 +419,7 @@ func (stack *IDMProtocolStack) handleBindErrorPDU(pdu IdmBindError) {
 	var unsignedBindErr asn1.RawValue
 	if optProtDirBindErr.Tag == asn1.TagSequence {
 		// This is the signed variant.
-		signed := SIGNED{}
+		signed := x500.SIGNED{}
 		rest, err = asn1.Unmarshal(optProtDirBindErr.FullBytes, &signed)
 		if err != nil {
 			stack.dispatchError(err)
@@ -457,7 +458,7 @@ func (stack *IDMProtocolStack) handleBindErrorPDU(pdu IdmBindError) {
 
 	var serviceError int64 = 0
 	var securityError int64 = 0
-	acseResult := Associate_result_Rejected_permanent
+	acseResult := x500.Associate_result_Rejected_permanent
 	if dirBindErr.Error.Class == asn1.ClassContextSpecific {
 		switch dirBindErr.Error.Tag {
 		case 1:
@@ -475,14 +476,14 @@ func (stack *IDMProtocolStack) handleBindErrorPDU(pdu IdmBindError) {
 		}
 		// We treat busy, unavailable, ditError, saslBindInProgress as "transient"
 		switch serviceError {
-		case ServiceProblem_Busy:
+		case x500.ServiceProblem_Busy:
 			fallthrough
-		case ServiceProblem_Unavailable:
+		case x500.ServiceProblem_Unavailable:
 			fallthrough
-		case ServiceProblem_DitError:
+		case x500.ServiceProblem_DitError:
 			fallthrough
-		case ServiceProblem_SaslBindInProgress:
-			acseResult = Associate_result_Rejected_transient
+		case x500.ServiceProblem_SaslBindInProgress:
+			acseResult = x500.Associate_result_Rejected_transient
 		}
 	}
 
@@ -510,11 +511,11 @@ func (stack *IDMProtocolStack) handleBindErrorPDU(pdu IdmBindError) {
 	}
 }
 
-func (stack *IDMProtocolStack) handleRequestPDU(pdu Request) {
+func (stack *IDMProtocolStack) handleRequestPDU(pdu x500.Request) {
 	stack.dispatchError(errors.New("server sent request"))
 }
 
-func (stack *IDMProtocolStack) handleResultPDU(pdu IdmResult) {
+func (stack *IDMProtocolStack) handleResultPDU(pdu x500.IdmResult) {
 	stack.mutex.Lock()
 	op, op_known := stack.pendingOperations[pdu.InvokeID]
 	stack.mutex.Unlock()
@@ -542,7 +543,7 @@ func (stack *IDMProtocolStack) handleResultPDU(pdu IdmResult) {
 	}
 }
 
-func (stack *IDMProtocolStack) handleErrorPDU(pdu IdmError) {
+func (stack *IDMProtocolStack) handleErrorPDU(pdu x500.IdmError) {
 	op, op_known := stack.pendingOperations[pdu.InvokeID]
 	if !op_known {
 		stack.dispatchError(errors.New("unrecognized error invoke id"))
@@ -568,7 +569,7 @@ func (stack *IDMProtocolStack) handleErrorPDU(pdu IdmError) {
 	}
 }
 
-func (stack *IDMProtocolStack) handleRejectPDU(pdu IdmReject) {
+func (stack *IDMProtocolStack) handleRejectPDU(pdu x500.IdmReject) {
 	op, op_known := stack.pendingOperations[pdu.InvokeID]
 	if !op_known {
 		stack.dispatchError(errors.New("unrecognized error invoke id"))
@@ -593,18 +594,18 @@ func (stack *IDMProtocolStack) handleRejectPDU(pdu IdmReject) {
 	}
 }
 
-func (stack *IDMProtocolStack) handleUnbindPDU(pdu Unbind) {
+func (stack *IDMProtocolStack) handleUnbindPDU(pdu x500.Unbind) {
 	stack.dispatchError(errors.New("server sent unbind message, which is not allowed"))
 }
 
-func (stack *IDMProtocolStack) handleAbortPDU(pdu Abort) {
+func (stack *IDMProtocolStack) handleAbortPDU(pdu x500.Abort) {
 	stack.mutex.Lock()
 	defer stack.mutex.Unlock()
 	stack.bound = false
 
 	bindOutcome := X500AssociateOutcome{
 		OutcomeType: OP_OUTCOME_ABORT,
-		ACSEResult:  Associate_result_Rejected_permanent,
+		ACSEResult:  x500.Associate_result_Rejected_permanent,
 		Abort: X500Abort{
 			UserReason: pdu,
 		},
@@ -639,11 +640,11 @@ func (stack *IDMProtocolStack) handleAbortPDU(pdu Abort) {
 	stack.receivedData = make([]byte, 0)
 }
 
-func (stack *IDMProtocolStack) handleStartTLSPDU(pdu StartTLS) {
+func (stack *IDMProtocolStack) handleStartTLSPDU(pdu x500.StartTLS) {
 	stack.dispatchError(errors.New("server sent starttls message, which is not allowed"))
 }
 
-func (stack *IDMProtocolStack) handleTLSResponsePDU(pdu TLSResponse) {
+func (stack *IDMProtocolStack) handleTLSResponsePDU(pdu x500.TLSResponse) {
 	select {
 	case stack.startTLSResponse <- StartTLSOutcome{response: pdu}:
 	default:
@@ -664,14 +665,14 @@ func (stack *IDMProtocolStack) handleTLSResponsePDU(pdu TLSResponse) {
 //		startTLS     [9]  StartTLS,
 //		tLSResponse  [10] TLSResponse,
 //		... }
-func (stack *IDMProtocolStack) handlePDU(pdu IDM_PDU) {
+func (stack *IDMProtocolStack) handlePDU(pdu x500.IDM_PDU) {
 	if pdu.Class != asn1.ClassContextSpecific {
 		return
 	}
 	switch pdu.Tag {
 	case 0:
 		{
-			payload := IdmBind{}
+			payload := x500.IdmBind{}
 			rest, err := asn1.Unmarshal(pdu.Bytes, &payload)
 			if err != nil {
 				stack.dispatchError(err)
@@ -685,7 +686,7 @@ func (stack *IDMProtocolStack) handlePDU(pdu IDM_PDU) {
 		}
 	case 1:
 		{
-			payload := IdmBindResult{}
+			payload := x500.IdmBindResult{}
 			rest, err := asn1.Unmarshal(pdu.Bytes, &payload)
 			if err != nil {
 				stack.dispatchError(err)
@@ -699,7 +700,7 @@ func (stack *IDMProtocolStack) handlePDU(pdu IDM_PDU) {
 		}
 	case 2:
 		{
-			payload := IdmBindError{}
+			payload := x500.IdmBindError{}
 			rest, err := asn1.Unmarshal(pdu.Bytes, &payload)
 			if err != nil {
 				stack.dispatchError(err)
@@ -713,7 +714,7 @@ func (stack *IDMProtocolStack) handlePDU(pdu IDM_PDU) {
 		}
 	case 3:
 		{
-			payload := Request{}
+			payload := x500.Request{}
 			rest, err := asn1.Unmarshal(pdu.Bytes, &payload)
 			if err != nil {
 				stack.dispatchError(err)
@@ -727,7 +728,7 @@ func (stack *IDMProtocolStack) handlePDU(pdu IDM_PDU) {
 		}
 	case 4:
 		{
-			payload := IdmResult{}
+			payload := x500.IdmResult{}
 			rest, err := asn1.Unmarshal(pdu.Bytes, &payload)
 			if err != nil {
 				stack.dispatchError(err)
@@ -741,7 +742,7 @@ func (stack *IDMProtocolStack) handlePDU(pdu IDM_PDU) {
 		}
 	case 5:
 		{
-			payload := IdmError{}
+			payload := x500.IdmError{}
 			rest, err := asn1.Unmarshal(pdu.Bytes, &payload)
 			if err != nil {
 				stack.dispatchError(err)
@@ -755,7 +756,7 @@ func (stack *IDMProtocolStack) handlePDU(pdu IDM_PDU) {
 		}
 	case 6:
 		{
-			payload := IdmReject{}
+			payload := x500.IdmReject{}
 			rest, err := asn1.Unmarshal(pdu.Bytes, &payload)
 			if err != nil {
 				stack.dispatchError(err)
@@ -769,7 +770,7 @@ func (stack *IDMProtocolStack) handlePDU(pdu IDM_PDU) {
 		}
 	case 7:
 		{
-			payload := Unbind{}
+			payload := x500.Unbind{}
 			rest, err := asn1.Unmarshal(pdu.Bytes, &payload)
 			if err != nil {
 				stack.dispatchError(err)
@@ -797,7 +798,7 @@ func (stack *IDMProtocolStack) handlePDU(pdu IDM_PDU) {
 		}
 	case 9:
 		{
-			payload := StartTLS{}
+			payload := x500.StartTLS{}
 			rest, err := asn1.Unmarshal(pdu.Bytes, &payload)
 			if err != nil {
 				stack.dispatchError(err)
@@ -832,7 +833,7 @@ func (stack *IDMProtocolStack) handlePDU(pdu IDM_PDU) {
 }
 
 func (stack *IDMProtocolStack) processNextPDU() (bytesRead uint32, err error) {
-	pdu := IDM_PDU{}
+	pdu := x500.IDM_PDU{}
 	bytesRead, err = stack.readPDU(&pdu)
 	if err != nil {
 		if errors.Is(err, net.ErrClosed) || err == io.EOF {
@@ -841,7 +842,7 @@ func (stack *IDMProtocolStack) processNextPDU() (bytesRead uint32, err error) {
 			stack.mutex.Lock()
 			bindOutcome := X500AssociateOutcome{
 				OutcomeType: OP_OUTCOME_FAILURE,
-				ACSEResult:  Associate_result_Rejected_transient,
+				ACSEResult:  x500.Associate_result_Rejected_transient,
 				err:         err,
 			}
 			select {
@@ -925,7 +926,7 @@ func (stack *IDMProtocolStack) startTLS(ctx context.Context) (response StartTLSO
 		return StartTLSOutcome{}, response.err
 	}
 	switch response.response {
-	case TLSResponse_Success:
+	case x500.TLSResponse_Success:
 		netconn, is_tcp := stack.socket.(net.Conn)
 		if !is_tcp {
 			return response, errors.New("tls already in use")
@@ -939,11 +940,11 @@ func (stack *IDMProtocolStack) startTLS(ctx context.Context) (response StartTLSO
 			return response, err
 		}
 		stack.socket = tlsConn
-	case TLSResponse_Unavailable:
+	case x500.TLSResponse_Unavailable:
 		return response, errors.New("tls unavailable")
-	case TLSResponse_OperationsError:
+	case x500.TLSResponse_OperationsError:
 		return response, errors.New("starttls operations error")
-	case TLSResponse_ProtocolError:
+	case x500.TLSResponse_ProtocolError:
 		return response, errors.New("starttls protocol error")
 	default:
 		return response, errors.New("unrecognized starttls error")
@@ -1038,7 +1039,7 @@ func (stack *IDMProtocolStack) Request(ctx context.Context, req X500Request) (re
 	if len(rest) > 0 {
 		return X500OpOutcome{}, errors.New("trailing bytes after invoke id")
 	}
-	idmRequest := Request{
+	idmRequest := x500.Request{
 		InvokeID: invokeId,
 		Opcode:   req.OpCode,
 		Argument: req.Argument,
@@ -1136,48 +1137,48 @@ func HashAlgFromHash(h crypto.Hash) (alg pkix.AlgorithmIdentifier, err error) {
 		}
 	case crypto.SHA1:
 		{
-			alg.Algorithm = Id_sha1
+			alg.Algorithm = x500.Id_sha1
 			alg.Parameters = asn1.NullRawValue
 		}
 	case crypto.SHA224:
 		{
-			alg.Algorithm = Id_sha224
+			alg.Algorithm = x500.Id_sha224
 		}
 	case crypto.SHA256:
 		{
-			alg.Algorithm = Id_sha256
+			alg.Algorithm = x500.Id_sha256
 		}
 	case crypto.SHA384:
 		{
-			alg.Algorithm = Id_sha384
+			alg.Algorithm = x500.Id_sha384
 		}
 	case crypto.SHA512:
 		{
-			alg.Algorithm = Id_sha512
+			alg.Algorithm = x500.Id_sha512
 		}
 	case crypto.SHA512_224:
 		{
-			alg.Algorithm = Id_sha512_224
+			alg.Algorithm = x500.Id_sha512_224
 		}
 	case crypto.SHA512_256:
 		{
-			alg.Algorithm = Id_sha512_256
+			alg.Algorithm = x500.Id_sha512_256
 		}
 	case crypto.SHA3_224:
 		{
-			alg.Algorithm = Id_sha3_224
+			alg.Algorithm = x500.Id_sha3_224
 		}
 	case crypto.SHA3_256:
 		{
-			alg.Algorithm = Id_sha3_256
+			alg.Algorithm = x500.Id_sha3_256
 		}
 	case crypto.SHA3_384:
 		{
-			alg.Algorithm = Id_sha3_384
+			alg.Algorithm = x500.Id_sha3_384
 		}
 	case crypto.SHA3_512:
 		{
-			alg.Algorithm = Id_sha3_512
+			alg.Algorithm = x500.Id_sha3_512
 		}
 	default:
 		return alg, errors.New("no algorithm identifier for that")
@@ -1191,7 +1192,7 @@ Produce a `SIGNATURE` as defined in ITU-T Recommendation X.509 from a "signer"
 
 This only supports RSA (PSS, not PKCS v1.5), ECDSA, and Ed25519.
 */
-func sign(signer crypto.Signer, data []byte) (sig SIGNATURE, err error) {
+func sign(signer crypto.Signer, data []byte) (sig x500.SIGNATURE, err error) {
 	to_sign := data
 	// No, we are not making this customizable right now.
 	var opts crypto.SignerOpts = crypto.SHA256
@@ -1206,7 +1207,7 @@ func sign(signer crypto.Signer, data []byte) (sig SIGNATURE, err error) {
 	_, is_ecdsa := signer.(*ecdsa.PrivateKey)
 	if is_ecdsa {
 		sig.AlgorithmIdentifier = pkix.AlgorithmIdentifier{
-			Algorithm: Ecdsa_with_SHA256,
+			Algorithm: x500.Ecdsa_with_SHA256,
 		}
 		hash := sha256.Sum256(data)
 		to_sign = hash[:]
@@ -1217,19 +1218,19 @@ func sign(signer crypto.Signer, data []byte) (sig SIGNATURE, err error) {
 			SaltLength: 32, // Recommended to be size of hash output.
 			Hash:       crypto.SHA256,
 		}
-		pss_params := RSASSA_PSS_Type{
+		pss_params := x500.RSASSA_PSS_Type{
 			HashAlgorithm: pkix.AlgorithmIdentifier{
-				Algorithm: Id_sha256,
+				Algorithm: x500.Id_sha256,
 			},
 			SaltLength:   32, // Recommended to be size of hash output.
 			TrailerField: 1,  // This is always supposed to be 1, apparently.
 		}
 		pss_params_bytes, err := asn1.Marshal(pss_params)
 		if err != nil {
-			return SIGNATURE{}, err
+			return x500.SIGNATURE{}, err
 		}
 		sig.AlgorithmIdentifier = pkix.AlgorithmIdentifier{
-			Algorithm:  Id_RSASSA_PSS,
+			Algorithm:  x500.Id_RSASSA_PSS,
 			Parameters: asn1.RawValue{FullBytes: pss_params_bytes},
 		}
 		hash := sha256.Sum256(data)
@@ -1238,7 +1239,7 @@ func sign(signer crypto.Signer, data []byte) (sig SIGNATURE, err error) {
 
 	sig_bytes, err := signer.Sign(rand.Reader, to_sign, opts)
 	if err != nil {
-		return SIGNATURE{}, err
+		return x500.SIGNATURE{}, err
 	}
 	sig.Signature.Bytes = sig_bytes
 	sig.Signature.BitLength = len(sig_bytes) * 8
@@ -1257,15 +1258,15 @@ func getSigAlg(signer crypto.Signer) (sig_alg pkix.AlgorithmIdentifier, err erro
 	_, is_ecdsa := signer.(*ecdsa.PrivateKey)
 	if is_ecdsa {
 		sig_alg = pkix.AlgorithmIdentifier{
-			Algorithm: Ecdsa_with_SHA256,
+			Algorithm: x500.Ecdsa_with_SHA256,
 		}
 		return sig_alg, nil
 	}
 	_, is_rsa := signer.(*rsa.PrivateKey)
 	if is_rsa {
-		pss_params := RSASSA_PSS_Type{
+		pss_params := x500.RSASSA_PSS_Type{
 			HashAlgorithm: pkix.AlgorithmIdentifier{
-				Algorithm: Id_sha256,
+				Algorithm: x500.Id_sha256,
 			},
 			SaltLength:   32, // Recommended to be size of hash output.
 			TrailerField: 1,  // This is always supposed to be 1, apparently.
@@ -1275,7 +1276,7 @@ func getSigAlg(signer crypto.Signer) (sig_alg pkix.AlgorithmIdentifier, err erro
 			return pkix.AlgorithmIdentifier{}, err
 		}
 		sig_alg = pkix.AlgorithmIdentifier{
-			Algorithm:  Id_RSASSA_PSS,
+			Algorithm:  x500.Id_RSASSA_PSS,
 			Parameters: asn1.RawValue{FullBytes: pss_params_bytes},
 		}
 		return sig_alg, nil
@@ -1285,11 +1286,11 @@ func getSigAlg(signer crypto.Signer) (sig_alg pkix.AlgorithmIdentifier, err erro
 
 func createSecurityParameters(
 	opCode asn1.RawValue,
-	certPath *CertificationPath,
-	target ProtectionRequest,
-	errorProtection ErrorProtectionRequest,
-	name *DistinguishedName,
-) (sp SecurityParameters, err error) {
+	certPath *x500.CertificationPath,
+	target x500.ProtectionRequest,
+	errorProtection x500.ErrorProtectionRequest,
+	name *x500.DistinguishedName,
+) (sp x500.SecurityParameters, err error) {
 	// 1 hour is long enough for any operation to complete, but not be easy to replay.
 	sp_time := time.Now().Add(time.Duration(1) * time.Hour)
 	time_bytes, err := asn1.Marshal(sp_time)
@@ -1301,7 +1302,7 @@ func createSecurityParameters(
 	if err != nil {
 		return sp, err
 	}
-	sp = SecurityParameters{
+	sp = x500.SecurityParameters{
 		Certification_path: *certPath,
 		OperationCode: asn1.RawValue{
 			Class:      asn1.ClassContextSpecific,
@@ -1337,7 +1338,7 @@ func localOpCode(opcode byte) asn1.RawValue {
 }
 
 func getToBeSigned[T any](signedBytes []byte, dataIsSet bool) (res *T, err error) {
-	signedResult := SIGNED{}
+	signedResult := x500.SIGNED{}
 	var innerResult T
 	var rest []byte
 	if dataIsSet {
@@ -1426,7 +1427,7 @@ const NORMAL_SIZE_LIMIT = 100_000
 const SMALL_ATTR_SIZE_LIMIT = 65535
 const SMALL_SIZE_LIMIT = 10_000
 
-func configureServiceControls(ctx context.Context, sc *ServiceControls) {
+func configureServiceControls(ctx context.Context, sc *x500.ServiceControls) {
 	// If the user didn't specify a time limit for the request, we set one based
 	// on the timeout of the context object. We round down the seconds to
 	// accommodate for network latency and processing time.
@@ -1461,7 +1462,7 @@ func configureServiceControls(ctx context.Context, sc *ServiceControls) {
 	}
 }
 
-func (stack *IDMProtocolStack) Read(ctx context.Context, arg_data ReadArgumentData) (response X500OpOutcome, result *ReadResultData, err error) {
+func (stack *IDMProtocolStack) Read(ctx context.Context, arg_data x500.ReadArgumentData) (response X500OpOutcome, result *x500.ReadResultData, err error) {
 	opCode := localOpCode(1) // Read operation
 	invokeId := stack.GetNextInvokeId()
 	iidBytes, err := asn1.Marshal(invokeId)
@@ -1495,7 +1496,7 @@ func (stack *IDMProtocolStack) Read(ctx context.Context, arg_data ReadArgumentDa
 		if err != nil {
 			return X500OpOutcome{}, nil, err
 		}
-		signed := SIGNED{
+		signed := x500.SIGNED{
 			ToBeSigned:          asn1.RawValue{FullBytes: arg_bytes},
 			AlgorithmIdentifier: sig.AlgorithmIdentifier,
 			Signature:           sig.Signature,
@@ -1527,7 +1528,7 @@ func (stack *IDMProtocolStack) Read(ctx context.Context, arg_data ReadArgumentDa
 		return outcome, nil, nil
 	}
 	if outcome.Parameter.Tag == asn1.TagSet {
-		var res ReadResultData
+		var res x500.ReadResultData
 		rest, err := asn1.UnmarshalWithParams(outcome.Parameter.FullBytes, &res, "set")
 		if err != nil {
 			return outcome, nil, err
@@ -1537,7 +1538,7 @@ func (stack *IDMProtocolStack) Read(ctx context.Context, arg_data ReadArgumentDa
 		}
 		return outcome, &res, nil
 	} else if outcome.Parameter.Tag == asn1.TagSequence {
-		tbs, err := getToBeSigned[ReadResultData](outcome.Parameter.FullBytes, true)
+		tbs, err := getToBeSigned[x500.ReadResultData](outcome.Parameter.FullBytes, true)
 		if err != nil {
 			return outcome, nil, err
 		}
@@ -1548,7 +1549,7 @@ func (stack *IDMProtocolStack) Read(ctx context.Context, arg_data ReadArgumentDa
 	}
 }
 
-func (stack *IDMProtocolStack) Compare(ctx context.Context, arg_data CompareArgumentData) (resp X500OpOutcome, result *CompareResultData, err error) {
+func (stack *IDMProtocolStack) Compare(ctx context.Context, arg_data x500.CompareArgumentData) (resp X500OpOutcome, result *x500.CompareResultData, err error) {
 	opCode := localOpCode(2) // Compare operation
 	invokeId := stack.GetNextInvokeId()
 	iidBytes, err := asn1.Marshal(invokeId)
@@ -1582,7 +1583,7 @@ func (stack *IDMProtocolStack) Compare(ctx context.Context, arg_data CompareArgu
 		if err != nil {
 			return X500OpOutcome{}, nil, err
 		}
-		signed := SIGNED{
+		signed := x500.SIGNED{
 			ToBeSigned:          asn1.RawValue{FullBytes: arg_bytes},
 			AlgorithmIdentifier: sig.AlgorithmIdentifier,
 			Signature:           sig.Signature,
@@ -1614,7 +1615,7 @@ func (stack *IDMProtocolStack) Compare(ctx context.Context, arg_data CompareArgu
 		return outcome, nil, nil
 	}
 	if outcome.Parameter.Tag == asn1.TagSet {
-		var res CompareResultData
+		var res x500.CompareResultData
 		rest, err := asn1.UnmarshalWithParams(outcome.Parameter.FullBytes, &res, "set")
 		if err != nil {
 			return outcome, nil, err
@@ -1624,7 +1625,7 @@ func (stack *IDMProtocolStack) Compare(ctx context.Context, arg_data CompareArgu
 		}
 		return outcome, &res, nil
 	} else if outcome.Parameter.Tag == asn1.TagSequence {
-		tbs, err := getToBeSigned[CompareResultData](outcome.Parameter.FullBytes, true)
+		tbs, err := getToBeSigned[x500.CompareResultData](outcome.Parameter.FullBytes, true)
 		if err != nil {
 			return outcome, nil, err
 		}
@@ -1635,7 +1636,7 @@ func (stack *IDMProtocolStack) Compare(ctx context.Context, arg_data CompareArgu
 	}
 }
 
-func (stack *IDMProtocolStack) Abandon(ctx context.Context, arg_data AbandonArgumentData) (resp X500OpOutcome, result *AbandonResultData, err error) {
+func (stack *IDMProtocolStack) Abandon(ctx context.Context, arg_data x500.AbandonArgumentData) (resp X500OpOutcome, result *x500.AbandonResultData, err error) {
 	opCode := localOpCode(3) // Abandon operation
 	invokeId := stack.GetNextInvokeId()
 	iidBytes, err := asn1.Marshal(invokeId)
@@ -1653,7 +1654,7 @@ func (stack *IDMProtocolStack) Abandon(ctx context.Context, arg_data AbandonArgu
 		if err != nil {
 			return X500OpOutcome{}, nil, err
 		}
-		signed := SIGNED{
+		signed := x500.SIGNED{
 			ToBeSigned:          asn1.RawValue{FullBytes: arg_bytes},
 			AlgorithmIdentifier: sig.AlgorithmIdentifier,
 			Signature:           sig.Signature,
@@ -1678,10 +1679,10 @@ func (stack *IDMProtocolStack) Abandon(ctx context.Context, arg_data AbandonArgu
 	if err != nil {
 		return X500OpOutcome{}, nil, err
 	}
-	return getDataFromNullOrOptProtSeq[AbandonResultData](outcome)
+	return getDataFromNullOrOptProtSeq[x500.AbandonResultData](outcome)
 }
 
-func (stack *IDMProtocolStack) List(ctx context.Context, arg_data ListArgumentData) (resp X500OpOutcome, info *ListResultData_listInfo, err error) {
+func (stack *IDMProtocolStack) List(ctx context.Context, arg_data x500.ListArgumentData) (resp X500OpOutcome, info *x500.ListResultData_listInfo, err error) {
 	opCode := localOpCode(4) // List operation
 	invokeId := stack.GetNextInvokeId()
 	iidBytes, err := asn1.Marshal(invokeId)
@@ -1718,7 +1719,7 @@ func (stack *IDMProtocolStack) List(ctx context.Context, arg_data ListArgumentDa
 		if err != nil {
 			return X500OpOutcome{}, nil, err
 		}
-		signed := SIGNED{
+		signed := x500.SIGNED{
 			ToBeSigned:          asn1.RawValue{FullBytes: arg_bytes},
 			AlgorithmIdentifier: sig.AlgorithmIdentifier,
 			Signature:           sig.Signature,
@@ -1747,7 +1748,7 @@ func (stack *IDMProtocolStack) List(ctx context.Context, arg_data ListArgumentDa
 	}
 	param := outcome.Parameter
 	if param.Class == asn1.ClassUniversal && param.Tag == asn1.TagSequence {
-		signedResult := SIGNED{}
+		signedResult := x500.SIGNED{}
 		rest, err := asn1.Unmarshal(param.FullBytes, &signedResult)
 		if err != nil {
 			return outcome, nil, err
@@ -1765,7 +1766,7 @@ func (stack *IDMProtocolStack) List(ctx context.Context, arg_data ListArgumentDa
 		// This is some other syntax other than listInfo.
 		return outcome, nil, nil
 	}
-	info = &ListResultData_listInfo{}
+	info = &x500.ListResultData_listInfo{}
 	rest, err := asn1.UnmarshalWithParams(param.FullBytes, info, "set")
 	if err != nil {
 		return outcome, nil, err
@@ -1776,7 +1777,7 @@ func (stack *IDMProtocolStack) List(ctx context.Context, arg_data ListArgumentDa
 	return outcome, info, nil
 }
 
-func (stack *IDMProtocolStack) Search(ctx context.Context, arg_data SearchArgumentData) (resp X500OpOutcome, info *SearchResultData_searchInfo, err error) {
+func (stack *IDMProtocolStack) Search(ctx context.Context, arg_data x500.SearchArgumentData) (resp X500OpOutcome, info *x500.SearchResultData_searchInfo, err error) {
 	opCode := localOpCode(5) // Search operation
 	invokeId := stack.GetNextInvokeId()
 	iidBytes, err := asn1.Marshal(invokeId)
@@ -1819,7 +1820,7 @@ func (stack *IDMProtocolStack) Search(ctx context.Context, arg_data SearchArgume
 		if err != nil {
 			return X500OpOutcome{}, nil, err
 		}
-		signed := SIGNED{
+		signed := x500.SIGNED{
 			ToBeSigned:          asn1.RawValue{FullBytes: arg_bytes},
 			AlgorithmIdentifier: sig.AlgorithmIdentifier,
 			Signature:           sig.Signature,
@@ -1848,7 +1849,7 @@ func (stack *IDMProtocolStack) Search(ctx context.Context, arg_data SearchArgume
 	}
 	param := outcome.Parameter
 	if param.Class == asn1.ClassUniversal && param.Tag == asn1.TagSequence {
-		signedResult := SIGNED{}
+		signedResult := x500.SIGNED{}
 		rest, err := asn1.Unmarshal(param.FullBytes, &signedResult)
 		if err != nil {
 			return outcome, nil, err
@@ -1866,7 +1867,7 @@ func (stack *IDMProtocolStack) Search(ctx context.Context, arg_data SearchArgume
 		// This is some other syntax other than searchInfo.
 		return outcome, nil, nil
 	}
-	info = &SearchResultData_searchInfo{}
+	info = &x500.SearchResultData_searchInfo{}
 	rest, err := asn1.UnmarshalWithParams(param.FullBytes, info, "set")
 	if err != nil {
 		return outcome, nil, err
@@ -1877,7 +1878,7 @@ func (stack *IDMProtocolStack) Search(ctx context.Context, arg_data SearchArgume
 	return outcome, info, nil
 }
 
-func (stack *IDMProtocolStack) AddEntry(ctx context.Context, arg_data AddEntryArgumentData) (resp X500OpOutcome, result *AddEntryResultData, err error) {
+func (stack *IDMProtocolStack) AddEntry(ctx context.Context, arg_data x500.AddEntryArgumentData) (resp X500OpOutcome, result *x500.AddEntryResultData, err error) {
 	opCode := localOpCode(6) // AddEntry operation
 	invokeId := stack.GetNextInvokeId()
 	iidBytes, err := asn1.Marshal(invokeId)
@@ -1911,7 +1912,7 @@ func (stack *IDMProtocolStack) AddEntry(ctx context.Context, arg_data AddEntryAr
 		if err != nil {
 			return X500OpOutcome{}, nil, err
 		}
-		signed := SIGNED{
+		signed := x500.SIGNED{
 			ToBeSigned:          asn1.RawValue{FullBytes: arg_bytes},
 			AlgorithmIdentifier: sig.AlgorithmIdentifier,
 			Signature:           sig.Signature,
@@ -1935,10 +1936,10 @@ func (stack *IDMProtocolStack) AddEntry(ctx context.Context, arg_data AddEntryAr
 	if err != nil {
 		return X500OpOutcome{}, nil, err
 	}
-	return getDataFromNullOrOptProtSeq[AddEntryResultData](outcome)
+	return getDataFromNullOrOptProtSeq[x500.AddEntryResultData](outcome)
 }
 
-func (stack *IDMProtocolStack) RemoveEntry(ctx context.Context, arg_data RemoveEntryArgumentData) (resp X500OpOutcome, result *RemoveEntryResultData, err error) {
+func (stack *IDMProtocolStack) RemoveEntry(ctx context.Context, arg_data x500.RemoveEntryArgumentData) (resp X500OpOutcome, result *x500.RemoveEntryResultData, err error) {
 	opCode := localOpCode(7) // RemoveEntry operation
 	invokeId := stack.GetNextInvokeId()
 	iidBytes, err := asn1.Marshal(invokeId)
@@ -1972,7 +1973,7 @@ func (stack *IDMProtocolStack) RemoveEntry(ctx context.Context, arg_data RemoveE
 		if err != nil {
 			return X500OpOutcome{}, nil, err
 		}
-		signed := SIGNED{
+		signed := x500.SIGNED{
 			ToBeSigned:          asn1.RawValue{FullBytes: arg_bytes},
 			AlgorithmIdentifier: sig.AlgorithmIdentifier,
 			Signature:           sig.Signature,
@@ -1996,10 +1997,10 @@ func (stack *IDMProtocolStack) RemoveEntry(ctx context.Context, arg_data RemoveE
 	if err != nil {
 		return X500OpOutcome{}, nil, err
 	}
-	return getDataFromNullOrOptProtSeq[RemoveEntryResultData](outcome)
+	return getDataFromNullOrOptProtSeq[x500.RemoveEntryResultData](outcome)
 }
 
-func (stack *IDMProtocolStack) ModifyEntry(ctx context.Context, arg_data ModifyEntryArgumentData) (resp X500OpOutcome, result *ModifyEntryResultData, err error) {
+func (stack *IDMProtocolStack) ModifyEntry(ctx context.Context, arg_data x500.ModifyEntryArgumentData) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
 	opCode := localOpCode(8) // ModifyEntry operation
 	invokeId := stack.GetNextInvokeId()
 	iidBytes, err := asn1.Marshal(invokeId)
@@ -2033,7 +2034,7 @@ func (stack *IDMProtocolStack) ModifyEntry(ctx context.Context, arg_data ModifyE
 		if err != nil {
 			return X500OpOutcome{}, nil, err
 		}
-		signed := SIGNED{
+		signed := x500.SIGNED{
 			ToBeSigned:          asn1.RawValue{FullBytes: arg_bytes},
 			AlgorithmIdentifier: sig.AlgorithmIdentifier,
 			Signature:           sig.Signature,
@@ -2057,10 +2058,10 @@ func (stack *IDMProtocolStack) ModifyEntry(ctx context.Context, arg_data ModifyE
 	if err != nil {
 		return X500OpOutcome{}, nil, err
 	}
-	return getDataFromNullOrOptProtSeq[ModifyEntryResultData](outcome)
+	return getDataFromNullOrOptProtSeq[x500.ModifyEntryResultData](outcome)
 }
 
-func (stack *IDMProtocolStack) ModifyDN(ctx context.Context, arg_data ModifyDNArgumentData) (resp X500OpOutcome, result *ModifyDNResultData, err error) {
+func (stack *IDMProtocolStack) ModifyDN(ctx context.Context, arg_data x500.ModifyDNArgumentData) (resp X500OpOutcome, result *x500.ModifyDNResultData, err error) {
 	opCode := localOpCode(9) // ModifyDN operation
 	invokeId := stack.GetNextInvokeId()
 	iidBytes, err := asn1.Marshal(invokeId)
@@ -2089,7 +2090,7 @@ func (stack *IDMProtocolStack) ModifyDN(ctx context.Context, arg_data ModifyDNAr
 		if err != nil {
 			return X500OpOutcome{}, nil, err
 		}
-		signed := SIGNED{
+		signed := x500.SIGNED{
 			ToBeSigned:          asn1.RawValue{FullBytes: arg_bytes},
 			AlgorithmIdentifier: sig.AlgorithmIdentifier,
 			Signature:           sig.Signature,
@@ -2113,10 +2114,10 @@ func (stack *IDMProtocolStack) ModifyDN(ctx context.Context, arg_data ModifyDNAr
 	if err != nil {
 		return X500OpOutcome{}, nil, err
 	}
-	return getDataFromNullOrOptProtSeq[ModifyDNResultData](outcome)
+	return getDataFromNullOrOptProtSeq[x500.ModifyDNResultData](outcome)
 }
 
-func (stack *IDMProtocolStack) ChangePassword(ctx context.Context, arg_data ChangePasswordArgumentData) (resp X500OpOutcome, result *ChangePasswordResultData, err error) {
+func (stack *IDMProtocolStack) ChangePassword(ctx context.Context, arg_data x500.ChangePasswordArgumentData) (resp X500OpOutcome, result *x500.ChangePasswordResultData, err error) {
 	opCode := localOpCode(10) // ChangePassword operation
 	invokeId := stack.GetNextInvokeId()
 	iidBytes, err := asn1.Marshal(invokeId)
@@ -2136,7 +2137,7 @@ func (stack *IDMProtocolStack) ChangePassword(ctx context.Context, arg_data Chan
 		if err != nil {
 			return X500OpOutcome{}, nil, err
 		}
-		signed := SIGNED{
+		signed := x500.SIGNED{
 			ToBeSigned:          asn1.RawValue{FullBytes: arg_bytes},
 			AlgorithmIdentifier: sig.AlgorithmIdentifier,
 			Signature:           sig.Signature,
@@ -2161,10 +2162,10 @@ func (stack *IDMProtocolStack) ChangePassword(ctx context.Context, arg_data Chan
 	if err != nil {
 		return X500OpOutcome{}, nil, err
 	}
-	return getDataFromNullOrOptProtSeq[ChangePasswordResultData](outcome)
+	return getDataFromNullOrOptProtSeq[x500.ChangePasswordResultData](outcome)
 }
 
-func (stack *IDMProtocolStack) AdministerPassword(ctx context.Context, arg_data AdministerPasswordArgumentData) (resp X500OpOutcome, result *AdministerPasswordResultData, err error) {
+func (stack *IDMProtocolStack) AdministerPassword(ctx context.Context, arg_data x500.AdministerPasswordArgumentData) (resp X500OpOutcome, result *x500.AdministerPasswordResultData, err error) {
 	opCode := localOpCode(11) // AdministerPassword operation
 	invokeId := stack.GetNextInvokeId()
 	iidBytes, err := asn1.Marshal(invokeId)
@@ -2183,7 +2184,7 @@ func (stack *IDMProtocolStack) AdministerPassword(ctx context.Context, arg_data 
 		if err != nil {
 			return X500OpOutcome{}, nil, err
 		}
-		signed := SIGNED{
+		signed := x500.SIGNED{
 			ToBeSigned:          asn1.RawValue{FullBytes: arg_bytes},
 			AlgorithmIdentifier: sig.AlgorithmIdentifier,
 			Signature:           sig.Signature,
@@ -2208,10 +2209,10 @@ func (stack *IDMProtocolStack) AdministerPassword(ctx context.Context, arg_data 
 	if err != nil {
 		return X500OpOutcome{}, nil, err
 	}
-	return getDataFromNullOrOptProtSeq[AdministerPasswordResultData](outcome)
+	return getDataFromNullOrOptProtSeq[x500.AdministerPasswordResultData](outcome)
 }
 
-func (stack *IDMProtocolStack) BindSimply(ctx context.Context, dn DistinguishedName, password string) (resp X500AssociateOutcome, err error) {
+func (stack *IDMProtocolStack) BindSimply(ctx context.Context, dn x500.DistinguishedName, password string) (resp X500AssociateOutcome, err error) {
 	unprotected := asn1.RawValue{
 		Class:      asn1.ClassUniversal,
 		Tag:        asn1.TagOctetString,
@@ -2222,9 +2223,9 @@ func (stack *IDMProtocolStack) BindSimply(ctx context.Context, dn DistinguishedN
 	if err != nil {
 		return X500AssociateOutcome{}, err
 	}
-	simpleCreds := SimpleCredentials{
+	simpleCreds := x500.SimpleCredentials{
 		Name:     dn,
-		Validity: SimpleCredentials_validity{
+		Validity: x500.SimpleCredentials_validity{
 			// TODO:
 		},
 		Password: asn1.RawValue{
@@ -2261,7 +2262,7 @@ func (stack *IDMProtocolStack) BindSimply(ctx context.Context, dn DistinguishedN
 	return stack.Bind(ctx, arg)
 }
 
-func (stack *IDMProtocolStack) BindStrongly(ctx context.Context, requesterDN DistinguishedName, recipientDN DistinguishedName, acPath *AttributeCertificationPath) (resp X500AssociateOutcome, err error) {
+func (stack *IDMProtocolStack) BindStrongly(ctx context.Context, requesterDN x500.DistinguishedName, recipientDN x500.DistinguishedName, acPath *x500.AttributeCertificationPath) (resp X500AssociateOutcome, err error) {
 	if stack.SigningKey == nil {
 		return X500AssociateOutcome{}, errors.New("no signing key configured")
 	}
@@ -2284,7 +2285,7 @@ func (stack *IDMProtocolStack) BindStrongly(ctx context.Context, requesterDN Dis
 		return X500AssociateOutcome{}, err
 	}
 
-	tokenContent := TokenContent{
+	tokenContent := x500.TokenContent{
 		Algorithm: sig_alg,
 		Name:      recipientDN,
 		Time: asn1.RawValue{
@@ -2306,16 +2307,16 @@ func (stack *IDMProtocolStack) BindStrongly(ctx context.Context, requesterDN Dis
 	if err != nil {
 		return X500AssociateOutcome{}, err
 	}
-	token := Token{
+	token := x500.Token{
 		ToBeSigned:          asn1.RawValue{FullBytes: tokenContentBytes},
 		AlgorithmIdentifier: sig.AlgorithmIdentifier,
 		Signature:           sig.Signature,
 	}
-	certPathRaw := CertificationPathRaw{
+	certPathRaw := x500.CertificationPathRaw{
 		UserCertificate:   asn1.RawValue{FullBytes: stack.SigningCert.UserCertificate.Raw},
-		TheCACertificates: make([]CertificatePairRaw, 0), // I already know this is empty.
+		TheCACertificates: make([]x500.CertificatePairRaw, 0), // I already know this is empty.
 	}
-	strongCreds := StrongCredentials{
+	strongCreds := x500.StrongCredentials{
 		Certification_path: certPathRaw,
 		Bind_token:         token,
 		Name:               requesterDN,
@@ -2370,7 +2371,7 @@ func (stack *IDMProtocolStack) BindPlainly(ctx context.Context, username string,
 	saslPayload = append(saslPayload, []byte(username)...)
 	saslPayload = append(saslPayload, '\x00')
 	saslPayload = append(saslPayload, []byte(password)...)
-	saslCreds := SaslCredentials{
+	saslCreds := x500.SaslCredentials{
 		Mechanism: asn1.RawValue{
 			Class:      asn1.ClassContextSpecific,
 			Tag:        0,
@@ -2406,12 +2407,12 @@ func (stack *IDMProtocolStack) BindPlainly(ctx context.Context, username string,
 	return stack.Bind(ctx, arg)
 }
 
-func (stack *IDMProtocolStack) ReadSimple(ctx context.Context, dn DistinguishedName, userAttributes []asn1.ObjectIdentifier) (response X500OpOutcome, result *ReadResultData, err error) {
+func (stack *IDMProtocolStack) ReadSimple(ctx context.Context, dn x500.DistinguishedName, userAttributes []asn1.ObjectIdentifier) (response X500OpOutcome, result *x500.ReadResultData, err error) {
 	name_bytes, err := asn1.Marshal(dn)
 	if err != nil {
 		return X500OpOutcome{}, nil, err
 	}
-	read_arg := ReadArgumentData{
+	read_arg := x500.ReadArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
@@ -2434,12 +2435,12 @@ func (stack *IDMProtocolStack) ReadSimple(ctx context.Context, dn DistinguishedN
 	return stack.Read(ctx, read_arg)
 }
 
-func (stack *IDMProtocolStack) RemoveEntryByDN(ctx context.Context, dn DistinguishedName) (resp X500OpOutcome, result *RemoveEntryResultData, err error) {
+func (stack *IDMProtocolStack) RemoveEntryByDN(ctx context.Context, dn x500.DistinguishedName) (resp X500OpOutcome, result *x500.RemoveEntryResultData, err error) {
 	name_bytes, err := asn1.Marshal(dn)
 	if err != nil {
 		return X500OpOutcome{}, nil, err
 	}
-	arg := RemoveEntryArgumentData{
+	arg := x500.RemoveEntryArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
@@ -2450,12 +2451,12 @@ func (stack *IDMProtocolStack) RemoveEntryByDN(ctx context.Context, dn Distingui
 	return stack.RemoveEntry(ctx, arg)
 }
 
-func (stack *IDMProtocolStack) AbandonById(ctx context.Context, invokeId int) (resp X500OpOutcome, result *AbandonResultData, err error) {
+func (stack *IDMProtocolStack) AbandonById(ctx context.Context, invokeId int) (resp X500OpOutcome, result *x500.AbandonResultData, err error) {
 	iidBytes, err := asn1.Marshal(invokeId)
 	if err != nil {
 		return X500OpOutcome{}, nil, err
 	}
-	arg := AbandonArgumentData{
+	arg := x500.AbandonArgumentData{
 		InvokeID: asn1.RawValue{
 			Class:      asn1.ClassContextSpecific,
 			Tag:        0,
@@ -2466,12 +2467,12 @@ func (stack *IDMProtocolStack) AbandonById(ctx context.Context, invokeId int) (r
 	return stack.Abandon(ctx, arg)
 }
 
-func (stack *IDMProtocolStack) ListByDN(ctx context.Context, dn DistinguishedName, limit int) (resp X500OpOutcome, info *ListResultData_listInfo, err error) {
+func (stack *IDMProtocolStack) ListByDN(ctx context.Context, dn x500.DistinguishedName, limit int) (resp X500OpOutcome, info *x500.ListResultData_listInfo, err error) {
 	name_bytes, err := asn1.Marshal(dn)
 	if err != nil {
 		return X500OpOutcome{}, nil, err
 	}
-	arg := ListArgumentData{
+	arg := x500.ListArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
@@ -2485,12 +2486,12 @@ func (stack *IDMProtocolStack) ListByDN(ctx context.Context, dn DistinguishedNam
 	return stack.List(ctx, arg)
 }
 
-func (stack *IDMProtocolStack) AddEntrySimple(ctx context.Context, dn DistinguishedName, attrs []Attribute) (resp X500OpOutcome, result *AddEntryResultData, err error) {
+func (stack *IDMProtocolStack) AddEntrySimple(ctx context.Context, dn x500.DistinguishedName, attrs []x500.Attribute) (resp X500OpOutcome, result *x500.AddEntryResultData, err error) {
 	name_bytes, err := asn1.Marshal(dn)
 	if err != nil {
 		return X500OpOutcome{}, nil, err
 	}
-	arg := AddEntryArgumentData{
+	arg := x500.AddEntryArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
@@ -2502,7 +2503,7 @@ func (stack *IDMProtocolStack) AddEntrySimple(ctx context.Context, dn Distinguis
 	return stack.AddEntry(ctx, arg)
 }
 
-func (stack *IDMProtocolStack) ChangePasswordSimple(ctx context.Context, dn DistinguishedName, old string, new string) (resp X500OpOutcome, result *ChangePasswordResultData, err error) {
+func (stack *IDMProtocolStack) ChangePasswordSimple(ctx context.Context, dn x500.DistinguishedName, old string, new string) (resp X500OpOutcome, result *x500.ChangePasswordResultData, err error) {
 	oldstr, err := asn1.MarshalWithParams(old, "utf8")
 	if err != nil {
 		return X500OpOutcome{}, nil, err
@@ -2523,7 +2524,7 @@ func (stack *IDMProtocolStack) ChangePasswordSimple(ctx context.Context, dn Dist
 		IsCompound: true,
 		Bytes:      newstr,
 	}
-	arg := ChangePasswordArgumentData{
+	arg := x500.ChangePasswordArgumentData{
 		Object: dn,
 		OldPwd: oldPwd,
 		NewPwd: newPwd,
@@ -2531,7 +2532,7 @@ func (stack *IDMProtocolStack) ChangePasswordSimple(ctx context.Context, dn Dist
 	return stack.ChangePassword(ctx, arg)
 }
 
-func (stack *IDMProtocolStack) AdministerPasswordSimple(ctx context.Context, dn DistinguishedName, new string) (resp X500OpOutcome, result *AdministerPasswordResultData, err error) {
+func (stack *IDMProtocolStack) AdministerPasswordSimple(ctx context.Context, dn x500.DistinguishedName, new string) (resp X500OpOutcome, result *x500.AdministerPasswordResultData, err error) {
 	newstr, err := asn1.MarshalWithParams(new, "utf8")
 	if err != nil {
 		return X500OpOutcome{}, nil, err
@@ -2542,9 +2543,10 @@ func (stack *IDMProtocolStack) AdministerPasswordSimple(ctx context.Context, dn 
 		IsCompound: true,
 		Bytes:      newstr,
 	}
-	arg := AdministerPasswordArgumentData{
+	arg := x500.AdministerPasswordArgumentData{
 		Object: dn,
 		NewPwd: newPwd,
 	}
 	return stack.AdministerPassword(ctx, arg)
 }
+

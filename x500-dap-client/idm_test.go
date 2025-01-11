@@ -1,4 +1,4 @@
-package x500_go
+package x500
 
 import (
 	"context"
@@ -14,15 +14,16 @@ import (
 	"sync"
 	"testing"
 	"time"
+  "github.com/Wildboar-Software/x500-go/x500"
 )
 
 var sensibleTimeout = time.Duration(5) * time.Second
 
-func getDN() DistinguishedName {
-	return DistinguishedName{
+func getDN() x500.DistinguishedName {
+	return x500.DistinguishedName{
 		[]pkix.AttributeTypeAndValue{
 			{
-				Type: Id_at_countryName,
+				Type: x500.Id_at_countryName,
 				Value: asn1.RawValue{
 					Tag:        asn1.TagPrintableString,
 					Class:      asn1.ClassUniversal,
@@ -34,11 +35,11 @@ func getDN() DistinguishedName {
 	}
 }
 
-func getDNWithManySubs() DistinguishedName {
-	return DistinguishedName{
+func getDNWithManySubs() x500.DistinguishedName {
+	return x500.DistinguishedName{
 		[]pkix.AttributeTypeAndValue{
 			{
-				Type: Id_at_countryName,
+				Type: x500.Id_at_countryName,
 				Value: asn1.RawValue{
 					Tag:        asn1.TagPrintableString,
 					Class:      asn1.ClassUniversal,
@@ -50,7 +51,7 @@ func getDNWithManySubs() DistinguishedName {
 		// c=US,st=FL,l=HIL,l=Tampa,l=Westchase
 		[]pkix.AttributeTypeAndValue{
 			{
-				Type: Id_at_stateOrProvinceName,
+				Type: x500.Id_at_stateOrProvinceName,
 				Value: asn1.RawValue{
 					Tag:        asn1.TagPrintableString,
 					Class:      asn1.ClassUniversal,
@@ -61,7 +62,7 @@ func getDNWithManySubs() DistinguishedName {
 		},
 		[]pkix.AttributeTypeAndValue{
 			{
-				Type: Id_at_localityName,
+				Type: x500.Id_at_localityName,
 				Value: asn1.RawValue{
 					Tag:        asn1.TagPrintableString,
 					Class:      asn1.ClassUniversal,
@@ -72,7 +73,7 @@ func getDNWithManySubs() DistinguishedName {
 		},
 		[]pkix.AttributeTypeAndValue{
 			{
-				Type: Id_at_localityName,
+				Type: x500.Id_at_localityName,
 				Value: asn1.RawValue{
 					Tag:        asn1.TagPrintableString,
 					Class:      asn1.ClassUniversal,
@@ -83,7 +84,7 @@ func getDNWithManySubs() DistinguishedName {
 		},
 		[]pkix.AttributeTypeAndValue{
 			{
-				Type: Id_at_localityName,
+				Type: x500.Id_at_localityName,
 				Value: asn1.RawValue{
 					Tag:        asn1.TagPrintableString,
 					Class:      asn1.ClassUniversal,
@@ -95,11 +96,11 @@ func getDNWithManySubs() DistinguishedName {
 	}
 }
 
-func getMeerkatDN() DistinguishedName {
-	return DistinguishedName{
+func getMeerkatDN() x500.DistinguishedName {
+	return x500.DistinguishedName{
 		[]pkix.AttributeTypeAndValue{
 			{
-				Type: Id_at_countryName,
+				Type: x500.Id_at_countryName,
 				Value: asn1.RawValue{
 					Tag:        asn1.TagPrintableString,
 					Class:      asn1.ClassUniversal,
@@ -111,7 +112,7 @@ func getMeerkatDN() DistinguishedName {
 		// c=US,st=FL,l=HIL,l=Tampa,l=Westchase
 		[]pkix.AttributeTypeAndValue{
 			{
-				Type: Id_at_stateOrProvinceName,
+				Type: x500.Id_at_stateOrProvinceName,
 				Value: asn1.RawValue{
 					Tag:        asn1.TagPrintableString,
 					Class:      asn1.ClassUniversal,
@@ -122,7 +123,7 @@ func getMeerkatDN() DistinguishedName {
 		},
 		[]pkix.AttributeTypeAndValue{
 			{
-				Type: Id_at_localityName,
+				Type: x500.Id_at_localityName,
 				Value: asn1.RawValue{
 					Tag:        asn1.TagPrintableString,
 					Class:      asn1.ClassUniversal,
@@ -133,7 +134,7 @@ func getMeerkatDN() DistinguishedName {
 		},
 		[]pkix.AttributeTypeAndValue{
 			{
-				Type: Id_at_organizationName,
+				Type: x500.Id_at_organizationName,
 				Value: asn1.RawValue{
 					Tag:        asn1.TagPrintableString,
 					Class:      asn1.ClassUniversal,
@@ -144,7 +145,7 @@ func getMeerkatDN() DistinguishedName {
 		},
 		[]pkix.AttributeTypeAndValue{
 			{
-				Type: Id_at_commonName,
+				Type: x500.Id_at_commonName,
 				Value: asn1.RawValue{
 					Tag:        asn1.TagPrintableString,
 					Class:      asn1.ClassUniversal,
@@ -186,7 +187,7 @@ func TestReadAnEntry(t *testing.T) {
 		return
 	}
 	name := asn1.RawValue{FullBytes: name_bytes}
-	arg_data := ReadArgumentData{
+	arg_data := x500.ReadArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
@@ -223,7 +224,7 @@ func TestReadAnEntry(t *testing.T) {
 		t.Error(err.Error())
 		return
 	}
-	result := ReadResultData{}
+	result := x500.ReadResultData{}
 	rest, err := asn1.UnmarshalWithParams(outcome.Parameter.FullBytes, &result, "set")
 	if err != nil {
 		t.Error(err.Error())
@@ -245,7 +246,7 @@ func TestReadAnEntry(t *testing.T) {
 			}
 			t.Logf("Attribute Type: %s\n", oid.String())
 		} else if info.Tag == asn1.TagSequence { // Attribute
-			attr := Attribute{}
+			attr := x500.Attribute{}
 			rest, err := asn1.Unmarshal(info.FullBytes, &attr)
 			if err != nil {
 				continue
@@ -255,7 +256,7 @@ func TestReadAnEntry(t *testing.T) {
 			}
 			t.Logf("Attribute Type: %s\n", attr.Type.String())
 			for _, value := range attr.Values {
-				str, err := ASN1RawValueToStr(value)
+				str, err := x500.ASN1RawValueToStr(value)
 				if err != nil {
 					t.Log(err.Error())
 					continue
@@ -267,7 +268,7 @@ func TestReadAnEntry(t *testing.T) {
 				}
 			}
 			for _, vwc := range attr.ValuesWithContext {
-				str, err := ASN1RawValueToStr(vwc.Value)
+				str, err := x500.ASN1RawValueToStr(vwc.Value)
 				if err != nil {
 					t.Log(err.Error())
 					continue
@@ -309,14 +310,14 @@ func TestReadAnEntry2(t *testing.T) {
 		return
 	}
 	name := asn1.RawValue{FullBytes: name_bytes}
-	arg_data := ReadArgumentData{
+	arg_data := x500.ReadArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
 			IsCompound: true,
 			Bytes:      name.FullBytes,
 		},
-		SecurityParameters: SecurityParameters{
+		SecurityParameters: x500.SecurityParameters{
 			Target:          idm.ResultsSigning,
 			ErrorProtection: idm.ErrorSigning,
 		},
@@ -340,7 +341,7 @@ func TestReadAnEntry2(t *testing.T) {
 			}
 			t.Logf("Attribute Type: %s\n", oid.String())
 		} else if info.Tag == asn1.TagSequence { // Attribute
-			attr := Attribute{}
+			attr := x500.Attribute{}
 			rest, err := asn1.Unmarshal(info.FullBytes, &attr)
 			if err != nil {
 				continue
@@ -350,7 +351,7 @@ func TestReadAnEntry2(t *testing.T) {
 			}
 			t.Logf("Attribute Type: %s\n", attr.Type.String())
 			for _, value := range attr.Values {
-				str, err := ASN1RawValueToStr(value)
+				str, err := x500.ASN1RawValueToStr(value)
 				if err != nil {
 					t.Log(err.Error())
 					continue
@@ -362,7 +363,7 @@ func TestReadAnEntry2(t *testing.T) {
 				}
 			}
 			for _, vwc := range attr.ValuesWithContext {
-				str, err := ASN1RawValueToStr(vwc.Value)
+				str, err := x500.ASN1RawValueToStr(vwc.Value)
 				if err != nil {
 					t.Log(err.Error())
 					continue
@@ -404,14 +405,14 @@ func TestManySimultaneousReads(t *testing.T) {
 		return
 	}
 	name := asn1.RawValue{FullBytes: name_bytes}
-	arg_data := ReadArgumentData{
+	arg_data := x500.ReadArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
 			IsCompound: true,
 			Bytes:      name.FullBytes,
 		},
-		SecurityParameters: SecurityParameters{
+		SecurityParameters: x500.SecurityParameters{
 			Target:          idm.ResultsSigning,
 			ErrorProtection: idm.ErrorSigning,
 		},
@@ -466,17 +467,17 @@ func TestListAnEntry(t *testing.T) {
 		return
 	}
 	name := asn1.RawValue{FullBytes: name_bytes}
-	arg_data := ListArgumentData{
+	arg_data := x500.ListArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
 			IsCompound: true,
 			Bytes:      name.FullBytes,
 		},
-		SecurityParameters: SecurityParameters{
+		SecurityParameters: x500.SecurityParameters{
 			// No signing so we get searchInfo instead of uncorrelatedSearchInfo
-			Target:          ProtectionRequest_None,
-			ErrorProtection: ErrorProtectionRequest_None,
+			Target:          x500.ProtectionRequest_None,
+			ErrorProtection: x500.ErrorProtectionRequest_None,
 		},
 	}
 	ctx, cancel = context.WithTimeout(context.Background(), sensibleTimeout)
@@ -531,17 +532,17 @@ func TestTLS(t *testing.T) {
 		return
 	}
 	name := asn1.RawValue{FullBytes: name_bytes}
-	arg_data := ListArgumentData{
+	arg_data := x500.ListArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
 			IsCompound: true,
 			Bytes:      name.FullBytes,
 		},
-		SecurityParameters: SecurityParameters{
+		SecurityParameters: x500.SecurityParameters{
 			// No signing so we get searchInfo instead of uncorrelatedSearchInfo
-			Target:          ProtectionRequest_None,
-			ErrorProtection: ErrorProtectionRequest_None,
+			Target:          x500.ProtectionRequest_None,
+			ErrorProtection: x500.ErrorProtectionRequest_None,
 		},
 	}
 	ctx, cancel = context.WithTimeout(context.Background(), sensibleTimeout)
@@ -594,20 +595,20 @@ func TestAbandon(t *testing.T) {
 		return
 	}
 	name := asn1.RawValue{FullBytes: name_bytes}
-	arg_data := ListArgumentData{
+	arg_data := x500.ListArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
 			IsCompound: true,
 			Bytes:      name.FullBytes,
 		},
-		SecurityParameters: SecurityParameters{
+		SecurityParameters: x500.SecurityParameters{
 			// No signing so we get searchInfo instead of uncorrelatedSearchInfo
-			Target:          ProtectionRequest_None,
-			ErrorProtection: ErrorProtectionRequest_None,
+			Target:          x500.ProtectionRequest_None,
+			ErrorProtection: x500.ErrorProtectionRequest_None,
 		},
 	}
-	abandon_arg_data := AbandonArgumentData{
+	abandon_arg_data := x500.AbandonArgumentData{
 		InvokeID: asn1.RawValue{
 			Class:      asn1.ClassContextSpecific,
 			Tag:        0,
@@ -689,17 +690,17 @@ func TestStartTLS(t *testing.T) {
 		return
 	}
 	name := asn1.RawValue{FullBytes: name_bytes}
-	arg_data := ListArgumentData{
+	arg_data := x500.ListArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
 			IsCompound: true,
 			Bytes:      name.FullBytes,
 		},
-		SecurityParameters: SecurityParameters{
+		SecurityParameters: x500.SecurityParameters{
 			// No signing so we get searchInfo instead of uncorrelatedSearchInfo
-			Target:          ProtectionRequest_None,
-			ErrorProtection: ErrorProtectionRequest_None,
+			Target:          x500.ProtectionRequest_None,
+			ErrorProtection: x500.ErrorProtectionRequest_None,
 		},
 	}
 	ctx, cancel = context.WithTimeout(context.Background(), sensibleTimeout)
@@ -753,17 +754,17 @@ func TestIDMv1(t *testing.T) {
 		return
 	}
 	name := asn1.RawValue{FullBytes: name_bytes}
-	arg_data := ListArgumentData{
+	arg_data := x500.ListArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
 			IsCompound: true,
 			Bytes:      name.FullBytes,
 		},
-		SecurityParameters: SecurityParameters{
+		SecurityParameters: x500.SecurityParameters{
 			// No signing so we get searchInfo instead of uncorrelatedSearchInfo
-			Target:          ProtectionRequest_None,
-			ErrorProtection: ErrorProtectionRequest_None,
+			Target:          x500.ProtectionRequest_None,
+			ErrorProtection: x500.ErrorProtectionRequest_None,
 		},
 	}
 	ctx, cancel = context.WithTimeout(context.Background(), sensibleTimeout)
@@ -849,14 +850,14 @@ func TestRequestTimeout(t *testing.T) {
 		return
 	}
 	name := asn1.RawValue{FullBytes: name_bytes}
-	arg_data := ReadArgumentData{
+	arg_data := x500.ReadArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
 			IsCompound: true,
 			Bytes:      name.FullBytes,
 		},
-		SecurityParameters: SecurityParameters{
+		SecurityParameters: x500.SecurityParameters{
 			Target:          idm.ResultsSigning,
 			ErrorProtection: idm.ErrorSigning,
 		},
@@ -923,7 +924,7 @@ func TestBindError(t *testing.T) {
 
 	dn := getDN()
 
-	simpleCreds := SimpleCredentials{
+	simpleCreds := x500.SimpleCredentials{
 		Name: dn,
 		Password: asn1.RawValue{
 			Class:      asn1.ClassContextSpecific,
@@ -995,14 +996,14 @@ func TestSocketClosure1(t *testing.T) {
 		return
 	}
 	name := asn1.RawValue{FullBytes: name_bytes}
-	arg_data := ReadArgumentData{
+	arg_data := x500.ReadArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
 			IsCompound: true,
 			Bytes:      name.FullBytes,
 		},
-		SecurityParameters: SecurityParameters{
+		SecurityParameters: x500.SecurityParameters{
 			Target:          idm.ResultsSigning,
 			ErrorProtection: idm.ErrorSigning,
 		},
@@ -1051,14 +1052,14 @@ func TestSocketClosure2(t *testing.T) {
 		return
 	}
 	name := asn1.RawValue{FullBytes: name_bytes}
-	arg_data := ReadArgumentData{
+	arg_data := x500.ReadArgumentData{
 		Object: asn1.RawValue{
 			Tag:        0,
 			Class:      asn1.ClassContextSpecific,
 			IsCompound: true,
 			Bytes:      name.FullBytes,
 		},
-		SecurityParameters: SecurityParameters{
+		SecurityParameters: x500.SecurityParameters{
 			Target:          idm.ResultsSigning,
 			ErrorProtection: idm.ErrorSigning,
 		},
@@ -1276,9 +1277,9 @@ func TestTagCorrection(t *testing.T) {
 		return
 	}
 	name := asn1.RawValue{FullBytes: name_bytes}
-	arg_data := ReadArgumentData{
+	arg_data := x500.ReadArgumentData{
 		Object: name, // This is the mistake.
-		SecurityParameters: SecurityParameters{
+		SecurityParameters: x500.SecurityParameters{
 			Target:          idm.ResultsSigning,
 			ErrorProtection: idm.ErrorSigning,
 		},
@@ -1321,7 +1322,7 @@ func TestReadSimple(t *testing.T) {
 	dn := getDN()
 
 	attrs := make([]asn1.ObjectIdentifier, 1)
-	attrs[0] = Id_at_countryName
+	attrs[0] = x500.Id_at_countryName
 
 	ctx, cancel = context.WithTimeout(context.Background(), sensibleTimeout)
 	defer cancel()
@@ -1332,7 +1333,7 @@ func TestReadSimple(t *testing.T) {
 	}
 	for _, info := range res.Entry.Information {
 		if info.Tag == asn1.TagSequence { // Attribute
-			attr := Attribute{}
+			attr := x500.Attribute{}
 			rest, err := asn1.Unmarshal(info.FullBytes, &attr)
 			if err != nil {
 				continue
@@ -1340,12 +1341,12 @@ func TestReadSimple(t *testing.T) {
 			if len(rest) > 0 {
 				continue
 			}
-			if !attr.Type.Equal(Id_at_countryName) {
+			if !attr.Type.Equal(x500.Id_at_countryName) {
 				t.FailNow()
 			}
 			t.Logf("Attribute Type: %s\n", attr.Type.String())
 			for _, value := range attr.Values {
-				str, err := ASN1RawValueToStr(value)
+				str, err := x500.ASN1RawValueToStr(value)
 				if err != nil {
 					t.Log(err.Error())
 					continue
@@ -1357,7 +1358,7 @@ func TestReadSimple(t *testing.T) {
 				}
 			}
 			for _, vwc := range attr.ValuesWithContext {
-				str, err := ASN1RawValueToStr(vwc.Value)
+				str, err := x500.ASN1RawValueToStr(vwc.Value)
 				if err != nil {
 					t.Log(err.Error())
 					continue
@@ -1430,7 +1431,7 @@ func TestAddEntrySimple(t *testing.T) {
 	dn := getDNWithManySubs()
 	rdn := []pkix.AttributeTypeAndValue{
 		{
-			Type: Id_at_commonName,
+			Type: x500.Id_at_commonName,
 			Value: asn1.RawValue{
 				Class:      asn1.ClassUniversal,
 				Tag:        asn1.TagPrintableString,
@@ -1443,9 +1444,9 @@ func TestAddEntrySimple(t *testing.T) {
 	ctx, cancel = context.WithTimeout(context.Background(), sensibleTimeout)
 	defer cancel()
 
-	attrs := make([]Attribute, 0)
-	objectClassAttr := Attribute{
-		Type: Id_at_objectClass,
+	attrs := make([]x500.Attribute, 0)
+	objectClassAttr := x500.Attribute{
+		Type: x500.Id_at_objectClass,
 		Values: []asn1.RawValue{
 			{
 				Class:      asn1.ClassUniversal,
@@ -1455,8 +1456,8 @@ func TestAddEntrySimple(t *testing.T) {
 			},
 		},
 	}
-	commonNameAttr := Attribute{
-		Type: Id_at_commonName,
+	commonNameAttr := x500.Attribute{
+		Type: x500.Id_at_commonName,
 		Values: []asn1.RawValue{
 			{
 				Class:      asn1.ClassUniversal,
@@ -1466,8 +1467,8 @@ func TestAddEntrySimple(t *testing.T) {
 			},
 		},
 	}
-	surnameAttr := Attribute{
-		Type: Id_at_surname,
+	surnameAttr := x500.Attribute{
+		Type: x500.Id_at_surname,
 		Values: []asn1.RawValue{
 			{
 				Class:      asn1.ClassUniversal,
@@ -1519,7 +1520,7 @@ func TestRemoveEntrySimple(t *testing.T) {
 	dn := getDNWithManySubs()
 	rdn := []pkix.AttributeTypeAndValue{
 		{
-			Type: Id_at_commonName,
+			Type: x500.Id_at_commonName,
 			Value: asn1.RawValue{
 				Class:      asn1.ClassUniversal,
 				Tag:        asn1.TagPrintableString,
@@ -1683,9 +1684,9 @@ func TestStrongAuth(t *testing.T) {
 	idm := IDMClient(conn, &IDMClientConfig{
 		StartTLSPolicy: StartTLSNever,
 		Errchan:        errchan,
-		SigningCert: &CertificationPath{
+		SigningCert: &x500.CertificationPath{
 			UserCertificate:   *cert,
-			TheCACertificates: make([]CertificatePair, 0),
+			TheCACertificates: make([]x500.CertificatePair, 0),
 		},
 		SigningKey: &signer,
 	})
@@ -1722,3 +1723,4 @@ func TestInterfaceImplementation(t *testing.T) {
 		return
 	}
 }
+
