@@ -1,3 +1,5 @@
+// Encode, decode, and print X.213 Network Service Access Point (NSAP) Addresses
+//
 // This module decodes and encodes a Network Service Access Point (NSAP) to and
 // from the "preferred binary encoding" described in Annex A, Section A.5.3 of
 // [ITU-T Recommendation X.213 (2001)](https://www.itu.int/rec/T-REC-X.213-200110-I/en).

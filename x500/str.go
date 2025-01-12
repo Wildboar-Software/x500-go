@@ -1,3 +1,4 @@
+// X.500 Directory Data Structures with ASN.1 Encoding and Decoding
 package x500
 
 import (
