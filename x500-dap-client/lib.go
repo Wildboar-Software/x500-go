@@ -1,3 +1,4 @@
+// X.500 Directory Access Protocol (DAP) client
 package x500
 
 import (

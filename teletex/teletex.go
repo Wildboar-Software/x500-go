@@ -1,4 +1,4 @@
-// Decode Teletex (T.61) strings into native UTF-8 strings
+// Decode Teletex (T.61) strings into native UTF-8 string
 package teletex
 
 // Convert a single Teletex (T.61) character to its UTF-8 equivalent.
