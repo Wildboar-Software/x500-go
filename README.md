@@ -12,3 +12,50 @@ libraries (and perhaps even tools, one day) written in Go. They are:
   over Internet Directly Mapped (IDM) protocol client, as described in ITU-T
   Recommendation X.519.
 
+## X.500 Directory Implementation
+
+If you are interested in working with X.500 directories, consider checking
+out [Meerkat DSA](https://wildboar-software.github.io/directory/), which,
+to my knowledge, is one of the two free and open source X.500 directory
+implementations out there, written by yours truly.
+
+## Developer Notes
+
+`SET OF SEQUENCE` = Just use the `set` tag
+`SEQUENCE OF SET` = Not supported by Golang. See: https://github.com/golang/go/issues/27426
+`SET OF SET` = I am not sure what to do here.
+
+## TODO
+
+### MVP
+
+- [x] Teletex Handling
+- [ ] Separate NSAP library
+- [x] `DirectoryString(s str)`
+- [x] `FromDirectoryString(ds DirectoryString)`
+- [ ] Test directory string encoding and decoding
+- [ ] Separate DirectoryString library?
+- [ ] Use `omitempty`
+- [ ] Even higher-level API
+- [ ] Change `int64` enums to `int`
+- [ ] Define and implement interfaces
+  - [ ] `CommonArguments`
+  - [ ] `CommonResults`
+  - [ ] `AccessPoint`
+  - [ ] `AVMPcommonComponents`
+  - [ ] `SchemaElement`
+- [ ] Use `X500OperationError`
+- [ ] List and Search Result Iterator
+- [ ] Test signing
+- [ ] Documentation
+
+### Future
+
+- [ ] Add types defined in newer X.500 specifications
+  - I think I will wait until the newest version is released.
+- [ ] Support other SASL methods:
+  - [ ] `EXTERNAL`
+  - [ ] `ANONYMOUS`
+  - [ ] `OTP`
+- [ ] Support more `DSAInfo` attributes
+

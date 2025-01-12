@@ -1,60 +1,18 @@
-# X.500 Directory Access Protocol Client in Go
+# X.500 Directory ASN.1 Data Structures in Go
 
-## Notes for Users
+This is a library containing Go equivalents of most of the data structures
+described in the International Telecommuncations Union's X.500 series of
+specifications for use in X.500 directories. They are decoded and encoded
+using Golang's standard library's `encoding/asn1` module.
 
-You will need to set `priority` in the service controls. Golang defaults enums
-to 0, even if you use the `default:1` tag on a struct member.
+You can create attribute certificates as described in ITU-T Recommendation
+X.509 by using this library. I might provide an example later on, but it's
+pretty straight-forward.
 
-The `timeLimit` field of the service controls is populated by the timeout
-specified with the `Context` object. If there is no such timeout specified
-either in the service controls, or in the context object, the request will not
-timeout unless configured to do so at the TCP or TLS layers. The `sizeLimit` and
-`attributeSizeLimit` fields get populated automatically with sensible defaults
-unless you supply your own values.
+## X.500 Directory Implementation
 
-This library supports requesting an attribute certificate from the DSA per the
-[private extension used by Meerkat DSA](https://wildboar-software.github.io/directory/docs/attr-cert).
+If you are interested in working with X.500 directories, consider checking
+out [Meerkat DSA](https://wildboar-software.github.io/directory/), which,
+to my knowledge, is one of the two free and open source X.500 directory
+implementations out there, written by yours truly.
 
-Known issues: https://github.com/golang/go/issues/27426
-Any `SEQUENCE OF SET` type will fail to be unmarshalled.
-
-## Developer Notes
-
-`SET OF SEQUENCE` = Just use the `set` tag
-`SEQUENCE OF SET` = Not supported by Golang. See: https://github.com/golang/go/issues/27426
-`SET OF SET` = I am not sure what to do here.
-
-## TODO
-
-### MVP
-
-- [ ] Teletex Handling
-- [ ] Separate NSAP library
-- [x] `DirectoryString(s str)`
-- [x] `FromDirectoryString(ds DirectoryString)`
-- [ ] Test directory string encoding and decoding
-- [ ] Separate DirectoryString library?
-- [ ] Use `omitempty`
-- [ ] Even higher-level API
-- [ ] Change `int64` enums to `int`
-- [ ] Define and implement interfaces
-  - [ ] `CommonArguments`
-  - [ ] `CommonResults`
-  - [ ] `AccessPoint`
-  - [ ] `AVMPcommonComponents`
-  - [ ] `SchemaElement`
-- [ ] Use `X500OperationError`
-- [ ] List and Search Result Iterator
-- [ ] Test signing
-- [ ] Documentation
-- [ ] Break this library up into `x500` and `x500-client`
-
-### Future
-
-- [ ] Add types defined in newer X.500 specifications
-  - I think I will wait until the newest version is released.
-- [ ] Support other SASL methods:
-  - [ ] `EXTERNAL`
-  - [ ] `ANONYMOUS`
-  - [ ] `OTP`
-- [ ] Support more `DSAInfo` attributes
