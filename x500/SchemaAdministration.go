@@ -21,6 +21,18 @@ type DITStructureRuleDescription struct {
 	Obsolete               bool                         `asn1:"optional"`
 }
 
+func (x *DITStructureRuleDescription) GetName() []UnboundedDirectoryString {
+	return x.Name
+}
+
+func (x *DITStructureRuleDescription) GetDescription() UnboundedDirectoryString {
+	return x.Description
+}
+
+func (x *DITStructureRuleDescription) GetObsolete() bool {
+	return x.Obsolete
+}
+
 // # ASN.1 Definition:
 //
 //	DITContentRuleDescription ::= SEQUENCE {
@@ -38,6 +50,22 @@ type DITContentRuleDescription struct {
 	Name                  [](UnboundedDirectoryString) `asn1:"optional,explicit,tag:4,set"`
 	Description           UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete              bool                         `asn1:"optional"`
+}
+
+func (x *DITContentRuleDescription) GetIdentifier() asn1.ObjectIdentifier {
+	return x.StructuralObjectClass
+}
+
+func (x *DITContentRuleDescription) GetName() []UnboundedDirectoryString {
+	return x.Name
+}
+
+func (x *DITContentRuleDescription) GetDescription() UnboundedDirectoryString {
+	return x.Description
+}
+
+func (x *DITContentRuleDescription) GetObsolete() bool {
+	return x.Obsolete
 }
 
 // # ASN.1 Definition:
@@ -58,6 +86,22 @@ type MatchingRuleDescription struct {
 	Information UnboundedDirectoryString     `asn1:"optional,explicit,tag:0"`
 }
 
+func (x *MatchingRuleDescription) GetIdentifier() asn1.ObjectIdentifier {
+	return x.Identifier
+}
+
+func (x *MatchingRuleDescription) GetName() []UnboundedDirectoryString {
+	return x.Name
+}
+
+func (x *MatchingRuleDescription) GetDescription() UnboundedDirectoryString {
+	return x.Description
+}
+
+func (x *MatchingRuleDescription) GetObsolete() bool {
+	return x.Obsolete
+}
+
 // # ASN.1 Definition:
 //
 //	AttributeTypeDescription ::= SEQUENCE {
@@ -73,6 +117,22 @@ type AttributeTypeDescription struct {
 	Description UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information AttributeTypeInformation     `asn1:"explicit,tag:0"`
+}
+
+func (x *AttributeTypeDescription) GetIdentifier() asn1.ObjectIdentifier {
+	return x.Identifier
+}
+
+func (x *AttributeTypeDescription) GetName() []UnboundedDirectoryString {
+	return x.Name
+}
+
+func (x *AttributeTypeDescription) GetDescription() UnboundedDirectoryString {
+	return x.Description
+}
+
+func (x *AttributeTypeDescription) GetObsolete() bool {
+	return x.Obsolete
 }
 
 // # ASN.1 Definition:
@@ -117,6 +177,22 @@ type ObjectClassDescription struct {
 	Information ObjectClassInformation       `asn1:"explicit,tag:0"`
 }
 
+func (x *ObjectClassDescription) GetIdentifier() asn1.ObjectIdentifier {
+	return x.Identifier
+}
+
+func (x *ObjectClassDescription) GetName() []UnboundedDirectoryString {
+	return x.Name
+}
+
+func (x *ObjectClassDescription) GetDescription() UnboundedDirectoryString {
+	return x.Description
+}
+
+func (x *ObjectClassDescription) GetObsolete() bool {
+	return x.Obsolete
+}
+
 // # ASN.1 Definition:
 //
 //	ObjectClassInformation ::= SEQUENCE {
@@ -149,6 +225,22 @@ type NameFormDescription struct {
 	Information NameFormInformation          `asn1:"explicit,tag:0"`
 }
 
+func (x *NameFormDescription) GetIdentifier() asn1.ObjectIdentifier {
+	return x.Identifier
+}
+
+func (x *NameFormDescription) GetName() []UnboundedDirectoryString {
+	return x.Name
+}
+
+func (x *NameFormDescription) GetDescription() UnboundedDirectoryString {
+	return x.Description
+}
+
+func (x *NameFormDescription) GetObsolete() bool {
+	return x.Obsolete
+}
+
 // # ASN.1 Definition:
 //
 //	NameFormInformation ::= SEQUENCE {
@@ -179,6 +271,22 @@ type MatchingRuleUseDescription struct {
 	Information [](asn1.ObjectIdentifier)    `asn1:"explicit,tag:0,set"`
 }
 
+func (x *MatchingRuleUseDescription) GetIdentifier() asn1.ObjectIdentifier {
+	return x.Identifier
+}
+
+func (x *MatchingRuleUseDescription) GetName() []UnboundedDirectoryString {
+	return x.Name
+}
+
+func (x *MatchingRuleUseDescription) GetDescription() UnboundedDirectoryString {
+	return x.Description
+}
+
+func (x *MatchingRuleUseDescription) GetObsolete() bool {
+	return x.Obsolete
+}
+
 // # ASN.1 Definition:
 //
 //	ContextDescription ::= SEQUENCE {
@@ -194,6 +302,22 @@ type ContextDescription struct {
 	Description UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information ContextInformation           `asn1:"explicit,tag:0"`
+}
+
+func (x *ContextDescription) GetIdentifier() asn1.ObjectIdentifier {
+	return x.Identifier
+}
+
+func (x *ContextDescription) GetName() []UnboundedDirectoryString {
+	return x.Name
+}
+
+func (x *ContextDescription) GetDescription() UnboundedDirectoryString {
+	return x.Description
+}
+
+func (x *ContextDescription) GetObsolete() bool {
+	return x.Obsolete
 }
 
 // # ASN.1 Definition:
@@ -224,6 +348,22 @@ type DITContextUseDescription struct {
 	Information DITContextUseInformation     `asn1:"explicit,tag:0"`
 }
 
+func (x *DITContextUseDescription) GetIdentifier() asn1.ObjectIdentifier {
+	return x.Identifier
+}
+
+func (x *DITContextUseDescription) GetName() []UnboundedDirectoryString {
+	return x.Name
+}
+
+func (x *DITContextUseDescription) GetDescription() UnboundedDirectoryString {
+	return x.Description
+}
+
+func (x *DITContextUseDescription) GetObsolete() bool {
+	return x.Obsolete
+}
+
 // # ASN.1 Definition:
 //
 //	DITContextUseInformation ::= SEQUENCE {
@@ -250,6 +390,22 @@ type FriendsDescription struct {
 	Description UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Friends     [](asn1.ObjectIdentifier)    `asn1:"explicit,tag:0,set"`
+}
+
+func (x *FriendsDescription) GetIdentifier() asn1.ObjectIdentifier {
+	return x.Anchor
+}
+
+func (x *FriendsDescription) GetName() []UnboundedDirectoryString {
+	return x.Name
+}
+
+func (x *FriendsDescription) GetDescription() UnboundedDirectoryString {
+	return x.Description
+}
+
+func (x *FriendsDescription) GetObsolete() bool {
+	return x.Obsolete
 }
 
 // # ASN.1 Definition:

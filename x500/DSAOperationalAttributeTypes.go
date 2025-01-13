@@ -76,6 +76,18 @@ type SupplierOrConsumer struct {
 	AgreementID         OperationalBindingID    `asn1:"explicit,tag:3"`
 }
 
+func (ap *SupplierOrConsumer) GetAETitle() Name {
+	return ap.Ae_title
+}
+
+func (ap *SupplierOrConsumer) GetAddress() PresentationAddress {
+	return ap.Address
+}
+
+func (ap *SupplierOrConsumer) GetProtocolInformation() []ProtocolInformation {
+	return ap.ProtocolInformation
+}
+
 // # ASN.1 Definition:
 //
 //	SupplierInformation ::= SET {
@@ -108,6 +120,18 @@ type SupplierAndConsumers struct {
 	Address             PresentationAddress     `asn1:"explicit,tag:1"`
 	ProtocolInformation [](ProtocolInformation) `asn1:"optional,explicit,tag:2"`
 	Consumers           [](AccessPoint)         `asn1:"explicit,tag:3,set"`
+}
+
+func (ap *SupplierAndConsumers) GetAETitle() Name {
+	return ap.Ae_title
+}
+
+func (ap *SupplierAndConsumers) GetAddress() PresentationAddress {
+	return ap.Address
+}
+
+func (ap *SupplierAndConsumers) GetProtocolInformation() []ProtocolInformation {
+	return ap.ProtocolInformation
 }
 
 // # ASN.1 Definition:

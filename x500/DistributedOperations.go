@@ -22,6 +22,22 @@ type DsaReferralData struct {
 	Notification       [](Attribute)         `asn1:"optional,explicit,tag:27"`
 }
 
+func (x *DsaReferralData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *DsaReferralData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *DsaReferralData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *DsaReferralData) GetNotification() []Attribute {
+	return x.Notification
+}
+
 // # ASN.1 Definition:
 //
 //	ChainingArguments ::= SET {
@@ -78,6 +94,14 @@ type ChainingArguments struct {
 	ExcludeWriteableCopies bool                `asn1:"optional,explicit,tag:24"`
 }
 
+func (x *ChainingArguments) GetTargetObject() (*Name, *DistinguishedName) {
+	return nil, &x.TargetObject
+}
+
+func (x *ChainingArguments) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
 // # ASN.1 Definition:
 //
 //	Time ::= CHOICE {
@@ -107,6 +131,10 @@ type ChainingResults struct {
 	CrossReferences    [](asn1.RawValue)  `asn1:"optional,explicit,tag:1"`
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:2,set"`
 	AlreadySearched    Exclusions         `asn1:"optional,explicit,tag:3"`
+}
+
+func (x *ChainingResults) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
 }
 
 // # ASN.1 Definition:
@@ -155,6 +183,10 @@ type TraceItem struct {
 	OperationProgress OperationProgress `asn1:"explicit,tag:2,set"`
 }
 
+func (x *TraceItem) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.TargetObject, nil
+}
+
 // # ASN.1 Definition:
 //
 //	ReferenceType ::= ENUMERATED {
@@ -196,6 +228,18 @@ type AccessPoint struct {
 	ProtocolInformation [](ProtocolInformation) `asn1:"optional,explicit,tag:2,set"`
 }
 
+func (ap *AccessPoint) GetAETitle() Name {
+	return ap.Ae_title
+}
+
+func (ap *AccessPoint) GetAddress() PresentationAddress {
+	return ap.Address
+}
+
+func (ap *AccessPoint) GetProtocolInformation() []ProtocolInformation {
+	return ap.ProtocolInformation
+}
+
 // # ASN.1 Definition:
 //
 //	MasterOrShadowAccessPoint ::= SET {
@@ -213,6 +257,26 @@ type MasterOrShadowAccessPoint struct {
 	ProtocolInformation [](ProtocolInformation)            `asn1:"optional,explicit,tag:2,set"`
 	Category            MasterOrShadowAccessPoint_category `asn1:"optional,explicit,tag:3,default:0"`
 	ChainingRequired    bool                               `asn1:"optional,explicit,tag:5"`
+}
+
+func (ap *MasterOrShadowAccessPoint) GetAETitle() Name {
+	return ap.Ae_title
+}
+
+func (ap *MasterOrShadowAccessPoint) GetAddress() PresentationAddress {
+	return ap.Address
+}
+
+func (ap *MasterOrShadowAccessPoint) GetProtocolInformation() []ProtocolInformation {
+	return ap.ProtocolInformation
+}
+
+func (ap *MasterOrShadowAccessPoint) GetCategory() MasterOrShadowAccessPoint_category {
+	return ap.Category
+}
+
+func (ap *MasterOrShadowAccessPoint) GetChainingRequired() bool {
+	return ap.ChainingRequired
 }
 
 // Changed to `[](asn1.RawValue)` becaues of https://github.com/golang/go/issues/27426
@@ -235,6 +299,26 @@ type AccessPointInformation struct {
 	Category            MasterOrShadowAccessPoint_category `asn1:"optional,explicit,tag:3"`
 	ChainingRequired    bool                               `asn1:"optional,explicit,tag:5"`
 	AdditionalPoints    MasterAndShadowAccessPoints        `asn1:"optional,explicit,tag:4"`
+}
+
+func (ap *AccessPointInformation) GetAETitle() Name {
+	return ap.Ae_title
+}
+
+func (ap *AccessPointInformation) GetAddress() PresentationAddress {
+	return ap.Address
+}
+
+func (ap *AccessPointInformation) GetProtocolInformation() []ProtocolInformation {
+	return ap.ProtocolInformation
+}
+
+func (ap *AccessPointInformation) GetCategory() MasterOrShadowAccessPoint_category {
+	return ap.Category
+}
+
+func (ap *AccessPointInformation) GetChainingRequired() bool {
+	return ap.ChainingRequired
 }
 
 // # ASN.1 Definition:
@@ -278,6 +362,10 @@ type ContinuationReference struct {
 	Exclusions          Exclusions                 `asn1:"optional,explicit,tag:7"`
 	ReturnToDUA         bool                       `asn1:"optional,explicit,tag:8"`
 	NameResolveOnMaster bool                       `asn1:"optional,explicit,tag:9"`
+}
+
+func (x *ContinuationReference) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.TargetObject, nil
 }
 
 // # ASN.1 Definition:

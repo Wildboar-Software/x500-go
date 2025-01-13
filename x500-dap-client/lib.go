@@ -678,16 +678,16 @@ type SchemaAwareDirectoryAccessClient interface {
 
 type CommonArgumentsInterface interface {
 	GetServiceControls() x500.ServiceControls
-	GetSecurityParameters() *x500.SecurityParameters
-	GetRequestor() *DN
+	GetSecurityParameters() x500.SecurityParameters
+	GetRequestor() DN
 	GetOperationProgress() x500.OperationProgress
 	GetAliasedRDNs() int
-	GetCriticalExtensions() *asn1.BitString
+	GetCriticalExtensions() asn1.BitString
 	GetReferenceType() x500.ReferenceType
 	GetEntryOnly() bool
-	GetExclusions() *x500.Exclusions
+	GetExclusions() x500.Exclusions
 	GetNameResolveOnMaster() bool
-	GetOperationContexts() *x500.ContextSelection
+	GetOperationContexts() x500.ContextSelection
 	GetFamilyGrouping() x500.FamilyGrouping
 }
 

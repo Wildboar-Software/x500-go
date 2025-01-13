@@ -29,6 +29,7 @@ implementations out there, written by yours truly.
 
 ### MVP
 
+- [ ] Document how to publish new versions (It wasn't obvious to me)
 - [x] Teletex Handling
 - [ ] Separate NSAP library
 - [x] `DirectoryString(s str)`
@@ -39,12 +40,18 @@ implementations out there, written by yours truly.
 - [ ] Even higher-level API
 - [ ] Change `int64` enums to `int`
 - [ ] Define and implement interfaces
-  - [ ] `CommonArguments`
-  - [ ] `CommonResults`
-  - [ ] `AccessPoint`
-  - [ ] `AVMPcommonComponents`
-  - [ ] `SchemaElement`
-- [ ] Use `X500OperationError`
+  - [x] `CommonArguments`
+  - [x] `CommonResults`
+  - [x] `AccessPoint`
+  - [x] `MasterOrShadowAccessPoint`
+  - [x] `AVMPcommonComponents`
+  - [x] `SchemaElement`
+  - [x] `WithSecurityParameters`
+  - [x] `TargetedObjectName`
+  - [x] `ObjectIdentifierIdentified`
+  - [x] `WithProblemCode`
+  - [ ] `WithEntryCount`
+- [ ] Use `X500OperationError` (I might not do this...)
 - [ ] List and Search Result Iterator
 - [ ] Test signing
 - [ ] Documentation

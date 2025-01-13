@@ -19,6 +19,18 @@ type AVMPcommonComponents struct {
 	Sequence  AVMPsequence
 }
 
+func (avmp *AVMPcommonComponents) GetVersion() AVMPversion {
+	return avmp.Version
+}
+
+func (avmp *AVMPcommonComponents) GetTimestamp() time.Time {
+	return avmp.TimeStamp
+}
+
+func (avmp *AVMPcommonComponents) GetAVMPSequence() AVMPsequence {
+	return avmp.Sequence
+}
+
 // # ASN.1 Definition:
 //
 //	AVMPversion ::= ENUMERATED { v1(1), v2(2), v3(3), ... }
@@ -46,6 +58,18 @@ type CertReq struct {
 	Sequence  AVMPsequence
 }
 
+func (avmp *CertReq) GetVersion() AVMPversion {
+	return avmp.Version
+}
+
+func (avmp *CertReq) GetTimestamp() time.Time {
+	return avmp.TimeStamp
+}
+
+func (avmp *CertReq) GetAVMPSequence() AVMPsequence {
+	return avmp.Sequence
+}
+
 // # ASN.1 Definition:
 //
 //	CertRsp ::= SEQUENCE {
@@ -60,6 +84,18 @@ type CertRsp struct {
 	TimeStamp time.Time
 	Sequence  AVMPsequence
 	Result    CertRsp_result
+}
+
+func (avmp *CertRsp) GetVersion() AVMPversion {
+	return avmp.Version
+}
+
+func (avmp *CertRsp) GetTimestamp() time.Time {
+	return avmp.TimeStamp
+}
+
+func (avmp *CertRsp) GetAVMPSequence() AVMPsequence {
+	return avmp.Sequence
 }
 
 // # ASN.1 Definition:
@@ -103,6 +139,18 @@ type AddAvlReq struct {
 	Certlist  CertAVL
 }
 
+func (avmp *AddAvlReq) GetVersion() AVMPversion {
+	return avmp.Version
+}
+
+func (avmp *AddAvlReq) GetTimestamp() time.Time {
+	return avmp.TimeStamp
+}
+
+func (avmp *AddAvlReq) GetAVMPSequence() AVMPsequence {
+	return avmp.Sequence
+}
+
 // # ASN.1 Definition:
 //
 //	AddAvlRsp ::= SEQUENCE {
@@ -117,6 +165,18 @@ type AddAvlRsp struct {
 	TimeStamp time.Time
 	Sequence  AVMPsequence
 	Result    AddAvlRsp_result
+}
+
+func (avmp *AddAvlRsp) GetVersion() AVMPversion {
+	return avmp.Version
+}
+
+func (avmp *AddAvlRsp) GetTimestamp() time.Time {
+	return avmp.TimeStamp
+}
+
+func (avmp *AddAvlRsp) GetAVMPSequence() AVMPsequence {
+	return avmp.Sequence
 }
 
 // # ASN.1 Definition:
@@ -152,6 +212,18 @@ type ReplaceAvlReq struct {
 	New       CertAVL
 }
 
+func (avmp *ReplaceAvlReq) GetVersion() AVMPversion {
+	return avmp.Version
+}
+
+func (avmp *ReplaceAvlReq) GetTimestamp() time.Time {
+	return avmp.TimeStamp
+}
+
+func (avmp *ReplaceAvlReq) GetAVMPSequence() AVMPsequence {
+	return avmp.Sequence
+}
+
 // # ASN.1 Definition:
 //
 //	ReplaceAvlRsp ::= SEQUENCE {
@@ -166,6 +238,18 @@ type ReplaceAvlRsp struct {
 	TimeStamp time.Time
 	Sequence  AVMPsequence
 	Result    ReplaceAvlRsp_result
+}
+
+func (avmp *ReplaceAvlRsp) GetVersion() AVMPversion {
+	return avmp.Version
+}
+
+func (avmp *ReplaceAvlRsp) GetTimestamp() time.Time {
+	return avmp.TimeStamp
+}
+
+func (avmp *ReplaceAvlRsp) GetAVMPSequence() AVMPsequence {
+	return avmp.Sequence
 }
 
 // # ASN.1 Definition:
@@ -199,6 +283,18 @@ type DeleteAvlReq struct {
 	Avl_Id    AvlSerialNumber `asn1:"optional"`
 }
 
+func (avmp *DeleteAvlReq) GetVersion() AVMPversion {
+	return avmp.Version
+}
+
+func (avmp *DeleteAvlReq) GetTimestamp() time.Time {
+	return avmp.TimeStamp
+}
+
+func (avmp *DeleteAvlReq) GetAVMPSequence() AVMPsequence {
+	return avmp.Sequence
+}
+
 // # ASN.1 Definition:
 //
 //	DeleteAvlRsp ::= SEQUENCE {
@@ -213,6 +309,18 @@ type DeleteAvlRsp struct {
 	TimeStamp time.Time
 	Sequence  AVMPsequence
 	Result    DeleteAvlRsp_result
+}
+
+func (avmp *DeleteAvlRsp) GetVersion() AVMPversion {
+	return avmp.Version
+}
+
+func (avmp *DeleteAvlRsp) GetTimestamp() time.Time {
+	return avmp.TimeStamp
+}
+
+func (avmp *DeleteAvlRsp) GetAVMPSequence() AVMPsequence {
+	return avmp.Sequence
 }
 
 // # ASN.1 Definition:
@@ -246,6 +354,18 @@ type RejectAVL struct {
 	Reason    AVMP_error
 }
 
+func (avmp *RejectAVL) GetVersion() AVMPversion {
+	return avmp.Version
+}
+
+func (avmp *RejectAVL) GetTimestamp() time.Time {
+	return avmp.TimeStamp
+}
+
+func (avmp *RejectAVL) GetAVMPSequence() AVMPsequence {
+	return avmp.Sequence
+}
+
 // # ASN.1 Definition:
 //
 //	CASPcommonComponents ::= SEQUENCE {
@@ -255,6 +375,14 @@ type RejectAVL struct {
 type CASPcommonComponents struct {
 	Version  CASPversion `asn1:"optional"`
 	Sequence CASPsequence
+}
+
+func (casp *CASPcommonComponents) GetVersion() CASPversion {
+	return casp.Version
+}
+
+func (casp *CASPcommonComponents) GetSequence() CASPsequence {
+	return casp.Sequence
 }
 
 // # ASN.1 Definition:
@@ -288,6 +416,14 @@ type CertSubscribeReq struct {
 	Certs    [](CertSubscribeReq_certs_Item)
 }
 
+func (casp *CertSubscribeReq) GetVersion() CASPversion {
+	return casp.Version
+}
+
+func (casp *CertSubscribeReq) GetSequence() CASPsequence {
+	return casp.Sequence
+}
+
 // # ASN.1 Definition:
 //
 //	CertSubscribeRsp ::= SEQUENCE {
@@ -301,6 +437,14 @@ type CertSubscribeRsp struct {
 	Version  CASPversion `asn1:"optional"`
 	Sequence CASPsequence
 	Result   CertSubscribeRsp_result
+}
+
+func (casp *CertSubscribeRsp) GetVersion() CASPversion {
+	return casp.Version
+}
+
+func (casp *CertSubscribeRsp) GetSequence() CASPsequence {
+	return casp.Sequence
 }
 
 // # ASN.1 Definition:
@@ -371,6 +515,14 @@ type CertUnsubscribeReq struct {
 	Certs    [](CertUnsubscribeReq_certs_Item)
 }
 
+func (casp *CertUnsubscribeReq) GetVersion() CASPversion {
+	return casp.Version
+}
+
+func (casp *CertUnsubscribeReq) GetSequence() CASPsequence {
+	return casp.Sequence
+}
+
 // # ASN.1 Definition:
 //
 //	CertUnsubscribeRsp ::= SEQUENCE {
@@ -384,6 +536,14 @@ type CertUnsubscribeRsp struct {
 	Version  CASPversion `asn1:"optional"`
 	Sequence CASPsequence
 	Result   CertUnsubscribeRsp_result
+}
+
+func (casp *CertUnsubscribeRsp) GetVersion() CASPversion {
+	return casp.Version
+}
+
+func (casp *CertUnsubscribeRsp) GetSequence() CASPsequence {
+	return casp.Sequence
 }
 
 // # ASN.1 Definition:
@@ -423,6 +583,14 @@ type CertReplaceReq struct {
 	Certs    [](CertReplaceReq_certs_Item)
 }
 
+func (casp *CertReplaceReq) GetVersion() CASPversion {
+	return casp.Version
+}
+
+func (casp *CertReplaceReq) GetSequence() CASPsequence {
+	return casp.Sequence
+}
+
 // # ASN.1 Definition:
 //
 //	CertReplaceRsp ::= SEQUENCE {
@@ -436,6 +604,14 @@ type CertReplaceRsp struct {
 	Version  CASPversion `asn1:"optional"`
 	Sequence CASPsequence
 	Result   CertReplaceRsp_result
+}
+
+func (casp *CertReplaceRsp) GetVersion() CASPversion {
+	return casp.Version
+}
+
+func (casp *CertReplaceRsp) GetSequence() CASPsequence {
+	return casp.Sequence
 }
 
 // # ASN.1 Definition:
@@ -480,6 +656,14 @@ type CertUpdateReq struct {
 	Certs    [](CertUpdateReq_certs_Item)
 }
 
+func (casp *CertUpdateReq) GetVersion() CASPversion {
+	return casp.Version
+}
+
+func (casp *CertUpdateReq) GetSequence() CASPsequence {
+	return casp.Sequence
+}
+
 // # ASN.1 Definition:
 //
 //	CertUpdateRsp ::= SEQUENCE {
@@ -493,6 +677,14 @@ type CertUpdateRsp struct {
 	Version  CASPversion `asn1:"optional"`
 	Sequence CASPsequence
 	Result   CertUpdateRsp_result
+}
+
+func (casp *CertUpdateRsp) GetVersion() CASPversion {
+	return casp.Version
+}
+
+func (casp *CertUpdateRsp) GetSequence() CASPsequence {
+	return casp.Sequence
 }
 
 // # ASN.1 Definition:
@@ -527,6 +719,14 @@ type RejectCAsubscribe struct {
 	Version  CASPversion `asn1:"optional"`
 	Sequence CASPsequence
 	Reason   CASP_error
+}
+
+func (casp *RejectCAsubscribe) GetVersion() CASPversion {
+	return casp.Version
+}
+
+func (casp *RejectCAsubscribe) GetSequence() CASPsequence {
+	return casp.Sequence
 }
 
 // # ASN.1 Definition:

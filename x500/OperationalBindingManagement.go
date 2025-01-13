@@ -41,6 +41,10 @@ type EstablishOperationalBindingArgumentData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:8,set"`
 }
 
+func (x *EstablishOperationalBindingArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
 // # ASN.1 Definition:
 //
 //	OperationalBindingID ::= SEQUENCE {
@@ -102,6 +106,22 @@ type EstablishOperationalBindingResultData struct {
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
 }
 
+func (x *EstablishOperationalBindingResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *EstablishOperationalBindingResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *EstablishOperationalBindingResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *EstablishOperationalBindingResultData) GetNotification() []Attribute {
+	return x.Notification
+}
+
 // # ASN.1 Definition:
 //
 //	ModifyOperationalBindingArgument ::= OPTIONALLY-PROTECTED-SEQ { ModifyOperationalBindingArgumentData }
@@ -136,6 +156,10 @@ type ModifyOperationalBindingArgumentData struct {
 	NewAgreement       asn1.RawValue                                  `asn1:"optional,explicit,tag:7"`
 	Valid              ModifiedValidity                               `asn1:"optional,explicit,tag:8"`
 	SecurityParameters SecurityParameters                             `asn1:"optional,explicit,tag:9,set"`
+}
+
+func (x *ModifyOperationalBindingArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
 }
 
 // # ASN.1 Definition:
@@ -186,6 +210,22 @@ type ModifyOperationalBindingResultData struct {
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
 }
 
+func (x *ModifyOperationalBindingResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *ModifyOperationalBindingResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *ModifyOperationalBindingResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *ModifyOperationalBindingResultData) GetNotification() []Attribute {
+	return x.Notification
+}
+
 // # ASN.1 Definition:
 //
 //	TerminateOperationalBindingArgument ::= OPTIONALLY-PROTECTED-SEQ { TerminateOperationalBindingArgumentData }
@@ -215,6 +255,10 @@ type TerminateOperationalBindingArgumentData struct {
 	SecurityParameters SecurityParameters                                `asn1:"optional,explicit,tag:6,set"`
 }
 
+func (x *TerminateOperationalBindingArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
 // # ASN.1 Definition:
 //
 //	TerminateOperationalBindingResult ::= CHOICE {
@@ -240,6 +284,22 @@ type TerminateOperationalBindingResultData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *TerminateOperationalBindingResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *TerminateOperationalBindingResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *TerminateOperationalBindingResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *TerminateOperationalBindingResultData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -276,6 +336,26 @@ type OpBindingErrorParam struct {
 	Performer          DistinguishedName           `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool                        `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)               `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *OpBindingErrorParam) GetProblem() int {
+	return int(x.Problem)
+}
+
+func (x *OpBindingErrorParam) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *OpBindingErrorParam) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *OpBindingErrorParam) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *OpBindingErrorParam) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:

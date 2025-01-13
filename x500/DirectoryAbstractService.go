@@ -37,6 +37,54 @@ type CommonArguments struct {
 	FamilyGrouping      FamilyGrouping     `asn1:"optional,explicit,tag:19"`
 }
 
+func (x *CommonArguments) GetServiceControls() ServiceControls {
+	return x.ServiceControls
+}
+
+func (x *CommonArguments) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *CommonArguments) GetRequestor() DistinguishedName {
+	return x.Requestor
+}
+
+func (x *CommonArguments) GetOperationProgress() OperationProgress {
+	return x.OperationProgress
+}
+
+func (x *CommonArguments) GetAliasedRDNs() int {
+	return x.AliasedRDNs
+}
+
+func (x *CommonArguments) GetCriticalExtensions() asn1.BitString {
+	return x.CriticalExtensions
+}
+
+func (x *CommonArguments) GetReferenceType() ReferenceType {
+	return x.ReferenceType
+}
+
+func (x *CommonArguments) GetEntryOnly() bool {
+	return x.EntryOnly
+}
+
+func (x *CommonArguments) GetExclusions() Exclusions {
+	return x.Exclusions
+}
+
+func (x *CommonArguments) GetNameResolveOnMaster() bool {
+	return x.NameResolveOnMaster
+}
+
+func (x *CommonArguments) GetOperationContexts() ContextSelection {
+	return x.OperationContexts
+}
+
+func (x *CommonArguments) GetFamilyGrouping() FamilyGrouping {
+	return x.FamilyGrouping
+}
+
 // # ASN.1 Definition:
 //
 //	CommonArgumentsSeq ::= SEQUENCE {
@@ -67,6 +115,54 @@ type CommonArgumentsSeq struct {
 	NameResolveOnMaster bool               `asn1:"optional,explicit,tag:21"`
 	OperationContexts   ContextSelection   `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping      FamilyGrouping     `asn1:"optional,explicit,tag:19"`
+}
+
+func (x *CommonArgumentsSeq) GetServiceControls() ServiceControls {
+	return x.ServiceControls
+}
+
+func (x *CommonArgumentsSeq) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *CommonArgumentsSeq) GetRequestor() DistinguishedName {
+	return x.Requestor
+}
+
+func (x *CommonArgumentsSeq) GetOperationProgress() OperationProgress {
+	return x.OperationProgress
+}
+
+func (x *CommonArgumentsSeq) GetAliasedRDNs() int {
+	return x.AliasedRDNs
+}
+
+func (x *CommonArgumentsSeq) GetCriticalExtensions() asn1.BitString {
+	return x.CriticalExtensions
+}
+
+func (x *CommonArgumentsSeq) GetReferenceType() ReferenceType {
+	return x.ReferenceType
+}
+
+func (x *CommonArgumentsSeq) GetEntryOnly() bool {
+	return x.EntryOnly
+}
+
+func (x *CommonArgumentsSeq) GetExclusions() Exclusions {
+	return x.Exclusions
+}
+
+func (x *CommonArgumentsSeq) GetNameResolveOnMaster() bool {
+	return x.NameResolveOnMaster
+}
+
+func (x *CommonArgumentsSeq) GetOperationContexts() ContextSelection {
+	return x.OperationContexts
+}
+
+func (x *CommonArgumentsSeq) GetFamilyGrouping() FamilyGrouping {
+	return x.FamilyGrouping
 }
 
 // # ASN.1 Definition:
@@ -102,6 +198,22 @@ type CommonResults struct {
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
 }
 
+func (x *CommonResults) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *CommonResults) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *CommonResults) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *CommonResults) GetNotification() []Attribute {
+	return x.Notification
+}
+
 // # ASN.1 Definition:
 //
 //	CommonResultsSeq ::= SEQUENCE {
@@ -116,6 +228,22 @@ type CommonResultsSeq struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *CommonResultsSeq) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *CommonResultsSeq) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *CommonResultsSeq) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *CommonResultsSeq) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -606,6 +734,10 @@ type DirectoryBindError_OPTIONALLY_PROTECTED_Parameter1 struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 }
 
+func (x *DirectoryBindError_OPTIONALLY_PROTECTED_Parameter1) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
 // # ASN.1 Definition:
 //
 //	BindKeyInfo ::= ENCRYPTED{BIT STRING}
@@ -684,6 +816,58 @@ type ReadArgumentData struct {
 	AttrCertReq AttrCertReq `asn1:"optional,explicit,private,tag:0,set"`
 }
 
+func (x *ReadArgumentData) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.Object, nil
+}
+
+func (x *ReadArgumentData) GetServiceControls() ServiceControls {
+	return x.ServiceControls
+}
+
+func (x *ReadArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *ReadArgumentData) GetRequestor() DistinguishedName {
+	return x.Requestor
+}
+
+func (x *ReadArgumentData) GetOperationProgress() OperationProgress {
+	return x.OperationProgress
+}
+
+func (x *ReadArgumentData) GetAliasedRDNs() int {
+	return x.AliasedRDNs
+}
+
+func (x *ReadArgumentData) GetCriticalExtensions() asn1.BitString {
+	return x.CriticalExtensions
+}
+
+func (x *ReadArgumentData) GetReferenceType() ReferenceType {
+	return x.ReferenceType
+}
+
+func (x *ReadArgumentData) GetEntryOnly() bool {
+	return x.EntryOnly
+}
+
+func (x *ReadArgumentData) GetExclusions() Exclusions {
+	return x.Exclusions
+}
+
+func (x *ReadArgumentData) GetNameResolveOnMaster() bool {
+	return x.NameResolveOnMaster
+}
+
+func (x *ReadArgumentData) GetOperationContexts() ContextSelection {
+	return x.OperationContexts
+}
+
+func (x *ReadArgumentData) GetFamilyGrouping() FamilyGrouping {
+	return x.FamilyGrouping
+}
+
 // # ASN.1 Definition:
 //
 //	ReadResult ::= OPTIONALLY-PROTECTED { ReadResultData }
@@ -719,6 +903,26 @@ type ReadResultData struct {
 	// directory would not cause the attribute certificate's encoding
 	// to change, and therefore, for its signature to become invalid.)
 	AttrCert []byte `asn1:"optional,implicit,private,tag:0"`
+}
+
+func (x *ReadResultData) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.Entry.Name, nil
+}
+
+func (x *ReadResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *ReadResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *ReadResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *ReadResultData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -767,6 +971,58 @@ type CompareArgumentData struct {
 	FamilyGrouping      FamilyGrouping          `asn1:"optional,explicit,tag:19"`
 }
 
+func (x *CompareArgumentData) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.Object, nil
+}
+
+func (x *CompareArgumentData) GetServiceControls() ServiceControls {
+	return x.ServiceControls
+}
+
+func (x *CompareArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *CompareArgumentData) GetRequestor() DistinguishedName {
+	return x.Requestor
+}
+
+func (x *CompareArgumentData) GetOperationProgress() OperationProgress {
+	return x.OperationProgress
+}
+
+func (x *CompareArgumentData) GetAliasedRDNs() int {
+	return x.AliasedRDNs
+}
+
+func (x *CompareArgumentData) GetCriticalExtensions() asn1.BitString {
+	return x.CriticalExtensions
+}
+
+func (x *CompareArgumentData) GetReferenceType() ReferenceType {
+	return x.ReferenceType
+}
+
+func (x *CompareArgumentData) GetEntryOnly() bool {
+	return x.EntryOnly
+}
+
+func (x *CompareArgumentData) GetExclusions() Exclusions {
+	return x.Exclusions
+}
+
+func (x *CompareArgumentData) GetNameResolveOnMaster() bool {
+	return x.NameResolveOnMaster
+}
+
+func (x *CompareArgumentData) GetOperationContexts() ContextSelection {
+	return x.OperationContexts
+}
+
+func (x *CompareArgumentData) GetFamilyGrouping() FamilyGrouping {
+	return x.FamilyGrouping
+}
+
 // # ASN.1 Definition:
 //
 //	CompareResult ::= OPTIONALLY-PROTECTED { CompareResultData }
@@ -791,6 +1047,26 @@ type CompareResultData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *CompareResultData) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.Name, nil
+}
+
+func (x *CompareResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *CompareResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *CompareResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *CompareResultData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -830,6 +1106,22 @@ type AbandonResultData struct {
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
 }
 
+func (x *AbandonResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *AbandonResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *AbandonResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *AbandonResultData) GetNotification() []Attribute {
+	return x.Notification
+}
+
 // # ASN.1 Definition:
 //
 //	ListArgument ::= OPTIONALLY-PROTECTED { ListArgumentData }
@@ -861,6 +1153,58 @@ type ListArgumentData struct {
 	NameResolveOnMaster bool                `asn1:"optional,explicit,tag:21"`
 	OperationContexts   ContextSelection    `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping      FamilyGrouping      `asn1:"optional,explicit,tag:19"`
+}
+
+func (x *ListArgumentData) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.Object, nil
+}
+
+func (x *ListArgumentData) GetServiceControls() ServiceControls {
+	return x.ServiceControls
+}
+
+func (x *ListArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *ListArgumentData) GetRequestor() DistinguishedName {
+	return x.Requestor
+}
+
+func (x *ListArgumentData) GetOperationProgress() OperationProgress {
+	return x.OperationProgress
+}
+
+func (x *ListArgumentData) GetAliasedRDNs() int {
+	return x.AliasedRDNs
+}
+
+func (x *ListArgumentData) GetCriticalExtensions() asn1.BitString {
+	return x.CriticalExtensions
+}
+
+func (x *ListArgumentData) GetReferenceType() ReferenceType {
+	return x.ReferenceType
+}
+
+func (x *ListArgumentData) GetEntryOnly() bool {
+	return x.EntryOnly
+}
+
+func (x *ListArgumentData) GetExclusions() Exclusions {
+	return x.Exclusions
+}
+
+func (x *ListArgumentData) GetNameResolveOnMaster() bool {
+	return x.NameResolveOnMaster
+}
+
+func (x *ListArgumentData) GetOperationContexts() ContextSelection {
+	return x.OperationContexts
+}
+
+func (x *ListArgumentData) GetFamilyGrouping() FamilyGrouping {
+	return x.FamilyGrouping
 }
 
 // # ASN.1 Definition:
@@ -991,6 +1335,58 @@ type SearchArgumentData struct {
 	FamilyGrouping       FamilyGrouping              `asn1:"optional,explicit,tag:19"`
 }
 
+func (x *SearchArgumentData) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.BaseObject, nil
+}
+
+func (x *SearchArgumentData) GetServiceControls() ServiceControls {
+	return x.ServiceControls
+}
+
+func (x *SearchArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *SearchArgumentData) GetRequestor() DistinguishedName {
+	return x.Requestor
+}
+
+func (x *SearchArgumentData) GetOperationProgress() OperationProgress {
+	return x.OperationProgress
+}
+
+func (x *SearchArgumentData) GetAliasedRDNs() int {
+	return x.AliasedRDNs
+}
+
+func (x *SearchArgumentData) GetCriticalExtensions() asn1.BitString {
+	return x.CriticalExtensions
+}
+
+func (x *SearchArgumentData) GetReferenceType() ReferenceType {
+	return x.ReferenceType
+}
+
+func (x *SearchArgumentData) GetEntryOnly() bool {
+	return x.EntryOnly
+}
+
+func (x *SearchArgumentData) GetExclusions() Exclusions {
+	return x.Exclusions
+}
+
+func (x *SearchArgumentData) GetNameResolveOnMaster() bool {
+	return x.NameResolveOnMaster
+}
+
+func (x *SearchArgumentData) GetOperationContexts() ContextSelection {
+	return x.OperationContexts
+}
+
+func (x *SearchArgumentData) GetFamilyGrouping() FamilyGrouping {
+	return x.FamilyGrouping
+}
+
 // # ASN.1 Definition:
 //
 //	HierarchySelections ::= BIT STRING {
@@ -1090,6 +1486,10 @@ type JoinArgument struct {
 	JoinSelection  EntryInformationSelection `asn1:"explicit,tag:5,set"`
 }
 
+func (x *JoinArgument) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.JoinBaseObject, nil
+}
+
 // # ASN.1 Definition:
 //
 //	DomainLocalID ::= UnboundedDirectoryString
@@ -1169,6 +1569,58 @@ type AddEntryArgumentData struct {
 	FamilyGrouping      FamilyGrouping     `asn1:"optional,explicit,tag:19"`
 }
 
+func (x *AddEntryArgumentData) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.Object, nil
+}
+
+func (x *AddEntryArgumentData) GetServiceControls() ServiceControls {
+	return x.ServiceControls
+}
+
+func (x *AddEntryArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *AddEntryArgumentData) GetRequestor() DistinguishedName {
+	return x.Requestor
+}
+
+func (x *AddEntryArgumentData) GetOperationProgress() OperationProgress {
+	return x.OperationProgress
+}
+
+func (x *AddEntryArgumentData) GetAliasedRDNs() int {
+	return x.AliasedRDNs
+}
+
+func (x *AddEntryArgumentData) GetCriticalExtensions() asn1.BitString {
+	return x.CriticalExtensions
+}
+
+func (x *AddEntryArgumentData) GetReferenceType() ReferenceType {
+	return x.ReferenceType
+}
+
+func (x *AddEntryArgumentData) GetEntryOnly() bool {
+	return x.EntryOnly
+}
+
+func (x *AddEntryArgumentData) GetExclusions() Exclusions {
+	return x.Exclusions
+}
+
+func (x *AddEntryArgumentData) GetNameResolveOnMaster() bool {
+	return x.NameResolveOnMaster
+}
+
+func (x *AddEntryArgumentData) GetOperationContexts() ContextSelection {
+	return x.OperationContexts
+}
+
+func (x *AddEntryArgumentData) GetFamilyGrouping() FamilyGrouping {
+	return x.FamilyGrouping
+}
+
 // # ASN.1 Definition:
 //
 //	AddEntryResult ::= CHOICE {
@@ -1188,6 +1640,22 @@ type AddEntryResultData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *AddEntryResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *AddEntryResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *AddEntryResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *AddEntryResultData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -1219,6 +1687,58 @@ type RemoveEntryArgumentData struct {
 	FamilyGrouping      FamilyGrouping     `asn1:"optional,explicit,tag:19"`
 }
 
+func (x *RemoveEntryArgumentData) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.Object, nil
+}
+
+func (x *RemoveEntryArgumentData) GetServiceControls() ServiceControls {
+	return x.ServiceControls
+}
+
+func (x *RemoveEntryArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *RemoveEntryArgumentData) GetRequestor() DistinguishedName {
+	return x.Requestor
+}
+
+func (x *RemoveEntryArgumentData) GetOperationProgress() OperationProgress {
+	return x.OperationProgress
+}
+
+func (x *RemoveEntryArgumentData) GetAliasedRDNs() int {
+	return x.AliasedRDNs
+}
+
+func (x *RemoveEntryArgumentData) GetCriticalExtensions() asn1.BitString {
+	return x.CriticalExtensions
+}
+
+func (x *RemoveEntryArgumentData) GetReferenceType() ReferenceType {
+	return x.ReferenceType
+}
+
+func (x *RemoveEntryArgumentData) GetEntryOnly() bool {
+	return x.EntryOnly
+}
+
+func (x *RemoveEntryArgumentData) GetExclusions() Exclusions {
+	return x.Exclusions
+}
+
+func (x *RemoveEntryArgumentData) GetNameResolveOnMaster() bool {
+	return x.NameResolveOnMaster
+}
+
+func (x *RemoveEntryArgumentData) GetOperationContexts() ContextSelection {
+	return x.OperationContexts
+}
+
+func (x *RemoveEntryArgumentData) GetFamilyGrouping() FamilyGrouping {
+	return x.FamilyGrouping
+}
+
 // # ASN.1 Definition:
 //
 //	RemoveEntryResult ::= CHOICE {
@@ -1238,6 +1758,22 @@ type RemoveEntryResultData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *RemoveEntryResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *RemoveEntryResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *RemoveEntryResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *RemoveEntryResultData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -1272,6 +1808,58 @@ type ModifyEntryArgumentData struct {
 	FamilyGrouping      FamilyGrouping            `asn1:"optional,explicit,tag:19"`
 }
 
+func (x *ModifyEntryArgumentData) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.Object, nil
+}
+
+func (x *ModifyEntryArgumentData) GetServiceControls() ServiceControls {
+	return x.ServiceControls
+}
+
+func (x *ModifyEntryArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *ModifyEntryArgumentData) GetRequestor() DistinguishedName {
+	return x.Requestor
+}
+
+func (x *ModifyEntryArgumentData) GetOperationProgress() OperationProgress {
+	return x.OperationProgress
+}
+
+func (x *ModifyEntryArgumentData) GetAliasedRDNs() int {
+	return x.AliasedRDNs
+}
+
+func (x *ModifyEntryArgumentData) GetCriticalExtensions() asn1.BitString {
+	return x.CriticalExtensions
+}
+
+func (x *ModifyEntryArgumentData) GetReferenceType() ReferenceType {
+	return x.ReferenceType
+}
+
+func (x *ModifyEntryArgumentData) GetEntryOnly() bool {
+	return x.EntryOnly
+}
+
+func (x *ModifyEntryArgumentData) GetExclusions() Exclusions {
+	return x.Exclusions
+}
+
+func (x *ModifyEntryArgumentData) GetNameResolveOnMaster() bool {
+	return x.NameResolveOnMaster
+}
+
+func (x *ModifyEntryArgumentData) GetOperationContexts() ContextSelection {
+	return x.OperationContexts
+}
+
+func (x *ModifyEntryArgumentData) GetFamilyGrouping() FamilyGrouping {
+	return x.FamilyGrouping
+}
+
 // # ASN.1 Definition:
 //
 //	ModifyEntryResult ::= CHOICE {
@@ -1293,6 +1881,22 @@ type ModifyEntryResultData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *ModifyEntryResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *ModifyEntryResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *ModifyEntryResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *ModifyEntryResultData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -1342,6 +1946,58 @@ type ModifyDNArgumentData struct {
 	FamilyGrouping      FamilyGrouping            `asn1:"optional,explicit,tag:19"`
 }
 
+func (x *ModifyDNArgumentData) GetTargetObject() (*Name, *DistinguishedName) {
+	return nil, &x.Object
+}
+
+func (x *ModifyDNArgumentData) GetServiceControls() ServiceControls {
+	return x.ServiceControls
+}
+
+func (x *ModifyDNArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *ModifyDNArgumentData) GetRequestor() DistinguishedName {
+	return x.Requestor
+}
+
+func (x *ModifyDNArgumentData) GetOperationProgress() OperationProgress {
+	return x.OperationProgress
+}
+
+func (x *ModifyDNArgumentData) GetAliasedRDNs() int {
+	return x.AliasedRDNs
+}
+
+func (x *ModifyDNArgumentData) GetCriticalExtensions() asn1.BitString {
+	return x.CriticalExtensions
+}
+
+func (x *ModifyDNArgumentData) GetReferenceType() ReferenceType {
+	return x.ReferenceType
+}
+
+func (x *ModifyDNArgumentData) GetEntryOnly() bool {
+	return x.EntryOnly
+}
+
+func (x *ModifyDNArgumentData) GetExclusions() Exclusions {
+	return x.Exclusions
+}
+
+func (x *ModifyDNArgumentData) GetNameResolveOnMaster() bool {
+	return x.NameResolveOnMaster
+}
+
+func (x *ModifyDNArgumentData) GetOperationContexts() ContextSelection {
+	return x.OperationContexts
+}
+
+func (x *ModifyDNArgumentData) GetFamilyGrouping() FamilyGrouping {
+	return x.FamilyGrouping
+}
+
 // # ASN.1 Definition:
 //
 //	ModifyDNResult ::= CHOICE {
@@ -1365,6 +2021,22 @@ type ModifyDNResultData struct {
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
 }
 
+func (x *ModifyDNResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *ModifyDNResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *ModifyDNResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *ModifyDNResultData) GetNotification() []Attribute {
+	return x.Notification
+}
+
 // # ASN.1 Definition:
 //
 //	ChangePasswordArgument ::= OPTIONALLY-PROTECTED-SEQ { ChangePasswordArgumentData }
@@ -1381,6 +2053,10 @@ type ChangePasswordArgumentData struct {
 	Object DistinguishedName `asn1:"explicit,tag:0"`
 	OldPwd UserPwd           `asn1:"explicit,tag:1"`
 	NewPwd UserPwd           `asn1:"explicit,tag:2"`
+}
+
+func (x *ChangePasswordArgumentData) GetTargetObject() (*Name, *DistinguishedName) {
+	return nil, &x.Object
 }
 
 // # ASN.1 Definition:
@@ -1404,6 +2080,22 @@ type ChangePasswordResultData struct {
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
 }
 
+func (x *ChangePasswordResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *ChangePasswordResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *ChangePasswordResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *ChangePasswordResultData) GetNotification() []Attribute {
+	return x.Notification
+}
+
 // # ASN.1 Definition:
 //
 //	AdministerPasswordArgument ::= OPTIONALLY-PROTECTED-SEQ { AdministerPasswordArgumentData }
@@ -1418,6 +2110,10 @@ type AdministerPasswordArgument = OPTIONALLY_PROTECTED_SEQ
 type AdministerPasswordArgumentData struct {
 	Object DistinguishedName `asn1:"explicit,tag:0"`
 	NewPwd UserPwd           `asn1:"explicit,tag:1"`
+}
+
+func (x *AdministerPasswordArgumentData) GetTargetObject() (*Name, *DistinguishedName) {
+	return nil, &x.Object
 }
 
 // # ASN.1 Definition:
@@ -1439,6 +2135,22 @@ type AdministerPasswordResultData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *AdministerPasswordResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *AdministerPasswordResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *AdministerPasswordResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *AdministerPasswordResultData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -1473,6 +2185,58 @@ type LdapArgumentData struct {
 	FamilyGrouping      FamilyGrouping     `asn1:"optional,explicit,tag:19"`
 }
 
+func (x *LdapArgumentData) GetTargetObject() (*Name, *DistinguishedName) {
+	return nil, &x.Object
+}
+
+func (x *LdapArgumentData) GetServiceControls() ServiceControls {
+	return x.ServiceControls
+}
+
+func (x *LdapArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *LdapArgumentData) GetRequestor() DistinguishedName {
+	return x.Requestor
+}
+
+func (x *LdapArgumentData) GetOperationProgress() OperationProgress {
+	return x.OperationProgress
+}
+
+func (x *LdapArgumentData) GetAliasedRDNs() int {
+	return x.AliasedRDNs
+}
+
+func (x *LdapArgumentData) GetCriticalExtensions() asn1.BitString {
+	return x.CriticalExtensions
+}
+
+func (x *LdapArgumentData) GetReferenceType() ReferenceType {
+	return x.ReferenceType
+}
+
+func (x *LdapArgumentData) GetEntryOnly() bool {
+	return x.EntryOnly
+}
+
+func (x *LdapArgumentData) GetExclusions() Exclusions {
+	return x.Exclusions
+}
+
+func (x *LdapArgumentData) GetNameResolveOnMaster() bool {
+	return x.NameResolveOnMaster
+}
+
+func (x *LdapArgumentData) GetOperationContexts() ContextSelection {
+	return x.OperationContexts
+}
+
+func (x *LdapArgumentData) GetFamilyGrouping() FamilyGrouping {
+	return x.FamilyGrouping
+}
+
 // # ASN.1 Definition:
 //
 //	LinkId ::= INTEGER
@@ -1498,6 +2262,22 @@ type LdapResultData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *LdapResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *LdapResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *LdapResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *LdapResultData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -1534,6 +2314,58 @@ type LinkedArgumentData struct {
 	FamilyGrouping      FamilyGrouping     `asn1:"optional,explicit,tag:19"`
 }
 
+func (x *LinkedArgumentData) GetTargetObject() (*Name, *DistinguishedName) {
+	return nil, &x.Object
+}
+
+func (x *LinkedArgumentData) GetServiceControls() ServiceControls {
+	return x.ServiceControls
+}
+
+func (x *LinkedArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *LinkedArgumentData) GetRequestor() DistinguishedName {
+	return x.Requestor
+}
+
+func (x *LinkedArgumentData) GetOperationProgress() OperationProgress {
+	return x.OperationProgress
+}
+
+func (x *LinkedArgumentData) GetAliasedRDNs() int {
+	return x.AliasedRDNs
+}
+
+func (x *LinkedArgumentData) GetCriticalExtensions() asn1.BitString {
+	return x.CriticalExtensions
+}
+
+func (x *LinkedArgumentData) GetReferenceType() ReferenceType {
+	return x.ReferenceType
+}
+
+func (x *LinkedArgumentData) GetEntryOnly() bool {
+	return x.EntryOnly
+}
+
+func (x *LinkedArgumentData) GetExclusions() Exclusions {
+	return x.Exclusions
+}
+
+func (x *LinkedArgumentData) GetNameResolveOnMaster() bool {
+	return x.NameResolveOnMaster
+}
+
+func (x *LinkedArgumentData) GetOperationContexts() ContextSelection {
+	return x.OperationContexts
+}
+
+func (x *LinkedArgumentData) GetFamilyGrouping() FamilyGrouping {
+	return x.FamilyGrouping
+}
+
 // # ASN.1 Definition:
 //
 //	LinkedResult ::= NULL
@@ -1552,6 +2384,26 @@ type AbandonedData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *AbandonedData) GetProblem() int {
+	return int(x.Problem)
+}
+
+func (x *AbandonedData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *AbandonedData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *AbandonedData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *AbandonedData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -1579,6 +2431,26 @@ type AbandonFailedData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *AbandonFailedData) GetProblem() int {
+	return int(x.Problem)
+}
+
+func (x *AbandonFailedData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *AbandonFailedData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *AbandonFailedData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *AbandonFailedData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -1614,6 +2486,26 @@ type AttributeErrorData struct {
 	Performer          DistinguishedName                    `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool                                 `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)                        `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *AttributeErrorData) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.Object, nil
+}
+
+func (x *AttributeErrorData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *AttributeErrorData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *AttributeErrorData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *AttributeErrorData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -1659,6 +2551,30 @@ type NameErrorData struct {
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
 }
 
+func (x *NameErrorData) GetProblem() int {
+	return int(x.Problem)
+}
+
+func (x *NameErrorData) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.Matched, nil
+}
+
+func (x *NameErrorData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *NameErrorData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *NameErrorData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *NameErrorData) GetNotification() []Attribute {
+	return x.Notification
+}
+
 // # ASN.1 Definition:
 //
 //	NameProblem ::= INTEGER {
@@ -1692,6 +2608,26 @@ type ReferralData struct {
 	Notification       [](Attribute)         `asn1:"optional,explicit,tag:27"`
 }
 
+func (x *ReferralData) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.Candidate.TargetObject, nil
+}
+
+func (x *ReferralData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *ReferralData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *ReferralData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *ReferralData) GetNotification() []Attribute {
+	return x.Notification
+}
+
 // # ASN.1 Definition:
 //
 //	SecurityErrorData ::= SET {
@@ -1709,6 +2645,26 @@ type SecurityErrorData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *SecurityErrorData) GetProblem() int {
+	return int(x.Problem)
+}
+
+func (x *SecurityErrorData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *SecurityErrorData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *SecurityErrorData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *SecurityErrorData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -1775,6 +2731,26 @@ type ServiceErrorData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *ServiceErrorData) GetProblem() int {
+	return int(x.Problem)
+}
+
+func (x *ServiceErrorData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *ServiceErrorData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *ServiceErrorData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *ServiceErrorData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -1854,6 +2830,26 @@ type UpdateErrorData struct {
 	Performer          DistinguishedName                      `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool                                   `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)                          `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *UpdateErrorData) GetProblem() int {
+	return int(x.Problem)
+}
+
+func (x *UpdateErrorData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *UpdateErrorData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *UpdateErrorData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *UpdateErrorData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -2101,6 +3097,26 @@ type ListResultData_listInfo struct {
 	Notification            [](Attribute)                                 `asn1:"optional,explicit,tag:27"`
 }
 
+func (x *ListResultData_listInfo) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.Name, nil
+}
+
+func (x *ListResultData_listInfo) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *ListResultData_listInfo) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *ListResultData_listInfo) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *ListResultData_listInfo) GetNotification() []Attribute {
+	return x.Notification
+}
+
 // # ASN.1 Definition:
 //
 //	PartialOutcomeQualifier-entryCount ::= CHOICE { -- REMOVED_FROM_UNNESTING -- }
@@ -2151,6 +3167,26 @@ type SearchResultData_searchInfo struct {
 	Performer               DistinguishedName       `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced       bool                    `asn1:"optional,explicit,tag:28"`
 	Notification            [](Attribute)           `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *SearchResultData_searchInfo) GetTargetObject() (*Name, *DistinguishedName) {
+	return &x.Name, nil
+}
+
+func (x *SearchResultData_searchInfo) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *SearchResultData_searchInfo) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *SearchResultData_searchInfo) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *SearchResultData_searchInfo) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:

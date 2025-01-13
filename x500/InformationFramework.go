@@ -273,6 +273,18 @@ type SearchRuleDescription struct {
 	Description          UnboundedDirectoryString     `asn1:"optional,explicit,tag:29"`
 }
 
+func (x *SearchRuleDescription) GetName() []UnboundedDirectoryString {
+	return x.Name
+}
+
+func (x *SearchRuleDescription) GetDescription() UnboundedDirectoryString {
+	return x.Description
+}
+
+func (x *SearchRuleDescription) GetObsolete() bool {
+	return false // close enough
+}
+
 // # ASN.1 Definition:
 //
 //	PwdHistory{ATTRIBUTE:passwordAttribute} ::= SEQUENCE {

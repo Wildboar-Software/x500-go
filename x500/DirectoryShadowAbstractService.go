@@ -188,6 +188,10 @@ type CoordinateShadowUpdateArgumentData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,set"`
 }
 
+func (x *CoordinateShadowUpdateArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
 // # ASN.1 Definition:
 //
 //	CoordinateShadowUpdateResult ::= CHOICE {
@@ -211,6 +215,22 @@ type CoordinateShadowUpdateResultData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *CoordinateShadowUpdateResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *CoordinateShadowUpdateResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *CoordinateShadowUpdateResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *CoordinateShadowUpdateResultData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -239,6 +259,10 @@ type RequestShadowUpdateArgumentData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,set"`
 }
 
+func (x *RequestShadowUpdateArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
 // # ASN.1 Definition:
 //
 //	RequestShadowUpdateResult ::= CHOICE {
@@ -265,6 +289,22 @@ type RequestShadowUpdateResultData struct {
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
 }
 
+func (x *RequestShadowUpdateResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *RequestShadowUpdateResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *RequestShadowUpdateResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *RequestShadowUpdateResultData) GetNotification() []Attribute {
+	return x.Notification
+}
+
 // # ASN.1 Definition:
 //
 //	UpdateShadowArgument ::= OPTIONALLY-PROTECTED {UpdateShadowArgumentData }
@@ -285,6 +325,10 @@ type UpdateShadowArgumentData struct {
 	UpdateWindow       UpdateWindow `asn1:"optional"`
 	UpdatedInfo        RefreshInformation
 	SecurityParameters SecurityParameters `asn1:"optional,set"`
+}
+
+func (x *UpdateShadowArgumentData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
 }
 
 // # ASN.1 Definition:
@@ -310,6 +354,22 @@ type UpdateShadowResultData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *UpdateShadowResultData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *UpdateShadowResultData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *UpdateShadowResultData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *UpdateShadowResultData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:
@@ -451,6 +511,26 @@ type ShadowErrorData struct {
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
 	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+}
+
+func (x *ShadowErrorData) GetProblem() int {
+	return int(x.Problem)
+}
+
+func (x *ShadowErrorData) GetSecurityParameters() SecurityParameters {
+	return x.SecurityParameters
+}
+
+func (x *ShadowErrorData) GetPerformer() DistinguishedName {
+	return x.Performer
+}
+
+func (x *ShadowErrorData) GetAliasDereferenced() bool {
+	return x.AliasDereferenced
+}
+
+func (x *ShadowErrorData) GetNotification() []Attribute {
+	return x.Notification
 }
 
 // # ASN.1 Definition:

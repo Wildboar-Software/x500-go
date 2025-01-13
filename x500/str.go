@@ -5,7 +5,7 @@ import (
 	"encoding/asn1"
 	"errors"
 	"fmt"
-  "github.com/Wildboar-Software/x500-go/teletex"
+	"github.com/Wildboar-Software/x500-go/teletex"
 )
 
 func ASN1RawValueToStr(value asn1.RawValue) (output string, err error) {
@@ -164,7 +164,6 @@ func DirectoryStringToString(ds asn1.RawValue) (s string, err error) {
 		}
 		return s, nil
 	default:
-		return "", errors.New(fmt.Sprint("invalid tag for directorystring: %d", ds.Tag))
+		return "", errors.New(fmt.Sprintf("invalid tag for directorystring: %d", ds.Tag))
 	}
 }
-
