@@ -3088,13 +3088,13 @@ type ListResultData_listInfo_subordinates_Item struct {
 //
 //	ListResultData-listInfo ::= SEQUENCE { -- REMOVED_FROM_UNNESTING -- }
 type ListResultData_listInfo struct {
-	Name                    Name                                          `asn1:"optional"`
 	Subordinates            [](ListResultData_listInfo_subordinates_Item) `asn1:"explicit,tag:1,set"`
 	PartialOutcomeQualifier PartialOutcomeQualifier                       `asn1:"optional,explicit,tag:2,set"`
 	SecurityParameters      SecurityParameters                            `asn1:"optional,explicit,tag:30,set"`
 	Performer               DistinguishedName                             `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced       bool                                          `asn1:"optional,explicit,tag:28"`
 	Notification            [](Attribute)                                 `asn1:"optional,explicit,tag:27"`
+	Name                    Name                                          `asn1:"optional"`
 }
 
 func (x *ListResultData_listInfo) GetTargetObject() (*Name, *DistinguishedName) {

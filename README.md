@@ -29,9 +29,14 @@ implementations out there, written by yours truly.
 
 ### MVP
 
+- [ ] Investigate issue with ordering of elements in `struct`s.
+  - This bit me in `ListResultData_listInfo.name`. By being first in the `struct`, it was
+    consuming `subordinates` if absent, then `subordinates` could not be found. I had to
+    move it to the end of the `struct`.
 - [ ] Document how to publish new versions (It wasn't obvious to me)
 - [x] Teletex Handling
 - [ ] Separate NSAP library
+- [ ] Do you handle `BOOLEAN DEFAULT TRUE` correctly?
 - [x] `DirectoryString(s str)`
 - [x] `FromDirectoryString(ds DirectoryString)`
 - [ ] Test directory string encoding and decoding
