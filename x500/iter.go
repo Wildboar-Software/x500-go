@@ -91,7 +91,7 @@ func NewListIter(lr ListResult) *ListResultIterator {
 	}
 }
 
-func (it *ListResultIterator) HasNext() bool {
+func (it *ListResultIterator) HasNext() (bool, error) {
 	for len(it.stack) > 0 {
 		current := it.stack[len(it.stack)-1]
 		childIndex := it.index[len(it.index)-1]
@@ -99,11 +99,11 @@ func (it *ListResultIterator) HasNext() bool {
 		info, subs, err := DissectListResult(current)
 		if err != nil {
 			// TODO: Should you just return the error?
-			return false
+			return false, nil
 		}
 		// If there are unprocessed children, or the current node has a value, return true
 		if childIndex < len(subs) {
-			return true
+			return true, nil
 		}
 		// Pop the current node if all its children are processed
 		it.stack = it.stack[:len(it.stack)-1]
@@ -112,18 +112,17 @@ func (it *ListResultIterator) HasNext() bool {
       continue
     }
 	}
-	return false
+	return false, nil
 }
 
-func (it *ListResultIterator) Next() *ListResultData_listInfo {
+func (it *ListResultIterator) Next() (*ListResultData_listInfo, error) {
 	for len(it.stack) > 0 {
 		current := it.stack[len(it.stack)-1]
 		childIndex := it.index[len(it.index)-1]
 
 		info, subs, err := DissectListResult(current)
 		if err != nil {
-			// FIXME: Return the error?
-			return nil
+			return nil, err
 		}
 
 		// Process children
@@ -140,7 +139,7 @@ func (it *ListResultIterator) Next() *ListResultData_listInfo {
     if info == nil {
       continue
     }
-		return info
+		return info, nil
 	}
-	return nil
+	return nil, nil
 }

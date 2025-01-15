@@ -141,14 +141,26 @@ func TestListResultsCount(t *testing.T) {
 func TestListResultIter(t *testing.T) {
   input := getComplexListResults()
   iter := NewListIter(input)
-  next := iter.Next()
+  next, err := iter.Next()
+  if err != nil {
+    t.Error(err)
+    return
+  }
   resultSetCount := 0
   entriesCount := 0
   for next != nil {
     entriesCount += len(next.Subordinates) 
     resultSetCount++
-    hasNext := iter.HasNext()
-    next = iter.Next()
+    hasNext, err := iter.HasNext()
+    if err != nil {
+      t.Error(err)
+      return
+    }
+    next, err = iter.Next()
+    if err != nil {
+      t.Error(err)
+      return
+    }
     if (hasNext && next == nil) || (!hasNext && next != nil) {
       t.Errorf("ListIter.hasNext() disagreed with ListIter.Next()")
     }
