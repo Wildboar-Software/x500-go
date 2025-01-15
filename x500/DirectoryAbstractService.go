@@ -3155,11 +3155,12 @@ const (
 	JoinArgument_joinSubset_WholeSubtree JoinArgument_joinSubset = 2
 )
 
+// NOTE: `Name` was moved to the bottom to fix a bug in Go's shitty `encoding/asn1`.
+//
 // # ASN.1 Definition:
 //
 //	SearchResultData-searchInfo ::= SEQUENCE { -- REMOVED_FROM_UNNESTING -- }
 type SearchResultData_searchInfo struct {
-	Name                    Name                    `asn1:"optional"`
 	Entries                 [](EntryInformation)    `asn1:"explicit,tag:0,set"`
 	PartialOutcomeQualifier PartialOutcomeQualifier `asn1:"optional,explicit,tag:2,set"`
 	AltMatching             bool                    `asn1:"optional,explicit,tag:3"`
@@ -3167,6 +3168,7 @@ type SearchResultData_searchInfo struct {
 	Performer               DistinguishedName       `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced       bool                    `asn1:"optional,explicit,tag:28"`
 	Notification            [](Attribute)           `asn1:"optional,explicit,tag:27"`
+	Name                    Name                    `asn1:"optional"`
 }
 
 func (x *SearchResultData_searchInfo) GetTargetObject() (*Name, *DistinguishedName) {

@@ -57,7 +57,7 @@ implementations out there, written by yours truly.
   - [x] `WithProblemCode`
   - [ ] `WithEntryCount`
 - [ ] Use `X500OperationError` (I might not do this...)
-- [ ] List and Search Result Iterator
+- [x] List and Search Result Iterator
 - [ ] Test signing
 - [ ] Documentation
 

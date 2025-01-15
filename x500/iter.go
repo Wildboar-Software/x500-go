@@ -6,77 +6,77 @@ import (
 	"fmt"
 )
 
-func DissectListResult(lr ListResult) (info *ListResultData_listInfo, subs []ListResult, err error) {
-	data := lr
+func dissectResult[T any](r asn1.RawValue) (info *T, signed *SIGNED, subs []ListResult, err error) {
+	data := r
 	if data.Class == asn1.ClassUniversal && data.Tag == asn1.TagSequence {
 		signedResult := SIGNED{}
 		rest, err := asn1.Unmarshal(data.FullBytes, &signedResult)
 		if err != nil {
-			return nil, make([]ListResult, 0), err
+			return nil, nil, subs, err
 		}
 		if len(rest) > 0 {
-			return nil, make([]ListResult, 0), errors.New("trailing bytes")
+			return nil, &signedResult, subs, errors.New("trailing bytes")
 		}
+		signed = &signedResult
 		data = signedResult.ToBeSigned
 	}
 	if data.Class == asn1.ClassContextSpecific && data.Tag == 0 {
-		// This is the uncorrelatedListInfo
+		// This is the uncorrelatedListInfo or uncorrelatedSearchInfo
 		sets := make([]ListResult, 0)
 		rest, err := asn1.UnmarshalWithParams(data.Bytes, &sets, "set")
 		if err != nil {
-			return nil, make([]ListResult, 0), err
+			return nil, signed, subs, err
 		}
 		if len(rest) > 0 {
-			return nil, make([]ListResult, 0), errors.New("trailing bytes")
+			return nil, signed, subs, errors.New("trailing bytes")
 		}
-		return nil, sets, nil
+		return nil, signed, sets, nil
 	}
 	if data.Class != asn1.ClassUniversal || data.Tag != asn1.TagSet {
-		// This is some other syntax other than listInfo.
-		errStr := fmt.Sprintf("unrecognized listresult syntax (class=%+v, tag=%d)", data.Class, data.Tag)
-		return nil, make([]ListResult, 0), errors.New(errStr)
+		// This is some other syntax other than listInfo or searchInfo
+		errStr := fmt.Sprintf("unrecognized list or search result syntax (class=%+v, tag=%d)", data.Class, data.Tag)
+		return nil, signed, subs, errors.New(errStr)
 	}
-	info = &ListResultData_listInfo{}
+	info = new(T)
 	rest, err := asn1.UnmarshalWithParams(data.FullBytes, info, "set")
 	if err != nil {
-		fmt.Println("still list info")
-		return nil, make([]ListResult, 0), err
+		return nil, signed, subs, err
 	}
 	if len(rest) > 0 {
-		return nil, make([]ListResult, 0), errors.New("trailing bytes")
+		return nil, signed, subs, errors.New("trailing bytes")
 	}
-	return info, make([]ListResult, 0), err
+	return info, signed, subs, err
 }
 
-// Get the number of entries returned in a ListResult.
-//
-// Once recursionLimit reaches (or falls below) 0, further recursion ceases and
-// an error is returned.
-//
-// If you want it as a feature, I might be able to implement this without
-// recursion, but it would not be very elegant.
-func GetListResultEntriesReturnedCount(lr ListResult, recursionLimit int) (count int, err error) {
-	info, sets, err := DissectListResult(lr)
+// Convenience function for breaking a ListResult into the underlying listInfo, its signature, or substituent sets
+func DissectListResult(lr ListResult) (info *ListResultData_listInfo, signed *SIGNED, subs []ListResult, err error) {
+	return dissectResult[ListResultData_listInfo](lr)
+}
+
+// Convenience function for breaking a SearchResult into the underlying searchInfo, its signature, or substituent sets
+func DissectSearchResult(sr SearchResult) (info *SearchResultData_searchInfo, signed *SIGNED, subs []SearchResult, err error) {
+	return dissectResult[SearchResultData_searchInfo](sr)
+}
+
+// Count the number of list result sets and entries
+func CountListResult(lr ListResult) (sets int, entries int, err error) {
+	iter := NewListIter(lr)
+	set, _, err := iter.Next()
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
-	if info != nil {
-		return len(info.Subordinates), nil
-	}
-	if recursionLimit <= 0 {
-		return 0, errors.New("too much recursion in listresult")
-	}
-	sum := 0
-	for _, s := range sets {
-		subcount, err := GetListResultEntriesReturnedCount(s, recursionLimit-1)
+	for set != nil {
+		sets++
+		entries += len(set.Subordinates)
+		set, _, err = iter.Next()
 		if err != nil {
-			return 0, err
+			return sets, entries, err
 		}
-		sum += subcount
 	}
-	return sum, nil
+	return sets, entries, err
 }
 
+// State for iteration over list results
 type ListResultIterator struct {
 	// Stack to hold nodes for depth-first traversal
 	stack []ListResult
@@ -84,6 +84,7 @@ type ListResultIterator struct {
 	index []int
 }
 
+// Create a new ListResultIterator
 func NewListIter(lr ListResult) *ListResultIterator {
 	return &ListResultIterator{
 		stack: []ListResult{lr},
@@ -91,38 +92,15 @@ func NewListIter(lr ListResult) *ListResultIterator {
 	}
 }
 
-func (it *ListResultIterator) HasNext() (bool, error) {
-	for len(it.stack) > 0 {
-		current := it.stack[len(it.stack)-1]
-		childIndex := it.index[len(it.index)-1]
-		// I think in this algorithm, list info doesn't matter.
-		info, subs, err := DissectListResult(current)
-		if err != nil {
-			// TODO: Should you just return the error?
-			return false, nil
-		}
-		// If there are unprocessed children, or the current node has a value, return true
-		if childIndex < len(subs) {
-			return true, nil
-		}
-		// Pop the current node if all its children are processed
-		it.stack = it.stack[:len(it.stack)-1]
-		it.index = it.index[:len(it.index)-1]
-    if info == nil {
-      continue
-    }
-	}
-	return false, nil
-}
-
-func (it *ListResultIterator) Next() (*ListResultData_listInfo, error) {
+// Return the next listInfo and its signature (if present)
+func (it *ListResultIterator) Next() (*ListResultData_listInfo, *SIGNED, error) {
 	for len(it.stack) > 0 {
 		current := it.stack[len(it.stack)-1]
 		childIndex := it.index[len(it.index)-1]
 
-		info, subs, err := DissectListResult(current)
+		info, signed, subs, err := DissectListResult(current)
 		if err != nil {
-			return nil, err
+			return nil, signed, err
 		}
 
 		// Process children
@@ -136,10 +114,74 @@ func (it *ListResultIterator) Next() (*ListResultData_listInfo, error) {
 		// Pop the current node
 		it.stack = it.stack[:len(it.stack)-1]
 		it.index = it.index[:len(it.index)-1]
-    if info == nil {
-      continue
-    }
-		return info, nil
+		if info == nil {
+			continue
+		}
+		return info, signed, nil
 	}
-	return nil, nil
+	return nil, nil, nil
+}
+
+// Count the number of search result sets and entries
+func CountSearchResult(sr SearchResult) (sets int, entries int, err error) {
+	iter := NewSearchIter(sr)
+	set, _, err := iter.Next()
+	if err != nil {
+		return 0, 0, err
+	}
+	for set != nil {
+		sets++
+		entries += len(set.Entries)
+		set, _, err = iter.Next()
+		if err != nil {
+			return sets, entries, err
+		}
+	}
+	return sets, entries, err
+}
+
+// State for iteration over list results
+type SearchResultIterator struct {
+	// Stack to hold nodes for depth-first traversal
+	stack []SearchResult
+	// Tracks the index of the current child for each node in the stack
+	index []int
+}
+
+// Create a new ListResultIterator
+func NewSearchIter(sr SearchResult) *SearchResultIterator {
+	return &SearchResultIterator{
+		stack: []SearchResult{sr},
+		index: []int{0},
+	}
+}
+
+// Return the next searchInfo and its signature (if present)
+func (it *SearchResultIterator) Next() (*SearchResultData_searchInfo, *SIGNED, error) {
+	for len(it.stack) > 0 {
+		current := it.stack[len(it.stack)-1]
+		childIndex := it.index[len(it.index)-1]
+
+		info, signed, subs, err := DissectSearchResult(current)
+		if err != nil {
+			return nil, signed, err
+		}
+
+		// Process children
+		if childIndex < len(subs) {
+			it.index[len(it.index)-1]++
+			it.stack = append(it.stack, subs[childIndex])
+			it.index = append(it.index, 0)
+			continue
+		}
+
+		// Pop the current node
+		it.stack = it.stack[:len(it.stack)-1]
+		it.index = it.index[:len(it.index)-1]
+		if info == nil {
+			continue
+		}
+		return info, signed, nil
+	}
+	return nil, nil, nil
 }

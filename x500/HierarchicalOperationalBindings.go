@@ -2,12 +2,10 @@ package x500
 
 // # ASN.1 Definition:
 //
-// HierarchicalAgreement ::= SEQUENCE {
-//   rdn                [0]  RelativeDistinguishedName,
-//   immediateSuperior  [1]  DistinguishedName,
-//   ... }
-//
-//
+//	HierarchicalAgreement ::= SEQUENCE {
+//	  rdn                [0]  RelativeDistinguishedName,
+//	  immediateSuperior  [1]  DistinguishedName,
+//	  ... }
 type HierarchicalAgreement struct {
 	Rdn               RelativeDistinguishedName `asn1:"explicit,tag:0"`
 	ImmediateSuperior DistinguishedName         `asn1:"explicit,tag:1"`
@@ -15,15 +13,13 @@ type HierarchicalAgreement struct {
 
 // # ASN.1 Definition:
 //
-// SuperiorToSubordinate ::= SEQUENCE {
-//   contextPrefixInfo     [0]  DITcontext,
-//   entryInfo             [1]  SET SIZE (1..MAX) OF
-//                                Attribute{{SupportedAttributes}} OPTIONAL,
-//   immediateSuperiorInfo [2]  SET SIZE (1..MAX) OF
-//                                Attribute{{SupportedAttributes}} OPTIONAL,
-//   ... }
-//
-//
+//	SuperiorToSubordinate ::= SEQUENCE {
+//	  contextPrefixInfo     [0]  DITcontext,
+//	  entryInfo             [1]  SET SIZE (1..MAX) OF
+//	                               Attribute{{SupportedAttributes}} OPTIONAL,
+//	  immediateSuperiorInfo [2]  SET SIZE (1..MAX) OF
+//	                               Attribute{{SupportedAttributes}} OPTIONAL,
+//	  ... }
 type SuperiorToSubordinate struct {
 	ContextPrefixInfo     DITcontext    `asn1:"explicit,tag:0"`
 	EntryInfo             [](Attribute) `asn1:"optional,explicit,tag:1,set"`
@@ -32,19 +28,17 @@ type SuperiorToSubordinate struct {
 
 // # ASN.1 Definition:
 //
-//   DITcontext ::= SEQUENCE OF Vertex
+//	DITcontext ::= SEQUENCE OF Vertex
 type DITcontext = [](Vertex)
 
 // # ASN.1 Definition:
 //
-// Vertex ::= SEQUENCE {
-//   rdn           [0]  RelativeDistinguishedName,
-//   admPointInfo  [1]  SET SIZE (1..MAX) OF Attribute{{SupportedAttributes}} OPTIONAL,
-//   subentries    [2]  SET SIZE (1..MAX) OF SubentryInfo OPTIONAL,
-//   accessPoints  [3]  MasterAndShadowAccessPoints OPTIONAL,
-//   ... }
-//
-//
+//	Vertex ::= SEQUENCE {
+//	  rdn           [0]  RelativeDistinguishedName,
+//	  admPointInfo  [1]  SET SIZE (1..MAX) OF Attribute{{SupportedAttributes}} OPTIONAL,
+//	  subentries    [2]  SET SIZE (1..MAX) OF SubentryInfo OPTIONAL,
+//	  accessPoints  [3]  MasterAndShadowAccessPoints OPTIONAL,
+//	  ... }
 type Vertex struct {
 	Rdn          RelativeDistinguishedName   `asn1:"explicit,tag:0"`
 	AdmPointInfo [](Attribute)               `asn1:"optional,explicit,tag:1,set"`
@@ -57,12 +51,10 @@ type Vertex struct {
 //
 // # ASN.1 Definition:
 //
-// SubentryInfo ::= SEQUENCE {
-//   rdn   [0]  RelativeDistinguishedName,
-//   info  [1]  SET OF Attribute{{SupportedAttributes}},
-//   ... }
-//
-//
+//	SubentryInfo ::= SEQUENCE {
+//	  rdn   [0]  RelativeDistinguishedName,
+//	  info  [1]  SET OF Attribute{{SupportedAttributes}},
+//	  ... }
 type SubentryInfo struct {
 	Rdn  RelativeDistinguishedName `asn1:"explicit,tag:0"`
 	Info [](Attribute)             `asn1:"explicit,tag:1,set"`
@@ -70,14 +62,12 @@ type SubentryInfo struct {
 
 // # ASN.1 Definition:
 //
-// SubordinateToSuperior ::= SEQUENCE {
-//   accessPoints  [0]  MasterAndShadowAccessPoints OPTIONAL,
-//   alias         [1]  BOOLEAN DEFAULT FALSE,
-//   entryInfo     [2]  SET SIZE (1..MAX) OF Attribute{{SupportedAttributes}} OPTIONAL,
-//   subentries    [3]  SET SIZE (1..MAX) OF SubentryInfo OPTIONAL,
-//   ... }
-//
-//
+//	SubordinateToSuperior ::= SEQUENCE {
+//	  accessPoints  [0]  MasterAndShadowAccessPoints OPTIONAL,
+//	  alias         [1]  BOOLEAN DEFAULT FALSE,
+//	  entryInfo     [2]  SET SIZE (1..MAX) OF Attribute{{SupportedAttributes}} OPTIONAL,
+//	  subentries    [3]  SET SIZE (1..MAX) OF SubentryInfo OPTIONAL,
+//	  ... }
 type SubordinateToSuperior struct {
 	AccessPoints MasterAndShadowAccessPoints `asn1:"optional,explicit,tag:0,set"`
 	Alias        bool                        `asn1:"optional,explicit,tag:1"`
@@ -87,17 +77,15 @@ type SubordinateToSuperior struct {
 
 // # ASN.1 Definition:
 //
-//  SuperiorToSubordinateModification ::= SuperiorToSubordinate (
-//   WITH COMPONENTS {..., entryInfo  ABSENT } )
+//	SuperiorToSubordinateModification ::= SuperiorToSubordinate (
+//	 WITH COMPONENTS {..., entryInfo  ABSENT } )
 type SuperiorToSubordinateModification = SuperiorToSubordinate
 
 // # ASN.1 Definition:
 //
-// NonSpecificHierarchicalAgreement ::= SEQUENCE {
-//   immediateSuperior  [1]  DistinguishedName,
-//   ... }
-//
-//
+//	NonSpecificHierarchicalAgreement ::= SEQUENCE {
+//	  immediateSuperior  [1]  DistinguishedName,
+//	  ... }
 type NonSpecificHierarchicalAgreement struct {
 	ImmediateSuperior DistinguishedName `asn1:"explicit,tag:1"`
 }
@@ -105,17 +93,16 @@ type NonSpecificHierarchicalAgreement struct {
 // # ASN.1 Definition:
 //
 // NHOBSuperiorToSubordinate ::= SuperiorToSubordinate (
-//   WITH COMPONENTS {..., entryInfo  ABSENT } )
+//
+//	WITH COMPONENTS {..., entryInfo  ABSENT } )
 type NHOBSuperiorToSubordinate = SuperiorToSubordinate
 
 // # ASN.1 Definition:
 //
-// NHOBSubordinateToSuperior ::= SEQUENCE {
-//   accessPoints  [0]  MasterAndShadowAccessPoints OPTIONAL,
-//   subentries    [3]  SET SIZE (1..MAX) OF SubentryInfo OPTIONAL,
-//   ... }
-//
-//
+//	NHOBSubordinateToSuperior ::= SEQUENCE {
+//	  accessPoints  [0]  MasterAndShadowAccessPoints OPTIONAL,
+//	  subentries    [3]  SET SIZE (1..MAX) OF SubentryInfo OPTIONAL,
+//	  ... }
 type NHOBSubordinateToSuperior struct {
 	AccessPoints MasterAndShadowAccessPoints `asn1:"optional,explicit,tag:0,set"`
 	Subentries   [](SubentryInfo)            `asn1:"optional,explicit,tag:3,set"`
