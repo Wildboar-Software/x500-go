@@ -137,3 +137,29 @@ func TestListResultsCount(t *testing.T) {
 		return
 	}
 }
+
+func TestListResultIter(t *testing.T) {
+  input := getComplexListResults()
+  iter := NewListIter(input)
+  next := iter.Next()
+  resultSetCount := 0
+  entriesCount := 0
+  for next != nil {
+    entriesCount += len(next.Subordinates) 
+    resultSetCount++
+    hasNext := iter.HasNext()
+    next = iter.Next()
+    if (hasNext && next == nil) || (!hasNext && next != nil) {
+      t.Errorf("ListIter.hasNext() disagreed with ListIter.Next()")
+    }
+  }
+
+	if resultSetCount != 9 {
+		t.Errorf("actual result set count was %d", resultSetCount)
+		return
+	}
+  if entriesCount != 98 {
+    t.Errorf("actual entry count was %d", entriesCount)
+    return
+  }
+}

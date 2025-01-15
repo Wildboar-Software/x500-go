@@ -96,7 +96,7 @@ func (it *ListResultIterator) HasNext() bool {
 		current := it.stack[len(it.stack)-1]
 		childIndex := it.index[len(it.index)-1]
 		// I think in this algorithm, list info doesn't matter.
-		_, subs, err := DissectListResult(current)
+		info, subs, err := DissectListResult(current)
 		if err != nil {
 			// TODO: Should you just return the error?
 			return false
@@ -108,6 +108,9 @@ func (it *ListResultIterator) HasNext() bool {
 		// Pop the current node if all its children are processed
 		it.stack = it.stack[:len(it.stack)-1]
 		it.index = it.index[:len(it.index)-1]
+    if info == nil {
+      continue
+    }
 	}
 	return false
 }
@@ -134,6 +137,9 @@ func (it *ListResultIterator) Next() *ListResultData_listInfo {
 		// Pop the current node
 		it.stack = it.stack[:len(it.stack)-1]
 		it.index = it.index[:len(it.index)-1]
+    if info == nil {
+      continue
+    }
 		return info
 	}
 	return nil
