@@ -40,7 +40,7 @@ implementations out there, written by yours truly.
 - [x] `DirectoryString(s str)`
 - [x] `FromDirectoryString(ds DirectoryString)`
 - [ ] Test directory string encoding and decoding
-- [ ] Separate DirectoryString library?
+- [x] Separate DirectoryString library?
 - [x] Use `omitempty`
 - [ ] Even higher-level API
 - [ ] Change `int64` enums to `int`

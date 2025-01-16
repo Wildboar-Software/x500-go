@@ -235,12 +235,12 @@ type PolicyConstraintsSyntax struct {
 // # ASN.1 Definition:
 //
 //	SkipCerts ::= INTEGER(0..MAX)
-type SkipCerts = int64
+type SkipCerts = int
 
 // # ASN.1 Definition:
 //
 //	CRLNumber ::= INTEGER(0..MAX)
-type CRLNumber = int64
+type CRLNumber = int
 
 // # ASN.1 Definition:
 //

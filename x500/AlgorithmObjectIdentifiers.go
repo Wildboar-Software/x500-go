@@ -574,7 +574,7 @@ var Id_gmac ID = []int{1, 0, 9797, 3, 4}
 // # ASN.1 Definition:
 //
 //	ShakeOutputLen ::= INTEGER
-type ShakeOutputLen = int64
+type ShakeOutputLen = int
 
 // # ASN.1 Definition:
 //

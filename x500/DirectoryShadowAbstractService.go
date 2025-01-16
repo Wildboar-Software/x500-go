@@ -547,7 +547,7 @@ func (x *ShadowErrorData) GetNotification() []Attribute {
 //	  updateAlreadyReceived      (9),
 //	  invalidSequencing          (10),
 //	  insufficientResources      (11) }
-type ShadowProblem = int64
+type ShadowProblem = int
 
 const ShadowProblem_InvalidAgreementID ShadowProblem = 1
 

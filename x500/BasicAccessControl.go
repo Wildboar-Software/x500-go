@@ -32,7 +32,7 @@ type ACIItem struct {
 // # ASN.1 Definition:
 //
 //	Precedence ::= INTEGER(0..255,...)
-type Precedence = int64
+type Precedence = int
 
 // # ASN.1 Definition:
 //

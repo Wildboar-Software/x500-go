@@ -42,7 +42,7 @@ type TBSAttributeCertificate struct {
 // # ASN.1 Definition:
 //
 //	AttCertVersion ::= INTEGER {v2(1)}
-type AttCertVersion = int64
+type AttCertVersion = int
 
 const AttCertVersion_V2 AttCertVersion = 1
 

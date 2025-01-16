@@ -5,6 +5,7 @@ import (
 	"encoding/asn1"
 	"errors"
 	"fmt"
+
 	"github.com/Wildboar-Software/x500-go/teletex"
 )
 
@@ -29,7 +30,7 @@ func ASN1RawValueToStr(value asn1.RawValue) (output string, err error) {
 		fallthrough
 	case asn1.TagEnum:
 		{
-			var decoded int64 = 0
+			var decoded int = 0
 			rest, err := asn1.Unmarshal(value.FullBytes, &decoded)
 			if err != nil {
 				return "?", err

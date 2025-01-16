@@ -55,7 +55,7 @@ type Context_list = [](Context_list_Item)
 // # ASN.1 Definition:
 //
 //	Presentation-context-identifier ::= INTEGER(1..127, ..., 128..MAX)
-type Presentation_context_identifier = int64
+type Presentation_context_identifier = int
 
 // # ASN.1 Definition:
 //
@@ -117,12 +117,12 @@ type Application_context_name = asn1.ObjectIdentifier
 // # ASN.1 Definition:
 //
 //	AP-invocation-identifier ::= INTEGER
-type AP_invocation_identifier = int64
+type AP_invocation_identifier = int
 
 // # ASN.1 Definition:
 //
 //	AE-invocation-identifier ::= INTEGER
-type AE_invocation_identifier = int64
+type AE_invocation_identifier = int
 
 // # ASN.1 Definition:
 //
@@ -163,7 +163,7 @@ type OsiBindResult struct {
 //	  acceptance         (0),
 //	  user-rejection     (1),
 //	  provider-rejection (2)}
-type Result = int64
+type Result = int
 
 const Result_Acceptance Result = 0
 
@@ -217,7 +217,7 @@ type Association_informationBindRes = [](asn1.RawValue)
 //	  accepted           (0),
 //	  rejected-permanent (1),
 //	  rejected-transient (2)}(0..2, ...)
-type Associate_result = int64
+type Associate_result = int
 
 const Associate_result_Accepted Associate_result = 0
 
@@ -293,7 +293,7 @@ type Result_list = [](Result_list_Item)
 //	  default-context-not-supported       (5),
 //	  user-data-not-readable              (6),
 //	  no-PSAP-available                   (7)}
-type Provider_reason = int64
+type Provider_reason = int
 
 const Provider_reason_Reason_not_specified Provider_reason = 0
 
@@ -376,7 +376,7 @@ type TheOsiUnbind struct {
 // # ASN.1 Definition:
 //
 //	Release-request-reason ::= INTEGER {normal(0)}
-type Release_request_reason = int64
+type Release_request_reason = int
 
 const Release_request_reason_Normal Release_request_reason = 0
 
@@ -400,7 +400,7 @@ type TheOsiUnbindRes struct {
 // # ASN.1 Definition:
 //
 //	Release-response-reason ::= INTEGER {normal(0)}
-type Release_response_reason = int64
+type Release_response_reason = int
 
 const Release_response_reason_Normal Release_response_reason = 0
 
@@ -481,7 +481,7 @@ type OsiRej struct {
 //	  unrecognizedPDU          (0),
 //	  mistypedPDU              (1),
 //	  badlyStructuredPDU       (2) }
-type GeneralProblem = int64
+type GeneralProblem = int
 
 const GeneralProblem_UnrecognizedPDU GeneralProblem = 0
 
@@ -497,7 +497,7 @@ const GeneralProblem_BadlyStructuredPDU GeneralProblem = 2
 //	  mistypedArgument         (2),
 //	  resourceLimitation       (3),
 //	  releaseInProgress        (4)}
-type InvokeProblem = int64
+type InvokeProblem = int
 
 const InvokeProblem_DuplicateInvocation InvokeProblem = 0
 
@@ -515,7 +515,7 @@ const InvokeProblem_ReleaseInProgress InvokeProblem = 4
 //	  unrecognizedInvocation   (0),
 //	  resultResponseUnexpected (1),
 //	  mistypedResult           (2)}
-type ReturnResultProblem = int64
+type ReturnResultProblem = int
 
 const ReturnResultProblem_UnrecognizedInvocation ReturnResultProblem = 0
 
@@ -531,7 +531,7 @@ const ReturnResultProblem_MistypedResult ReturnResultProblem = 2
 //	  unrecognizedError        (2),
 //	  unexpectedError          (3),
 //	  mistypedParameter        (4)}
-type ReturnErrorProblem = int64
+type ReturnErrorProblem = int
 
 const ReturnErrorProblem_UnrecognizedInvocation ReturnErrorProblem = 0
 
@@ -583,7 +583,7 @@ type ABRT_apdu struct {
 //	ABRT-source ::= INTEGER {
 //	  acse-service-user     (0),
 //	  acse-service-provider (1) }
-type ABRT_source = int64
+type ABRT_source = int
 
 const ABRT_source_Acse_service_user ABRT_source = 0
 
@@ -609,7 +609,7 @@ type ARP_PPDU struct {
 //	  unrecognized-ppdu-parameter          (4),
 //	  unexpected-ppdu-parameter            (5),
 //	  invalid-ppdu-parameter-value         (6)}
-type Abort_reason = int64
+type Abort_reason = int
 
 const Abort_reason_Reason_not_specified Abort_reason = 0
 
@@ -636,7 +636,7 @@ const Abort_reason_Invalid_ppdu_parameter_value Abort_reason = 6
 //	  td-PPDU              (7),
 //	  s-release-indication (14),
 //	  s-release-confirm    (15) }
-type Event_identifier = int64
+type Event_identifier = int
 
 const Event_identifier_Cp_PPDU Event_identifier = 0
 
@@ -775,7 +775,7 @@ const AARE_apdu_protocol_version_Version1 int32 = 0
 // # ASN.1 Definition:
 //
 //	Associate-source-diagnostic-acse-service-user ::= INTEGER { -- REMOVED_FROM_UNNESTING -- }
-type Associate_source_diagnostic_acse_service_user = int64
+type Associate_source_diagnostic_acse_service_user = int
 
 const Associate_source_diagnostic_acse_service_user_Null Associate_source_diagnostic_acse_service_user = 0
 
@@ -802,7 +802,7 @@ const Associate_source_diagnostic_acse_service_user_Called_AE_invocation_identif
 // # ASN.1 Definition:
 //
 //	Associate-source-diagnostic-acse-service-provider ::= INTEGER { -- REMOVED_FROM_UNNESTING -- }
-type Associate_source_diagnostic_acse_service_provider = int64
+type Associate_source_diagnostic_acse_service_provider = int
 
 const Associate_source_diagnostic_acse_service_provider_Null Associate_source_diagnostic_acse_service_provider = 0
 
@@ -850,7 +850,7 @@ type OsiBindError_normal_mode_parameters struct {
 // # ASN.1 Definition:
 //
 //	Result-list-Item-provider-reason ::= INTEGER { -- REMOVED_FROM_UNNESTING -- }
-type Result_list_Item_provider_reason = int64
+type Result_list_Item_provider_reason = int
 
 const Result_list_Item_provider_reason_Reason_not_specified Result_list_Item_provider_reason = 0
 

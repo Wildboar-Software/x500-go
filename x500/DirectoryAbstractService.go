@@ -547,7 +547,7 @@ type SecurityParameters struct {
 // # ASN.1 Definition:
 //
 //	ProtectionRequest ::= INTEGER {none(0), signed(1)}
-type ProtectionRequest = int64
+type ProtectionRequest = int
 
 const ProtectionRequest_None ProtectionRequest = 0
 
@@ -564,7 +564,7 @@ const ProtectionRequest_Signed ProtectionRequest = 1
 // # ASN.1 Definition:
 //
 //	ErrorProtectionRequest ::= INTEGER {none(0), signed(1)}
-type ErrorProtectionRequest = int64
+type ErrorProtectionRequest = int
 
 const ErrorProtectionRequest_None ErrorProtectionRequest = 0
 
@@ -1274,7 +1274,7 @@ type PartialOutcomeQualifier struct {
 //	  timeLimitExceeded           (0),
 //	  sizeLimitExceeded           (1),
 //	  administrativeLimitExceeded (2) }
-type LimitProblem = int64
+type LimitProblem = int
 
 const LimitProblem_TimeLimitExceeded LimitProblem = 0
 
@@ -2254,7 +2254,7 @@ func (x *LdapArgumentData) GetFamilyGrouping() FamilyGrouping {
 // # ASN.1 Definition:
 //
 //	LinkId ::= INTEGER
-type LinkId = int64
+type LinkId = int
 
 // # ASN.1 Definition:
 //
@@ -2473,7 +2473,7 @@ func (x *AbandonFailedData) GetNotification() []Attribute {
 //	  noSuchOperation (1),
 //	  tooLate         (2),
 //	  cannotAbandon   (3) }
-type AbandonProblem = int64
+type AbandonProblem = int
 
 const AbandonProblem_NoSuchOperation AbandonProblem = 1
 
@@ -2532,7 +2532,7 @@ func (x *AttributeErrorData) GetNotification() []Attribute {
 //	  constraintViolation           (5),
 //	  attributeOrValueAlreadyExists (6),
 //	  contextViolation              (7) }
-type AttributeProblem = int64
+type AttributeProblem = int
 
 const AttributeProblem_NoSuchAttributeOrValue AttributeProblem = 1
 
@@ -2597,7 +2597,7 @@ func (x *NameErrorData) GetNotification() []Attribute {
 //	  invalidAttributeSyntax    (3),
 //	  aliasDereferencingProblem (4)
 //	  -- not to be used         (5)-- }
-type NameProblem = int64
+type NameProblem = int
 
 const NameProblem_NoSuchObject NameProblem = 1
 
@@ -2696,7 +2696,7 @@ func (x *SecurityErrorData) GetNotification() []Attribute {
 //	  unsupportedAuthenticationMethod (10),
 //	  passwordExpired                 (11),
 //	  inappropriateAlgorithms         (12) }
-type SecurityProblem = int64
+type SecurityProblem = int
 
 const SecurityProblem_InappropriateAuthentication SecurityProblem = 1
 
@@ -2788,7 +2788,7 @@ func (x *ServiceErrorData) GetNotification() []Attribute {
 //	  ambiguousKeyAttributes       (16),
 //	  saslBindInProgress           (17),
 //	  notSupportedByLDAP           (18) }
-type ServiceProblem = int64
+type ServiceProblem = int
 
 const ServiceProblem_Busy ServiceProblem = 1
 
@@ -2884,7 +2884,7 @@ func (x *UpdateErrorData) GetNotification() []Attribute {
 //	  insufficientPasswordQuality       (13),
 //	  passwordInHistory                 (14),
 //	  noPasswordSlot                    (15) }
-type UpdateProblem = int64
+type UpdateProblem = int
 
 const UpdateProblem_NamingViolation UpdateProblem = 1
 
@@ -2924,7 +2924,7 @@ var Id_at_family_information asn1.ObjectIdentifier = []int{2, 5, 4, 64}
 // # ASN.1 Definition:
 //
 // ServiceControls-priority ::= INTEGER { -- REMOVED_FROM_UNNESTING -- }
-type ServiceControls_priority = int64
+type ServiceControls_priority = int
 
 const ServiceControls_priority_Low ServiceControls_priority = 0
 
@@ -2935,7 +2935,7 @@ const ServiceControls_priority_High ServiceControls_priority = 2
 // # ASN.1 Definition:
 //
 //	ServiceControls-scopeOfReferral ::= INTEGER { -- REMOVED_FROM_UNNESTING -- }
-type ServiceControls_scopeOfReferral = int64
+type ServiceControls_scopeOfReferral = int
 
 const ServiceControls_scopeOfReferral_Dmd ServiceControls_scopeOfReferral = 0
 
@@ -2957,7 +2957,7 @@ type EntryInformationSelection_attributes = asn1.RawValue
 // # ASN.1 Definition:
 //
 //	EntryInformationSelection-infoTypes ::= INTEGER { -- REMOVED_FROM_UNNESTING -- }
-type EntryInformationSelection_infoTypes = int64
+type EntryInformationSelection_infoTypes = int
 
 const EntryInformationSelection_infoTypes_AttributeTypesOnly EntryInformationSelection_infoTypes = 0
 
@@ -3144,7 +3144,7 @@ type PartialOutcomeQualifier_entryCount = asn1.RawValue
 // # ASN.1 Definition:
 //
 //	SearchArgumentData-subset ::= INTEGER { -- REMOVED_FROM_UNNESTING -- }
-type SearchArgumentData_subset = int64
+type SearchArgumentData_subset = int
 
 const SearchArgumentData_subset_BaseObject SearchArgumentData_subset = 0
 

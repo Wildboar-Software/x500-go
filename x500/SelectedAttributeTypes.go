@@ -577,7 +577,7 @@ type DayTime struct {
 // # ASN.1 Definition:
 //
 //	TimeZone ::= INTEGER(-12..12)
-type TimeZone = int64
+type TimeZone = int
 
 // # ASN.1 Definition:
 //
@@ -1825,7 +1825,7 @@ var Id_avc_ldapAttributeOption asn1.ObjectIdentifier = []int{2, 5, 31, 5}
 // # ASN.1 Definition:
 //
 //	EnhancedGuide-subset ::= INTEGER { -- REMOVED_FROM_UNNESTING -- }
-type EnhancedGuide_subset = int64
+type EnhancedGuide_subset = int
 
 const EnhancedGuide_subset_BaseObject EnhancedGuide_subset = 0
 
@@ -1836,7 +1836,7 @@ const EnhancedGuide_subset_WholeSubtree EnhancedGuide_subset = 2
 // # ASN.1 Definition:
 //
 //	PreferredDeliveryMethod-Item ::= INTEGER { -- REMOVED_FROM_UNNESTING -- }
-type PreferredDeliveryMethod_Item = int64
+type PreferredDeliveryMethod_Item = int
 
 const PreferredDeliveryMethod_Item_Any_delivery_method PreferredDeliveryMethod_Item = 0
 

@@ -68,7 +68,7 @@ type SecurityPolicyIdentifier = asn1.ObjectIdentifier
 //	  confidential  (3),
 //	  secret        (4),
 //	  top-secret    (5)}
-type SecurityClassification = int64
+type SecurityClassification = int
 
 const SecurityClassification_Unmarked SecurityClassification = 0
 

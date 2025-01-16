@@ -27,14 +27,14 @@ const AssociationEstablishment_Outward int32 = 1
 // # ASN.1 Definition:
 //
 //	AssociationId ::= INTEGER
-type AssociationId = int64
+type AssociationId = int
 
 // # ASN.1 Definition:
 //
 //	AuthenReasonSyntax ::= INTEGER {
 //	  unknownUser(0), incorrectPassword(1), inaccessiblePassword(2),
 //	  passwordVerificationLoop(3), unrecognizedUser(4)}
-type AuthenReasonSyntax = int64
+type AuthenReasonSyntax = int
 
 const AuthenReasonSyntax_UnknownUser AuthenReasonSyntax = 0
 
@@ -65,7 +65,7 @@ type DirectoryInformationServiceElement struct {
 // # ASN.1 Definition:
 //
 //	DSAScopeOfChainingValue ::= INTEGER {dmd(0), country(1), global(2)}
-type DSAScopeOfChainingValue = int64
+type DSAScopeOfChainingValue = int
 
 const DSAScopeOfChainingValue_Dmd DSAScopeOfChainingValue = 0
 
@@ -76,7 +76,7 @@ const DSAScopeOfChainingValue_Global DSAScopeOfChainingValue = 2
 // # ASN.1 Definition:
 //
 //	DSAScopeOfReferralValue ::= INTEGER {dmd(0), country(1), global(2)}
-type DSAScopeOfReferralValue = int64
+type DSAScopeOfReferralValue = int
 
 const DSAScopeOfReferralValue_Dmd DSAScopeOfReferralValue = 0
 
@@ -87,7 +87,7 @@ const DSAScopeOfReferralValue_Global DSAScopeOfReferralValue = 2
 // # ASN.1 Definition:
 //
 //	HOBRole ::= INTEGER {superior(0), subordinate(1)}
-type HOBRole = int64
+type HOBRole = int
 
 const HOBRole_Superior HOBRole = 0
 
@@ -116,7 +116,7 @@ type MgtGeneralizedTime = time.Time
 // # ASN.1 Definition:
 //
 //	MgtInteger ::= INTEGER
-type MgtInteger = int64
+type MgtInteger = int
 
 // # ASN.1 Definition:
 //
@@ -178,7 +178,7 @@ const RequestAuthenticationPolicy_Strong int32 = 2
 //	ResourceSyntax ::= INTEGER {
 //	  insufficientMemory(0), insufficientAssociations(1), insufficientDiskSpace(2),
 //	  miscellaneousResourceExhausted(4)}
-type ResourceSyntax = int64
+type ResourceSyntax = int
 
 const ResourceSyntax_InsufficientMemory ResourceSyntax = 0
 
@@ -203,7 +203,7 @@ type SecondaryShadows = [](asn1.RawValue)
 // # ASN.1 Definition:
 //
 //	ShadowingRole ::= INTEGER {supplier(0), consumer(1)}
-type ShadowingRole = int64
+type ShadowingRole = int
 
 const ShadowingRole_Supplier ShadowingRole = 0
 

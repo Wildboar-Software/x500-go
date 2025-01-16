@@ -21,7 +21,8 @@ import (
 	"runtime"
 	"sync"
 	"time"
-  "github.com/Wildboar-Software/x500-go/x500"
+
+	"github.com/Wildboar-Software/x500-go/x500"
 )
 
 const BIND_RESPONSE_RECEIVE_BUFFER_SIZE = 4096
@@ -456,8 +457,8 @@ func (stack *IDMProtocolStack) handleBindErrorPDU(pdu x500.IdmBindError) {
 		}
 	}
 
-	var serviceError int64 = 0
-	var securityError int64 = 0
+	var serviceError int = 0
+	var securityError int = 0
 	acseResult := x500.Associate_result_Rejected_permanent
 	if dirBindErr.Error.Class == asn1.ClassContextSpecific {
 		switch dirBindErr.Error.Tag {
@@ -2549,4 +2550,3 @@ func (stack *IDMProtocolStack) AdministerPasswordSimple(ctx context.Context, dn 
 	}
 	return stack.AdministerPassword(ctx, arg)
 }
-

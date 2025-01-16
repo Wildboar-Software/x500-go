@@ -91,7 +91,7 @@ var DummyCurv asn1.ObjectIdentifier = []int{2, 5, 5}
 // # ASN.1 Definition:
 //
 //	Version ::= INTEGER {v1(0), v2(1), v3(2)}
-type Version = int64
+type Version = int
 
 const Version_V1 Version = 0
 

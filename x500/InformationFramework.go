@@ -153,7 +153,7 @@ type ChopSpecification struct {
 // # ASN.1 Definition:
 //
 //	BaseDistance ::= INTEGER(0..MAX)
-type BaseDistance = int64
+type BaseDistance = int
 
 // # ASN.1 Definition:
 //
@@ -212,7 +212,7 @@ type DITStructureRule struct {
 // # ASN.1 Definition:
 //
 //	RuleIdentifier ::= INTEGER
-type RuleIdentifier = int64
+type RuleIdentifier = int
 
 // # ASN.1 Definition:
 //
@@ -299,7 +299,7 @@ type PwdHistory struct {
 // # ASN.1 Definition:
 //
 //	HierarchyLevel ::= INTEGER
-type HierarchyLevel = int64
+type HierarchyLevel = int
 
 // # ASN.1 Definition:
 //

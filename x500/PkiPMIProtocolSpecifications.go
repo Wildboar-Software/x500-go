@@ -45,7 +45,7 @@ const (
 // # ASN.1 Definition:
 //
 //	AVMPsequence ::= INTEGER (1..MAX)
-type AVMPsequence = int64
+type AVMPsequence = int
 
 // # ASN.1 Definition:
 //
@@ -399,7 +399,7 @@ const (
 // # ASN.1 Definition:
 //
 //	CASPsequence ::= INTEGER (1..MAX)
-type CASPsequence = int64
+type CASPsequence = int
 
 // # ASN.1 Definition:
 //
