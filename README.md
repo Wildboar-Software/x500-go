@@ -36,12 +36,12 @@ implementations out there, written by yours truly.
 - [ ] Document how to publish new versions (It wasn't obvious to me)
 - [x] Teletex Handling
 - [ ] Separate NSAP library
-- [ ] Do you handle `BOOLEAN DEFAULT TRUE` correctly?
+- [x] Do you handle `BOOLEAN DEFAULT TRUE` correctly?
 - [x] `DirectoryString(s str)`
 - [x] `FromDirectoryString(ds DirectoryString)`
 - [ ] Test directory string encoding and decoding
 - [ ] Separate DirectoryString library?
-- [ ] Use `omitempty`
+- [x] Use `omitempty`
 - [ ] Even higher-level API
 - [ ] Change `int64` enums to `int`
 - [ ] Define and implement interfaces

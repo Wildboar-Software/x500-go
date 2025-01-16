@@ -88,6 +88,10 @@ func (ap *SupplierOrConsumer) GetProtocolInformation() []ProtocolInformation {
 	return ap.ProtocolInformation
 }
 
+// NOTE: Supplier_is_master is represented as an `asn1.RawValue` because the
+// boolean defaults to true, but Go only defaults booleans to false, so we
+// have to preserve the raw element.
+//
 // # ASN.1 Definition:
 //
 //	SupplierInformation ::= SET {
@@ -100,7 +104,7 @@ type SupplierInformation struct {
 	Address              PresentationAddress     `asn1:"explicit,tag:1"`
 	ProtocolInformation  [](ProtocolInformation) `asn1:"optional,explicit,tag:2,set"`
 	AgreementID          OperationalBindingID    `asn1:"explicit,tag:3"`
-	Supplier_is_master   bool                    `asn1:"optional,explicit,tag:4"`
+	Supplier_is_master   asn1.RawValue           `asn1:"optional,explicit,tag:4"`
 	Non_supplying_master AccessPoint             `asn1:"optional,explicit,tag:5,set"`
 }
 

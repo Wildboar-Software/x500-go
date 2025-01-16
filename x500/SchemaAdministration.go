@@ -135,6 +135,12 @@ func (x *AttributeTypeDescription) GetObsolete() bool {
 	return x.Obsolete
 }
 
+// NOTE: Both Multi_valued and UserModifiable are represented as
+// `asn1.RawValue` because there is no way to correctly encode and decode a
+// BOOLEAN that defaults to TRUE using Go's `encoding/asn1` other than by just
+// preserving the original raw value. It's omission can be detected if the
+// `RawValue.FullBytes` has a length of zero.
+//
 // # ASN.1 Definition:
 //
 //	AttributeTypeInformation ::= SEQUENCE {
@@ -154,9 +160,9 @@ type AttributeTypeInformation struct {
 	OrderingMatch   asn1.ObjectIdentifier    `asn1:"optional,explicit,tag:2"`
 	SubstringsMatch asn1.ObjectIdentifier    `asn1:"optional,explicit,tag:3"`
 	AttributeSyntax UnboundedDirectoryString `asn1:"optional,explicit,tag:4"`
-	Multi_valued    bool                     `asn1:"optional,explicit,tag:5"`
+	Multi_valued    asn1.RawValue            `asn1:"optional,explicit,tag:5"`
 	Collective      bool                     `asn1:"optional,explicit,tag:6"`
-	UserModifiable  bool                     `asn1:"optional,explicit,tag:7"`
+	UserModifiable  asn1.RawValue            `asn1:"optional,explicit,tag:7"`
 	Application     AttributeUsage           `asn1:"optional"`
 }
 

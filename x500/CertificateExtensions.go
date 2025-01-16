@@ -619,6 +619,10 @@ type AltSignatureAlgorithm = pkix.AlgorithmIdentifier
 //	AltSignatureValue ::= BIT STRING
 type AltSignatureValue = asn1.BitString
 
+// NOTE: Some fields are represented as an `asn1.RawValue` because the
+// boolean defaults to true, but Go only defaults booleans to false, so we
+// have to preserve the raw element.
+//
 // # ASN.1 Definition:
 //
 //	AAIssuingDistPointSyntax ::= SEQUENCE {
@@ -633,9 +637,9 @@ type AAIssuingDistPointSyntax struct {
 	DistributionPoint          DistributionPointName `asn1:"optional,tag:0"`
 	OnlySomeReasons            ReasonFlags           `asn1:"optional,tag:1"`
 	IndirectCRL                bool                  `asn1:"optional,tag:2"`
-	ContainsUserAttributeCerts bool                  `asn1:"optional,tag:3"`
-	ContainsAACerts            bool                  `asn1:"optional,tag:4"`
-	ContainsSOAPublicKeyCerts  bool                  `asn1:"optional,tag:5"`
+	ContainsUserAttributeCerts asn1.RawValue         `asn1:"optional,tag:3"`
+	ContainsAACerts            asn1.RawValue         `asn1:"optional,tag:4"`
+	ContainsSOAPublicKeyCerts  asn1.RawValue         `asn1:"optional,tag:5"`
 }
 
 // # ASN.1 Definition:

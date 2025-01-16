@@ -387,6 +387,10 @@ type FamilyReturn struct {
 	FamilySelect [](asn1.ObjectIdentifier) `asn1:"optional,omitempty"`
 }
 
+// NOTE: FromEntry will be incorrect, because there is no way to correctly
+// encode and decode a BOOLEAN that defaults to TRUE using Go's
+// `encoding/asn1`.
+//
 // # ASN.1 Definition:
 //
 //	EntryInformation ::= SEQUENCE {
@@ -401,12 +405,12 @@ type FamilyReturn struct {
 //	  derivedEntry     [5]  BOOLEAN DEFAULT FALSE,
 //	  ... }
 type EntryInformation struct {
-	Name            Name
-	FromEntry       bool                                  `asn1:"optional"`
-	Information     [](EntryInformation_information_Item) `asn1:"optional,set,omitempty"`
-	IncompleteEntry bool                                  `asn1:"optional,explicit,tag:3"`
-	PartialName     bool                                  `asn1:"optional,explicit,tag:4"`
-	DerivedEntry    bool                                  `asn1:"optional,explicit,tag:5"`
+	Name               Name
+	FromEntryINCORRECT bool                                  `asn1:"optional"`
+	Information        [](EntryInformation_information_Item) `asn1:"optional,set,omitempty"`
+	IncompleteEntry    bool                                  `asn1:"optional,explicit,tag:3"`
+	PartialName        bool                                  `asn1:"optional,explicit,tag:4"`
+	DerivedEntry       bool                                  `asn1:"optional,explicit,tag:5"`
 }
 
 // # ASN.1 Definition:
@@ -1028,6 +1032,11 @@ func (x *CompareArgumentData) GetFamilyGrouping() FamilyGrouping {
 //	CompareResult ::= OPTIONALLY-PROTECTED { CompareResultData }
 type CompareResult = OPTIONALLY_PROTECTED
 
+// NOTE: FromEntry is represented as an `asn1.RawValue` because there is no way
+// to correctly encode and decode a BOOLEAN that defaults to TRUE using Go's
+// `encoding/asn1` other than by just preserving the original raw value. It's
+// omission can be detected if the `RawValue.FullBytes` has a length of zero.
+//
 // # ASN.1 Definition:
 //
 //	CompareResultData ::= SET {
@@ -1041,7 +1050,7 @@ type CompareResult = OPTIONALLY_PROTECTED
 type CompareResultData struct {
 	Name               Name               `asn1:"optional"`
 	Matched            bool               `asn1:"explicit,tag:0"`
-	FromEntry          bool               `asn1:"optional,explicit,tag:1"`
+	FromEntry          asn1.RawValue      `asn1:"optional,explicit,tag:1"`
 	MatchedSubtype     AttributeType      `asn1:"optional,explicit,tag:2"`
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
@@ -1278,6 +1287,11 @@ const LimitProblem_AdministrativeLimitExceeded LimitProblem = 2
 //	SearchArgument ::= OPTIONALLY-PROTECTED { SearchArgumentData }
 type SearchArgument = OPTIONALLY_PROTECTED
 
+// NOTE: SearchAliases is represented as an `asn1.RawValue` because there is no way
+// to correctly encode and decode a BOOLEAN that defaults to TRUE using Go's
+// `encoding/asn1` other than by just preserving the original raw value. It's
+// omission can be detected if the `RawValue.FullBytes` has a length of zero.
+//
 // # ASN.1 Definition:
 //
 //	SearchArgumentData ::= SET {
@@ -1309,7 +1323,7 @@ type SearchArgumentData struct {
 	BaseObject           Name                        `asn1:"explicit,tag:0"`
 	Subset               SearchArgumentData_subset   `asn1:"optional,explicit,tag:1,default:0"`
 	Filter               Filter                      `asn1:"optional,explicit,tag:2"`
-	SearchAliases        bool                        `asn1:"optional,explicit,tag:3"`
+	SearchAliases        asn1.RawValue               `asn1:"optional,explicit,tag:3"`
 	Selection            EntryInformationSelection   `asn1:"optional,explicit,tag:4,set"`
 	PagedResults         PagedResultsRequest         `asn1:"optional,explicit,tag:5"`
 	MatchedValuesOnly    bool                        `asn1:"optional,explicit,tag:6"`
@@ -3075,13 +3089,18 @@ type ModifyRights_Item struct {
 	Permission ModifyRights_Item_permission `asn1:"explicit,tag:3"`
 }
 
+// NOTE: FromEntry is represented as an `asn1.RawValue` because there is no way
+// to correctly encode and decode a BOOLEAN that defaults to TRUE using Go's
+// `encoding/asn1` other than by just preserving the original raw value. It's
+// omission can be detected if the `RawValue.FullBytes` has a length of zero.
+//
 // # ASN.1 Definition:
 //
 //	ListResultData-listInfo-subordinates-Item ::= SEQUENCE { -- REMOVED_FROM_UNNESTING -- }
 type ListResultData_listInfo_subordinates_Item struct {
 	Rdn        pkix.RelativeDistinguishedNameSET
-	AliasEntry bool `asn1:"optional,explicit,tag:0"`
-	FromEntry  bool `asn1:"optional,explicit,tag:1"`
+	AliasEntry bool          `asn1:"optional,explicit,tag:0"`
+	FromEntry  asn1.RawValue `asn1:"optional,explicit,tag:1"`
 }
 
 // # ASN.1 Definition:
