@@ -22,8 +22,8 @@ type HierarchicalAgreement struct {
 //	  ... }
 type SuperiorToSubordinate struct {
 	ContextPrefixInfo     DITcontext    `asn1:"explicit,tag:0"`
-	EntryInfo             [](Attribute) `asn1:"optional,explicit,tag:1,set"`
-	ImmediateSuperiorInfo [](Attribute) `asn1:"optional,explicit,tag:2,set"`
+	EntryInfo             [](Attribute) `asn1:"optional,explicit,tag:1,set,omitempty"`
+	ImmediateSuperiorInfo [](Attribute) `asn1:"optional,explicit,tag:2,set,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -41,9 +41,9 @@ type DITcontext = [](Vertex)
 //	  ... }
 type Vertex struct {
 	Rdn          RelativeDistinguishedName   `asn1:"explicit,tag:0"`
-	AdmPointInfo [](Attribute)               `asn1:"optional,explicit,tag:1,set"`
-	Subentries   [](SubentryInfo)            `asn1:"optional,explicit,tag:2,set"`
-	AccessPoints MasterAndShadowAccessPoints `asn1:"optional,explicit,tag:3,set"`
+	AdmPointInfo [](Attribute)               `asn1:"optional,explicit,tag:1,set,omitempty"`
+	Subentries   [](SubentryInfo)            `asn1:"optional,explicit,tag:2,set,omitempty"`
+	AccessPoints MasterAndShadowAccessPoints `asn1:"optional,explicit,tag:3,set,omitempty"`
 }
 
 // WARNING: If you encounter a bug encoding or decoding, it is probably the
@@ -69,10 +69,10 @@ type SubentryInfo struct {
 //	  subentries    [3]  SET SIZE (1..MAX) OF SubentryInfo OPTIONAL,
 //	  ... }
 type SubordinateToSuperior struct {
-	AccessPoints MasterAndShadowAccessPoints `asn1:"optional,explicit,tag:0,set"`
+	AccessPoints MasterAndShadowAccessPoints `asn1:"optional,explicit,tag:0,set,omitempty"`
 	Alias        bool                        `asn1:"optional,explicit,tag:1"`
-	EntryInfo    [](Attribute)               `asn1:"optional,explicit,tag:2,set"`
-	Subentries   [](SubentryInfo)            `asn1:"optional,explicit,tag:3,set"`
+	EntryInfo    [](Attribute)               `asn1:"optional,explicit,tag:2,set,omitempty"`
+	Subentries   [](SubentryInfo)            `asn1:"optional,explicit,tag:3,set,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -104,6 +104,6 @@ type NHOBSuperiorToSubordinate = SuperiorToSubordinate
 //	  subentries    [3]  SET SIZE (1..MAX) OF SubentryInfo OPTIONAL,
 //	  ... }
 type NHOBSubordinateToSuperior struct {
-	AccessPoints MasterAndShadowAccessPoints `asn1:"optional,explicit,tag:0,set"`
-	Subentries   [](SubentryInfo)            `asn1:"optional,explicit,tag:3,set"`
+	AccessPoints MasterAndShadowAccessPoints `asn1:"optional,explicit,tag:0,set,omitempty"`
+	Subentries   [](SubentryInfo)            `asn1:"optional,explicit,tag:3,set,omitempty"`
 }

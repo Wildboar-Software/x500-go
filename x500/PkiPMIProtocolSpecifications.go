@@ -118,7 +118,7 @@ type CertOK struct {
 //	  ... }
 type CertErr struct {
 	NotOK CertErr_notOK
-	Note  Notifications `asn1:"optional"`
+	Note  Notifications `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:

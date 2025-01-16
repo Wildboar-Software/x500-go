@@ -214,7 +214,7 @@ type CoordinateShadowUpdateResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *CoordinateShadowUpdateResultData) GetSecurityParameters() SecurityParameters {
@@ -286,7 +286,7 @@ type RequestShadowUpdateResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *RequestShadowUpdateResultData) GetSecurityParameters() SecurityParameters {
@@ -353,7 +353,7 @@ type UpdateShadowResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *UpdateShadowResultData) GetSecurityParameters() SecurityParameters {
@@ -401,7 +401,7 @@ type RefreshInformation = asn1.RawValue
 //	  ...}
 type TotalRefresh struct {
 	SDSE    SDSEContent `asn1:"optional"`
-	Subtree [](Subtree) `asn1:"optional,set"`
+	Subtree [](Subtree) `asn1:"optional,set,omitempty"`
 }
 
 // WARNING: If you encounter a bug encoding or decoding, it is probably the
@@ -457,7 +457,7 @@ type IncrementalRefresh = [](IncrementalStepRefresh)
 //	  subordinateUpdates  SEQUENCE SIZE (1..MAX) OF SubordinateChanges OPTIONAL }
 type IncrementalStepRefresh struct {
 	SDSEChanges        IncrementalStepRefresh_sDSEChanges `asn1:"optional"`
-	SubordinateUpdates [](SubordinateChanges)             `asn1:"optional"`
+	SubordinateUpdates [](SubordinateChanges)             `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -510,7 +510,7 @@ type ShadowErrorData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *ShadowErrorData) GetProblem() int {

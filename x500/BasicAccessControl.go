@@ -61,16 +61,16 @@ type Precedence = int64
 type ProtectedItems struct {
 	Entry                          asn1.RawValue                `asn1:"optional,explicit,tag:0"`
 	AllUserAttributeTypes          asn1.RawValue                `asn1:"optional,explicit,tag:1"`
-	AttributeType                  [](AttributeType)            `asn1:"optional,explicit,tag:2"`
-	AllAttributeValues             [](AttributeType)            `asn1:"optional,explicit,tag:3"`
+	AttributeType                  [](AttributeType)            `asn1:"optional,explicit,tag:2,omitempty"`
+	AllAttributeValues             [](AttributeType)            `asn1:"optional,explicit,tag:3,omitempty"`
 	AllUserAttributeTypesAndValues asn1.RawValue                `asn1:"optional,explicit,tag:4"`
-	AttributeValue                 []pkix.AttributeTypeAndValue `asn1:"optional,explicit,tag:5"`
-	SelfValue                      [](AttributeType)            `asn1:"optional,explicit,tag:6"`
+	AttributeValue                 []pkix.AttributeTypeAndValue `asn1:"optional,explicit,tag:5,omitempty"`
+	SelfValue                      [](AttributeType)            `asn1:"optional,explicit,tag:6,omitempty"`
 	RangeOfValues                  Filter                       `asn1:"optional,explicit,tag:7"`
-	MaxValueCount                  [](MaxValueCount)            `asn1:"optional,explicit,tag:8"`
+	MaxValueCount                  [](MaxValueCount)            `asn1:"optional,explicit,tag:8,omitempty"`
 	MaxImmSub                      int                          `asn1:"optional,explicit,tag:9"`
-	RestrictedBy                   [](RestrictedValue)          `asn1:"optional,explicit,tag:10"`
-	Contexts                       [](ContextAssertion)         `asn1:"optional,explicit,tag:11"`
+	RestrictedBy                   [](RestrictedValue)          `asn1:"optional,explicit,tag:10,omitempty"`
+	Contexts                       [](ContextAssertion)         `asn1:"optional,explicit,tag:11,omitempty"`
 	Classes                        Refinement                   `asn1:"optional,explicit,tag:12"`
 }
 
@@ -110,9 +110,9 @@ type RestrictedValue struct {
 type UserClasses struct {
 	AllUsers  asn1.RawValue            `asn1:"optional,explicit,tag:0"`
 	ThisEntry asn1.RawValue            `asn1:"optional,explicit,tag:1"`
-	Name      [](NameAndOptionalUID)   `asn1:"optional,explicit,tag:2"`
-	UserGroup [](NameAndOptionalUID)   `asn1:"optional,explicit,tag:3"`
-	Subtree   [](SubtreeSpecification) `asn1:"optional,explicit,tag:4"`
+	Name      [](NameAndOptionalUID)   `asn1:"optional,explicit,tag:2,omitempty"`
+	UserGroup [](NameAndOptionalUID)   `asn1:"optional,explicit,tag:3,omitempty"`
+	Subtree   [](SubtreeSpecification) `asn1:"optional,explicit,tag:4,omitempty"`
 }
 
 // # ASN.1 Definition:

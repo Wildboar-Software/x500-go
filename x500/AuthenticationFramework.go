@@ -151,7 +151,7 @@ type Extensions = [](pkix.Extension)
 //	  ... }
 type Certificates struct {
 	UserCertificate   x509.Certificate
-	CertificationPath ForwardCertificationPath `asn1:"optional"`
+	CertificationPath ForwardCertificationPath `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -175,7 +175,7 @@ type CrossCertificates = [](x509.Certificate)
 //	  ... }
 type CertificationPath struct {
 	UserCertificate   x509.Certificate
-	TheCACertificates [](CertificatePair) `asn1:"optional"`
+	TheCACertificates [](CertificatePair) `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -186,7 +186,7 @@ type CertificationPath struct {
 //	  ... }
 type CertificationPathRaw struct {
 	UserCertificate   asn1.RawValue
-	TheCACertificates [](CertificatePairRaw) `asn1:"optional"`
+	TheCACertificates [](CertificatePairRaw) `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -225,7 +225,7 @@ type TBSCertAVL struct {
 	Issuer        Name
 	Constrained   bool
 	Entries       [](TBSCertAVL_entries_Item)
-	AvlExtensions Extensions `asn1:"optional"`
+	AvlExtensions Extensions `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -300,7 +300,7 @@ type CertificatePairRaw struct {
 type SupportedAlgorithm struct {
 	AlgorithmIdentifier         pkix.AlgorithmIdentifier
 	IntendedUsage               KeyUsage                  `asn1:"optional,explicit,tag:0"`
-	IntendedCertificatePolicies CertificatePoliciesSyntax `asn1:"optional,explicit,tag:1"`
+	IntendedCertificatePolicies CertificatePoliciesSyntax `asn1:"optional,explicit,tag:1,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -345,7 +345,7 @@ type PolicyID = CertPolicyId
 type SupportedPublicKeyAlgorithms struct {
 	AlgorithmIdentifier pkix.AlgorithmIdentifier
 	MinKeySize          int
-	Extensions          [](OidOrAttr) `asn1:"optional,explicit,tag:0"`
+	Extensions          [](OidOrAttr) `asn1:"optional,explicit,tag:0,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -492,13 +492,13 @@ type TBSCertAVL_entries_Item_idType = asn1.RawValue
 type TBSCertAVL_entries_Item struct {
 	IdType          TBSCertAVL_entries_Item_idType
 	Scope           ScopeRestrictions `asn1:"optional,tag:0"`
-	EntryExtensions Extensions        `asn1:"optional,tag:1"`
+	EntryExtensions Extensions        `asn1:"optional,tag:1,omitempty"`
 }
 
 // # ASN.1 Definition:
 //
 // InfoSyntax-pointer ::= SEQUENCE { -- REMOVED_FROM_UNNESTING -- }
 type InfoSyntax_pointer struct {
-	Name GeneralNames
-	Hash HASH `asn1:"optional"`
+	Name GeneralNames `asn1:"omitempty"`
+	Hash HASH         `asn1:"optional"`
 }

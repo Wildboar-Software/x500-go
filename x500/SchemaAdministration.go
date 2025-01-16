@@ -16,7 +16,7 @@ type DITStructureRuleDescription struct {
 	RuleIdentifier         RuleIdentifier
 	NameForm               asn1.ObjectIdentifier
 	SuperiorStructureRules [](RuleIdentifier)           `asn1:"optional,set"`
-	Name                   [](UnboundedDirectoryString) `asn1:"optional,explicit,tag:1,set"`
+	Name                   [](UnboundedDirectoryString) `asn1:"optional,explicit,tag:1,set,omitempty"`
 	Description            UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete               bool                         `asn1:"optional"`
 }
@@ -47,7 +47,7 @@ type DITContentRuleDescription struct {
 	Mandatory             [](asn1.ObjectIdentifier)    `asn1:"optional,explicit,tag:1,set"`
 	Optional              [](asn1.ObjectIdentifier)    `asn1:"optional,explicit,tag:2,set"`
 	Precluded             [](asn1.ObjectIdentifier)    `asn1:"optional,explicit,tag:3,set"`
-	Name                  [](UnboundedDirectoryString) `asn1:"optional,explicit,tag:4,set"`
+	Name                  [](UnboundedDirectoryString) `asn1:"optional,explicit,tag:4,set,omitempty"`
 	Description           UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete              bool                         `asn1:"optional"`
 }
@@ -80,7 +80,7 @@ func (x *DITContentRuleDescription) GetObsolete() bool {
 //	  ... }
 type MatchingRuleDescription struct {
 	Identifier  asn1.ObjectIdentifier
-	Name        [](UnboundedDirectoryString) `asn1:"optional,set"`
+	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
 	Description UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information UnboundedDirectoryString     `asn1:"optional,explicit,tag:0"`
@@ -113,7 +113,7 @@ func (x *MatchingRuleDescription) GetObsolete() bool {
 //	  ... }
 type AttributeTypeDescription struct {
 	Identifier  asn1.ObjectIdentifier
-	Name        [](UnboundedDirectoryString) `asn1:"optional,set"`
+	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
 	Description UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information AttributeTypeInformation     `asn1:"explicit,tag:0"`
@@ -171,7 +171,7 @@ type AttributeTypeInformation struct {
 //	  ... }
 type ObjectClassDescription struct {
 	Identifier  asn1.ObjectIdentifier
-	Name        [](UnboundedDirectoryString) `asn1:"optional,set"`
+	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
 	Description UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information ObjectClassInformation       `asn1:"explicit,tag:0"`
@@ -202,10 +202,10 @@ func (x *ObjectClassDescription) GetObsolete() bool {
 //	  optionals    [4]  SET SIZE (1..MAX) OF ATTRIBUTE.&id    OPTIONAL,
 //	  ... }
 type ObjectClassInformation struct {
-	SubclassOf  [](asn1.ObjectIdentifier) `asn1:"optional,set"`
+	SubclassOf  [](asn1.ObjectIdentifier) `asn1:"optional,set,omitempty"`
 	Kind        ObjectClassKind           `asn1:"optional"`
-	Mandatories [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:3,set"`
-	Optionals   [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:4,set"`
+	Mandatories [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:3,set,omitempty"`
+	Optionals   [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:4,set,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -219,7 +219,7 @@ type ObjectClassInformation struct {
 //	  ... }
 type NameFormDescription struct {
 	Identifier  asn1.ObjectIdentifier
-	Name        [](UnboundedDirectoryString) `asn1:"optional,set"`
+	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
 	Description UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information NameFormInformation          `asn1:"explicit,tag:0"`
@@ -251,7 +251,7 @@ func (x *NameFormDescription) GetObsolete() bool {
 type NameFormInformation struct {
 	Subordinate       asn1.ObjectIdentifier
 	NamingMandatories [](asn1.ObjectIdentifier) `asn1:"set"`
-	NamingOptionals   [](asn1.ObjectIdentifier) `asn1:"optional,set"`
+	NamingOptionals   [](asn1.ObjectIdentifier) `asn1:"optional,set,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -265,7 +265,7 @@ type NameFormInformation struct {
 //	  ... }
 type MatchingRuleUseDescription struct {
 	Identifier  asn1.ObjectIdentifier
-	Name        [](UnboundedDirectoryString) `asn1:"optional,set"`
+	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
 	Description UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information [](asn1.ObjectIdentifier)    `asn1:"explicit,tag:0,set"`
@@ -298,7 +298,7 @@ func (x *MatchingRuleUseDescription) GetObsolete() bool {
 //	  ... }
 type ContextDescription struct {
 	Identifier  asn1.ObjectIdentifier
-	Name        [](UnboundedDirectoryString) `asn1:"optional,set"`
+	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
 	Description UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information ContextInformation           `asn1:"explicit,tag:0"`
@@ -342,7 +342,7 @@ type ContextInformation struct {
 //	  ... }
 type DITContextUseDescription struct {
 	Identifier  asn1.ObjectIdentifier
-	Name        [](UnboundedDirectoryString) `asn1:"optional,set"`
+	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
 	Description UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information DITContextUseInformation     `asn1:"explicit,tag:0"`
@@ -371,8 +371,8 @@ func (x *DITContextUseDescription) GetObsolete() bool {
 //	  optionalContexts   [2]  SET SIZE (1..MAX) OF CONTEXT.&id OPTIONAL,
 //	  ... }
 type DITContextUseInformation struct {
-	MandatoryContexts [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:1,set"`
-	OptionalContexts  [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:2,set"`
+	MandatoryContexts [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:1,set,omitempty"`
+	OptionalContexts  [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:2,set,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -386,10 +386,10 @@ type DITContextUseInformation struct {
 //	  ... }
 type FriendsDescription struct {
 	Anchor      asn1.ObjectIdentifier
-	Name        [](UnboundedDirectoryString) `asn1:"optional,set"`
+	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
 	Description UnboundedDirectoryString     `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
-	Friends     [](asn1.ObjectIdentifier)    `asn1:"explicit,tag:0,set"`
+	Friends     [](asn1.ObjectIdentifier)    `asn1:"explicit,tag:0,set,omitempty"`
 }
 
 func (x *FriendsDescription) GetIdentifier() asn1.ObjectIdentifier {

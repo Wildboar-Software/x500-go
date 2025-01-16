@@ -25,8 +25,8 @@ type PDU_wrapper = SIGNED
 type TBSPDU_wrapper struct {
 	Version            Version `asn1:"optional"`
 	SignatureAlgorithm pkix.AlgorithmIdentifier
-	CertPath           PkiPath          `asn1:"tag:0"`
-	SignedAttrs        SignedAttributes `asn1:"optional,tag:1"`
+	CertPath           PkiPath          `asn1:"tag:0,omitempty"`
+	SignedAttrs        SignedAttributes `asn1:"optional,tag:1,omitempty"`
 	Conf               TBSPDU_wrapper_conf
 }
 

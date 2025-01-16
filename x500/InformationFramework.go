@@ -19,7 +19,7 @@ import (
 type Attribute struct {
 	Type              asn1.ObjectIdentifier
 	Values            [](asn1.RawValue)                    `asn1:"set"`
-	ValuesWithContext [](Attribute_valuesWithContext_Item) `asn1:"optional,set"`
+	ValuesWithContext [](Attribute_valuesWithContext_Item) `asn1:"optional,set,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -42,7 +42,7 @@ type AttributeValue = asn1.RawValue
 //	  ... }
 type Context struct {
 	ContextType   asn1.ObjectIdentifier
-	ContextValues [](asn1.RawValue) `asn1:"set"`
+	ContextValues [](asn1.RawValue) `asn1:"set,omitempty"`
 	Fallback      bool              `asn1:"optional"`
 }
 
@@ -59,7 +59,7 @@ type Context struct {
 type AttributeValueAssertion struct {
 	Type             asn1.ObjectIdentifier
 	Assertion        asn1.RawValue
-	AssertedContexts AttributeValueAssertion_assertedContexts `asn1:"optional"`
+	AssertedContexts AttributeValueAssertion_assertedContexts `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -71,7 +71,7 @@ type AttributeValueAssertion struct {
 //	  ... }
 type ContextAssertion struct {
 	ContextType   asn1.ObjectIdentifier
-	ContextValues [](asn1.RawValue) `asn1:"set"`
+	ContextValues [](asn1.RawValue) `asn1:"set,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -82,7 +82,7 @@ type ContextAssertion struct {
 //	  ... }
 type AttributeTypeAssertion struct {
 	Type             asn1.ObjectIdentifier
-	AssertedContexts [](ContextAssertion) `asn1:"optional"`
+	AssertedContexts [](ContextAssertion) `asn1:"optional,omitempty"`
 }
 
 // Note that the `dnsName` and `oid` alternatives are extremely new: they were
@@ -118,7 +118,7 @@ type RelativeDistinguishedName = [](pkix.AttributeTypeAndValue)
 //	  ... }
 type SubtreeSpecification struct {
 	Base                LocalName                                     `asn1:"optional,explicit,tag:0"`
-	SpecificExclusions  [](ChopSpecification_specificExclusions_Item) `asn1:"optional,explicit,tag:1,set"`
+	SpecificExclusions  [](ChopSpecification_specificExclusions_Item) `asn1:"optional,explicit,tag:1,set,omitempty"`
 	Minimum             BaseDistance                                  `asn1:"optional,explicit,tag:2"`
 	Maximum             BaseDistance                                  `asn1:"optional,explicit,tag:3"`
 	SpecificationFilter Refinement                                    `asn1:"optional,explicit,tag:4"`
@@ -206,7 +206,7 @@ const (
 type DITStructureRule struct {
 	RuleIdentifier         RuleIdentifier
 	NameForm               asn1.ObjectIdentifier
-	SuperiorStructureRules [](RuleIdentifier) `asn1:"optional,set"`
+	SuperiorStructureRules [](RuleIdentifier) `asn1:"optional,set,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -225,10 +225,10 @@ type RuleIdentifier = int64
 //	  ... }
 type DITContentRule struct {
 	StructuralObjectClass asn1.ObjectIdentifier
-	Auxiliaries           [](asn1.ObjectIdentifier) `asn1:"optional,set"`
-	Mandatory             [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:1,set"`
-	Optional              [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:2,set"`
-	Precluded             [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:3,set"`
+	Auxiliaries           [](asn1.ObjectIdentifier) `asn1:"optional,set,omitempty"`
+	Mandatory             [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:1,set,omitempty"`
+	Optional              [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:2,set,omitempty"`
+	Precluded             [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:3,set,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -240,8 +240,8 @@ type DITContentRule struct {
 //	  ... }
 type DITContextUse struct {
 	AttributeType     asn1.ObjectIdentifier
-	MandatoryContexts [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:1,set"`
-	OptionalContexts  [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:2,set"`
+	MandatoryContexts [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:1,set,omitempty"`
+	OptionalContexts  [](asn1.ObjectIdentifier) `asn1:"optional,explicit,tag:2,set,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -269,7 +269,7 @@ type SearchRuleDescription struct {
 	AllowedSubset        AllowedSubset                `asn1:"optional,explicit,tag:13"`
 	ImposedSubset        ImposedSubset                `asn1:"optional,explicit,tag:14"`
 	EntryLimit           EntryLimit                   `asn1:"optional,explicit,tag:15"`
-	Name                 [](UnboundedDirectoryString) `asn1:"optional,explicit,tag:28,set"`
+	Name                 [](UnboundedDirectoryString) `asn1:"optional,explicit,tag:28,set,omitempty"`
 	Description          UnboundedDirectoryString     `asn1:"optional,explicit,tag:29"`
 }
 

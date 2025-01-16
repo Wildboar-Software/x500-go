@@ -31,7 +31,7 @@ type CommonArguments struct {
 	CriticalExtensions  asn1.BitString     `asn1:"optional,explicit,tag:25"`
 	ReferenceType       ReferenceType      `asn1:"optional,explicit,tag:24"`
 	EntryOnly           bool               `asn1:"optional,explicit,tag:23"`
-	Exclusions          Exclusions         `asn1:"optional,explicit,tag:22"`
+	Exclusions          Exclusions         `asn1:"optional,explicit,tag:22,omitempty"`
 	NameResolveOnMaster bool               `asn1:"optional,explicit,tag:21"`
 	OperationContexts   ContextSelection   `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping      FamilyGrouping     `asn1:"optional,explicit,tag:19"`
@@ -111,7 +111,7 @@ type CommonArgumentsSeq struct {
 	CriticalExtensions  asn1.BitString     `asn1:"optional,explicit,tag:25"`
 	ReferenceType       ReferenceType      `asn1:"optional,explicit,tag:24"`
 	EntryOnly           bool               `asn1:"optional,explicit,tag:23"`
-	Exclusions          Exclusions         `asn1:"optional,explicit,tag:22"`
+	Exclusions          Exclusions         `asn1:"optional,explicit,tag:22,omitempty"`
 	NameResolveOnMaster bool               `asn1:"optional,explicit,tag:21"`
 	OperationContexts   ContextSelection   `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping      FamilyGrouping     `asn1:"optional,explicit,tag:19"`
@@ -195,7 +195,7 @@ type CommonResults struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *CommonResults) GetSecurityParameters() SecurityParameters {
@@ -227,7 +227,7 @@ type CommonResultsSeq struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *CommonResultsSeq) GetSecurityParameters() SecurityParameters {
@@ -384,7 +384,7 @@ type TypeAndContextAssertion struct {
 //	  ... }
 type FamilyReturn struct {
 	MemberSelect FamilyReturn_memberSelect
-	FamilySelect [](asn1.ObjectIdentifier) `asn1:"optional"`
+	FamilySelect [](asn1.ObjectIdentifier) `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -403,7 +403,7 @@ type FamilyReturn struct {
 type EntryInformation struct {
 	Name            Name
 	FromEntry       bool                                  `asn1:"optional"`
-	Information     [](EntryInformation_information_Item) `asn1:"optional,set"`
+	Information     [](EntryInformation_information_Item) `asn1:"optional,set,omitempty"`
 	IncompleteEntry bool                                  `asn1:"optional,explicit,tag:3"`
 	PartialName     bool                                  `asn1:"optional,explicit,tag:4"`
 	DerivedEntry    bool                                  `asn1:"optional,explicit,tag:5"`
@@ -433,7 +433,7 @@ type FamilyEntries struct {
 type FamilyEntry struct {
 	Rdn         RelativeDistinguishedName
 	Information [](FamilyEntry_information_Item)
-	Family_info [](FamilyEntries) `asn1:"optional"`
+	Family_info [](FamilyEntries) `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -799,7 +799,7 @@ type ReadArgumentData struct {
 	CriticalExtensions  asn1.BitString            `asn1:"optional,explicit,tag:25"`
 	ReferenceType       ReferenceType             `asn1:"optional,explicit,tag:24"`
 	EntryOnly           bool                      `asn1:"optional,explicit,tag:23"`
-	Exclusions          Exclusions                `asn1:"optional,explicit,tag:22"`
+	Exclusions          Exclusions                `asn1:"optional,explicit,tag:22,omitempty"`
 	NameResolveOnMaster bool                      `asn1:"optional,explicit,tag:21"`
 	OperationContexts   ContextSelection          `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping      FamilyGrouping            `asn1:"optional,explicit,tag:19"`
@@ -888,7 +888,7 @@ type ReadResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 
 	// This is not defined in the X.500 specifications, but instead is a
 	// non-standard extension to `ReadArgumentData` used by Meerkat DSA.
@@ -965,7 +965,7 @@ type CompareArgumentData struct {
 	CriticalExtensions  asn1.BitString          `asn1:"optional,explicit,tag:25"`
 	ReferenceType       ReferenceType           `asn1:"optional,explicit,tag:24"`
 	EntryOnly           bool                    `asn1:"optional,explicit,tag:23"`
-	Exclusions          Exclusions              `asn1:"optional,explicit,tag:22"`
+	Exclusions          Exclusions              `asn1:"optional,explicit,tag:22,omitempty"`
 	NameResolveOnMaster bool                    `asn1:"optional,explicit,tag:21"`
 	OperationContexts   ContextSelection        `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping      FamilyGrouping          `asn1:"optional,explicit,tag:19"`
@@ -1046,7 +1046,7 @@ type CompareResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *CompareResultData) GetTargetObject() (*Name, *DistinguishedName) {
@@ -1103,7 +1103,7 @@ type AbandonResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *AbandonResultData) GetSecurityParameters() SecurityParameters {
@@ -1149,7 +1149,7 @@ type ListArgumentData struct {
 	CriticalExtensions  asn1.BitString      `asn1:"optional,explicit,tag:25"`
 	ReferenceType       ReferenceType       `asn1:"optional,explicit,tag:24"`
 	EntryOnly           bool                `asn1:"optional,explicit,tag:23"`
-	Exclusions          Exclusions          `asn1:"optional,explicit,tag:22"`
+	Exclusions          Exclusions          `asn1:"optional,explicit,tag:22,omitempty"`
 	NameResolveOnMaster bool                `asn1:"optional,explicit,tag:21"`
 	OperationContexts   ContextSelection    `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping      FamilyGrouping      `asn1:"optional,explicit,tag:19"`
@@ -1250,12 +1250,12 @@ type ListResultData = asn1.RawValue
 //	  --                            [10] Not to be used -- }
 type PartialOutcomeQualifier struct {
 	LimitProblem                  LimitProblem                       `asn1:"optional,explicit,tag:0"`
-	Unexplored                    [](ContinuationReference)          `asn1:"optional,explicit,tag:1"`
+	Unexplored                    [](ContinuationReference)          `asn1:"optional,explicit,tag:1,omitempty"`
 	UnavailableCriticalExtensions bool                               `asn1:"optional,explicit,tag:2"`
-	UnknownErrors                 [](asn1.RawValue)                  `asn1:"optional,explicit,tag:3,set"`
+	UnknownErrors                 [](asn1.RawValue)                  `asn1:"optional,explicit,tag:3,set,omitempty"`
 	QueryReference                []byte                             `asn1:"optional,explicit,tag:4"`
 	OverspecFilter                Filter                             `asn1:"optional,explicit,tag:5"`
-	Notification                  [](Attribute)                      `asn1:"optional,explicit,tag:6,set"`
+	Notification                  [](Attribute)                      `asn1:"optional,explicit,tag:6,set,omitempty"`
 	EntryCount                    PartialOutcomeQualifier_entryCount `asn1:"optional"`
 }
 
@@ -1319,7 +1319,7 @@ type SearchArgumentData struct {
 	ExtendedArea         int                         `asn1:"optional,explicit,tag:10"`
 	HierarchySelections  HierarchySelections         `asn1:"optional,explicit,tag:11"`
 	SearchControlOptions SearchControlOptions        `asn1:"optional,explicit,tag:12"`
-	JoinArguments        [](JoinArgument)            `asn1:"optional,explicit,tag:13"`
+	JoinArguments        [](JoinArgument)            `asn1:"optional,explicit,tag:13,omitempty"`
 	JoinType             SearchArgumentData_joinType `asn1:"optional,explicit,tag:14,default:1"`
 	ServiceControls      ServiceControls             `asn1:"optional,explicit,tag:30,set"`
 	SecurityParameters   SecurityParameters          `asn1:"optional,explicit,tag:29,set"`
@@ -1329,7 +1329,7 @@ type SearchArgumentData struct {
 	CriticalExtensions   asn1.BitString              `asn1:"optional,explicit,tag:25"`
 	ReferenceType        ReferenceType               `asn1:"optional,explicit,tag:24"`
 	EntryOnly            bool                        `asn1:"optional,explicit,tag:23"`
-	Exclusions           Exclusions                  `asn1:"optional,explicit,tag:22"`
+	Exclusions           Exclusions                  `asn1:"optional,explicit,tag:22,omitempty"`
 	NameResolveOnMaster  bool                        `asn1:"optional,explicit,tag:21"`
 	OperationContexts    ContextSelection            `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping       FamilyGrouping              `asn1:"optional,explicit,tag:19"`
@@ -1482,7 +1482,7 @@ type JoinArgument struct {
 	DomainLocalID  DomainLocalID             `asn1:"optional,explicit,tag:1"`
 	JoinSubset     JoinArgument_joinSubset   `asn1:"optional,explicit,tag:2,default:0"`
 	JoinFilter     Filter                    `asn1:"optional,explicit,tag:3"`
-	JoinAttributes [](JoinAttPair)           `asn1:"optional,explicit,tag:4"`
+	JoinAttributes [](JoinAttPair)           `asn1:"optional,explicit,tag:4,omitempty"`
 	JoinSelection  EntryInformationSelection `asn1:"explicit,tag:5,set"`
 }
 
@@ -1505,7 +1505,7 @@ type DomainLocalID = UnboundedDirectoryString
 type JoinAttPair struct {
 	BaseAtt     AttributeType
 	JoinAtt     AttributeType
-	JoinContext [](JoinContextType) `asn1:"optional"`
+	JoinContext [](JoinContextType) `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -1563,7 +1563,7 @@ type AddEntryArgumentData struct {
 	CriticalExtensions  asn1.BitString     `asn1:"optional,explicit,tag:25"`
 	ReferenceType       ReferenceType      `asn1:"optional,explicit,tag:24"`
 	EntryOnly           bool               `asn1:"optional,explicit,tag:23"`
-	Exclusions          Exclusions         `asn1:"optional,explicit,tag:22"`
+	Exclusions          Exclusions         `asn1:"optional,explicit,tag:22,omitempty"`
 	NameResolveOnMaster bool               `asn1:"optional,explicit,tag:21"`
 	OperationContexts   ContextSelection   `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping      FamilyGrouping     `asn1:"optional,explicit,tag:19"`
@@ -1639,7 +1639,7 @@ type AddEntryResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *AddEntryResultData) GetSecurityParameters() SecurityParameters {
@@ -1681,7 +1681,7 @@ type RemoveEntryArgumentData struct {
 	CriticalExtensions  asn1.BitString     `asn1:"optional,explicit,tag:25"`
 	ReferenceType       ReferenceType      `asn1:"optional,explicit,tag:24"`
 	EntryOnly           bool               `asn1:"optional,explicit,tag:23"`
-	Exclusions          Exclusions         `asn1:"optional,explicit,tag:22"`
+	Exclusions          Exclusions         `asn1:"optional,explicit,tag:22,omitempty"`
 	NameResolveOnMaster bool               `asn1:"optional,explicit,tag:21"`
 	OperationContexts   ContextSelection   `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping      FamilyGrouping     `asn1:"optional,explicit,tag:19"`
@@ -1757,7 +1757,7 @@ type RemoveEntryResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *RemoveEntryResultData) GetSecurityParameters() SecurityParameters {
@@ -1802,7 +1802,7 @@ type ModifyEntryArgumentData struct {
 	CriticalExtensions  asn1.BitString            `asn1:"optional,explicit,tag:25"`
 	ReferenceType       ReferenceType             `asn1:"optional,explicit,tag:24"`
 	EntryOnly           bool                      `asn1:"optional,explicit,tag:23"`
-	Exclusions          Exclusions                `asn1:"optional,explicit,tag:22"`
+	Exclusions          Exclusions                `asn1:"optional,explicit,tag:22,omitempty"`
 	NameResolveOnMaster bool                      `asn1:"optional,explicit,tag:21"`
 	OperationContexts   ContextSelection          `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping      FamilyGrouping            `asn1:"optional,explicit,tag:19"`
@@ -1880,7 +1880,7 @@ type ModifyEntryResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *ModifyEntryResultData) GetSecurityParameters() SecurityParameters {
@@ -1940,7 +1940,7 @@ type ModifyDNArgumentData struct {
 	CriticalExtensions  asn1.BitString            `asn1:"optional,explicit,tag:25"`
 	ReferenceType       ReferenceType             `asn1:"optional,explicit,tag:24"`
 	EntryOnly           bool                      `asn1:"optional,explicit,tag:23"`
-	Exclusions          Exclusions                `asn1:"optional,explicit,tag:22"`
+	Exclusions          Exclusions                `asn1:"optional,explicit,tag:22,omitempty"`
 	NameResolveOnMaster bool                      `asn1:"optional,explicit,tag:21"`
 	OperationContexts   ContextSelection          `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping      FamilyGrouping            `asn1:"optional,explicit,tag:19"`
@@ -2018,7 +2018,7 @@ type ModifyDNResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *ModifyDNResultData) GetSecurityParameters() SecurityParameters {
@@ -2077,7 +2077,7 @@ type ChangePasswordResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *ChangePasswordResultData) GetSecurityParameters() SecurityParameters {
@@ -2134,7 +2134,7 @@ type AdministerPasswordResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *AdministerPasswordResultData) GetSecurityParameters() SecurityParameters {
@@ -2179,7 +2179,7 @@ type LdapArgumentData struct {
 	CriticalExtensions  asn1.BitString     `asn1:"optional,explicit,tag:25"`
 	ReferenceType       ReferenceType      `asn1:"optional,explicit,tag:24"`
 	EntryOnly           bool               `asn1:"optional,explicit,tag:23"`
-	Exclusions          Exclusions         `asn1:"optional,explicit,tag:22"`
+	Exclusions          Exclusions         `asn1:"optional,explicit,tag:22,omitempty"`
 	NameResolveOnMaster bool               `asn1:"optional,explicit,tag:21"`
 	OperationContexts   ContextSelection   `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping      FamilyGrouping     `asn1:"optional,explicit,tag:19"`
@@ -2256,12 +2256,12 @@ type LdapResult = OPTIONALLY_PROTECTED_SEQ
 //	  ...,
 //	  COMPONENTS OF CommonResultsSeq }
 type LdapResultData struct {
-	LdapMessages       [](asn1.RawValue)  `asn1:"optional"`
+	LdapMessages       [](asn1.RawValue)  `asn1:"optional,omitempty"`
 	ReturnToClient     bool               `asn1:"optional"`
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *LdapResultData) GetSecurityParameters() SecurityParameters {
@@ -2308,7 +2308,7 @@ type LinkedArgumentData struct {
 	CriticalExtensions  asn1.BitString     `asn1:"optional,explicit,tag:25"`
 	ReferenceType       ReferenceType      `asn1:"optional,explicit,tag:24"`
 	EntryOnly           bool               `asn1:"optional,explicit,tag:23"`
-	Exclusions          Exclusions         `asn1:"optional,explicit,tag:22"`
+	Exclusions          Exclusions         `asn1:"optional,explicit,tag:22,omitempty"`
 	NameResolveOnMaster bool               `asn1:"optional,explicit,tag:21"`
 	OperationContexts   ContextSelection   `asn1:"optional,explicit,tag:20"`
 	FamilyGrouping      FamilyGrouping     `asn1:"optional,explicit,tag:19"`
@@ -2383,7 +2383,7 @@ type AbandonedData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *AbandonedData) GetProblem() int {
@@ -2430,7 +2430,7 @@ type AbandonFailedData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *AbandonFailedData) GetProblem() int {
@@ -2485,7 +2485,7 @@ type AttributeErrorData struct {
 	SecurityParameters SecurityParameters                   `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName                    `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool                                 `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)                        `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)                        `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *AttributeErrorData) GetTargetObject() (*Name, *DistinguishedName) {
@@ -2548,7 +2548,7 @@ type NameErrorData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *NameErrorData) GetProblem() int {
@@ -2605,7 +2605,7 @@ type ReferralData struct {
 	SecurityParameters SecurityParameters    `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName     `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool                  `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)         `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)         `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *ReferralData) GetTargetObject() (*Name, *DistinguishedName) {
@@ -2644,7 +2644,7 @@ type SecurityErrorData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *SecurityErrorData) GetProblem() int {
@@ -2730,7 +2730,7 @@ type ServiceErrorData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *ServiceErrorData) GetProblem() int {
@@ -2825,11 +2825,11 @@ const ServiceProblem_NotSupportedByLDAP ServiceProblem = 18
 //	  COMPONENTS OF       CommonResults }
 type UpdateErrorData struct {
 	Problem            UpdateProblem                          `asn1:"explicit,tag:0"`
-	AttributeInfo      [](UpdateErrorData_attributeInfo_Item) `asn1:"optional,explicit,tag:1,set"`
+	AttributeInfo      [](UpdateErrorData_attributeInfo_Item) `asn1:"optional,explicit,tag:1,set,omitempty"`
 	SecurityParameters SecurityParameters                     `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName                      `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool                                   `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)                          `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)                          `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *UpdateErrorData) GetProblem() int {
@@ -3093,7 +3093,7 @@ type ListResultData_listInfo struct {
 	SecurityParameters      SecurityParameters                            `asn1:"optional,explicit,tag:30,set"`
 	Performer               DistinguishedName                             `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced       bool                                          `asn1:"optional,explicit,tag:28"`
-	Notification            [](Attribute)                                 `asn1:"optional,explicit,tag:27"`
+	Notification            [](Attribute)                                 `asn1:"optional,explicit,tag:27,omitempty"`
 	Name                    Name                                          `asn1:"optional"`
 }
 
@@ -3167,7 +3167,7 @@ type SearchResultData_searchInfo struct {
 	SecurityParameters      SecurityParameters      `asn1:"optional,explicit,tag:30,set"`
 	Performer               DistinguishedName       `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced       bool                    `asn1:"optional,explicit,tag:28"`
-	Notification            [](Attribute)           `asn1:"optional,explicit,tag:27"`
+	Notification            [](Attribute)           `asn1:"optional,explicit,tag:27,omitempty"`
 	Name                    Name                    `asn1:"optional"`
 }
 

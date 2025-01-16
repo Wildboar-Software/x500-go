@@ -230,7 +230,7 @@ type PresentationAddress struct {
 	PSelector  []byte     `asn1:"optional,explicit,tag:0"`
 	SSelector  []byte     `asn1:"optional,explicit,tag:1"`
 	TSelector  []byte     `asn1:"optional,explicit,tag:2"`
-	NAddresses []([]byte) `asn1:"explicit,tag:3,set"`
+	NAddresses []([]byte) `asn1:"explicit,tag:3,set,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -512,7 +512,7 @@ type TimeSpecification struct {
 //	  years       [4]  SET OF INTEGER(1000..MAX) OPTIONAL,
 //	  ... }
 type Period struct {
-	TimesOfDay [](DayTimeBand) `asn1:"optional,explicit,tag:0,set"`
+	TimesOfDay [](DayTimeBand) `asn1:"optional,explicit,tag:0,set,omitempty"`
 	Days       Period_days     `asn1:"optional,explicit,tag:1"`
 	Weeks      Period_weeks    `asn1:"optional,explicit,tag:2"`
 	Months     Period_months   `asn1:"optional,explicit,tag:3"`

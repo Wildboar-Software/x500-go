@@ -36,7 +36,7 @@ type TBSAttributeCertificate struct {
 	AttrCertValidityPeriod AttCertValidityPeriod
 	Attributes             [](Attribute)
 	IssuerUniqueID         UniqueIdentifier `asn1:"optional"`
-	Extensions             Extensions       `asn1:"optional"`
+	Extensions             Extensions       `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -57,7 +57,7 @@ const AttCertVersion_V2 AttCertVersion = 1
 //	   WITH COMPONENTS {..., objectDigestInfo  PRESENT } )
 type Holder struct {
 	BaseCertificateID IssuerSerial     `asn1:"optional,tag:0"`
-	EntityName        GeneralNames     `asn1:"optional,tag:1"`
+	EntityName        GeneralNames     `asn1:"optional,tag:1,omitempty"`
 	ObjectDigestInfo  ObjectDigestInfo `asn1:"optional,tag:2"`
 }
 
@@ -69,7 +69,7 @@ type Holder struct {
 //	  issuerUID  UniqueIdentifier OPTIONAL,
 //	  ... }
 type IssuerSerial struct {
-	Issuer    GeneralNames
+	Issuer    GeneralNames `asn1:"omitempty"`
 	Serial    CertificateSerialNumber
 	IssuerUID UniqueIdentifier `asn1:"optional"`
 }
@@ -103,7 +103,7 @@ type ObjectDigestInfo struct {
 //	   WITH COMPONENTS {..., baseCertificateID  PRESENT } |
 //	   WITH COMPONENTS {..., objectDigestInfo  PRESENT } )
 type AttCertIssuer struct {
-	IssuerName        GeneralNames     `asn1:"optional"`
+	IssuerName        GeneralNames     `asn1:"optional,omitempty"`
 	BaseCertificateID IssuerSerial     `asn1:"optional,tag:0"`
 	ObjectDigestInfo  ObjectDigestInfo `asn1:"optional,tag:1"`
 }
@@ -153,7 +153,7 @@ type PrivilegePolicy = asn1.ObjectIdentifier
 //	  roleName       [1]  GeneralName,
 //	  ... }
 type RoleSyntax struct {
-	RoleAuthority GeneralNames `asn1:"optional,tag:0"`
+	RoleAuthority GeneralNames `asn1:"optional,tag:0,omitempty"`
 	RoleName      GeneralName  `asn1:"tag:1"`
 }
 
@@ -277,7 +277,7 @@ type RoleSpecCertIdentifier struct {
 	RoleName             GeneralName             `asn1:"tag:0"`
 	RoleCertIssuer       GeneralName             `asn1:"tag:1"`
 	RoleCertSerialNumber CertificateSerialNumber `asn1:"optional,tag:2"`
-	RoleCertLocator      GeneralNames            `asn1:"optional,tag:3"`
+	RoleCertLocator      GeneralNames            `asn1:"optional,tag:3,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -337,8 +337,8 @@ type AttributeMappings = [](AttributeMappings_Item)
 //	  excludedSubtrees   [1]  GeneralSubtrees OPTIONAL,
 //	  ... }
 type HolderNameConstraintsSyntax struct {
-	PermittedSubtrees GeneralSubtrees `asn1:"tag:0"`
-	ExcludedSubtrees  GeneralSubtrees `asn1:"optional,tag:1"`
+	PermittedSubtrees GeneralSubtrees `asn1:"tag:0,omitempty"`
+	ExcludedSubtrees  GeneralSubtrees `asn1:"optional,tag:1,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -370,7 +370,7 @@ type AttributeCertificateExactAssertion struct {
 //	  ... }
 type AttributeCertificateAssertion struct {
 	Holder          AttributeCertificateAssertion_holder `asn1:"optional,tag:0"`
-	Issuer          GeneralNames                         `asn1:"optional,tag:1"`
+	Issuer          GeneralNames                         `asn1:"optional,tag:1,omitempty"`
 	AttCertValidity time.Time                            `asn1:"optional,tag:2"`
 	AttType         [](AttributeType)                    `asn1:"optional,tag:3,set"`
 }

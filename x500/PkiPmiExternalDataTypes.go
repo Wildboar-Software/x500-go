@@ -144,8 +144,8 @@ const G3FacsimileNonBasicParameters_Processable_mode_26 int32 = 71
 //	  extension-attributes                ExtensionAttributes OPTIONAL }
 type ORAddress struct {
 	Built_in_standard_attributes       BuiltInStandardAttributes
-	Built_in_domain_defined_attributes BuiltInDomainDefinedAttributes `asn1:"optional"`
-	Extension_attributes               ExtensionAttributesSet         `asn1:"optional"`
+	Built_in_domain_defined_attributes BuiltInDomainDefinedAttributes `asn1:"optional,omitempty"`
+	Extension_attributes               ExtensionAttributesSet         `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -173,7 +173,7 @@ type BuiltInStandardAttributes struct {
 	Organization_name          OrganizationName         `asn1:"optional,explicit,tag:3"`
 	Numeric_user_identifier    NumericUserIdentifier    `asn1:"optional,explicit,tag:4"`
 	Personal_name              PersonalName             `asn1:"optional,explicit,tag:5,set"`
-	Organizational_unit_names  OrganizationalUnitNames  `asn1:"optional,explicit,tag:6"`
+	Organizational_unit_names  OrganizationalUnitNames  `asn1:"optional,explicit,tag:6,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -462,7 +462,7 @@ type UniversalExtensionPhysicalDeliveryAddressComponents = UniversalPDSParameter
 //	    PrintableString (SIZE (1..ub-pds-parameter-length)) OPTIONAL,
 //	  teletex-string    TeletexString(SIZE (1..ub-unformatted-address-length)) OPTIONAL }
 type UnformattedPostalAddress struct {
-	Printable_address [](string) `asn1:"optional"`
+	Printable_address [](string) `asn1:"optional,omitempty"`
 	Teletex_string    string     `asn1:"optional"`
 }
 

@@ -103,7 +103,7 @@ type EstablishOperationalBindingResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *EstablishOperationalBindingResultData) GetSecurityParameters() SecurityParameters {
@@ -207,7 +207,7 @@ type ModifyOperationalBindingResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *ModifyOperationalBindingResultData) GetSecurityParameters() SecurityParameters {
@@ -283,7 +283,7 @@ type TerminateOperationalBindingResultData struct {
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *TerminateOperationalBindingResultData) GetSecurityParameters() SecurityParameters {
@@ -335,7 +335,7 @@ type OpBindingErrorParam struct {
 	SecurityParameters SecurityParameters          `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName           `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool                        `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)               `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)               `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *OpBindingErrorParam) GetProblem() int {

@@ -19,7 +19,7 @@ type DsaReferralData struct {
 	SecurityParameters SecurityParameters    `asn1:"optional,explicit,tag:30,set"`
 	Performer          DistinguishedName     `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced  bool                  `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)         `asn1:"optional,explicit,tag:27"`
+	Notification       [](Attribute)         `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *DsaReferralData) GetSecurityParameters() SecurityParameters {
@@ -83,7 +83,7 @@ type ChainingArguments struct {
 	EntryOnly              bool                `asn1:"optional,explicit,tag:11"`
 	UniqueIdentifier       UniqueIdentifier    `asn1:"optional,explicit,tag:12"`
 	AuthenticationLevel    AuthenticationLevel `asn1:"optional,explicit,tag:13"`
-	Exclusions             Exclusions          `asn1:"optional,explicit,tag:14"`
+	Exclusions             Exclusions          `asn1:"optional,explicit,tag:14,omitempty"`
 	ExcludeShadows         bool                `asn1:"optional,explicit,tag:15"`
 	NameResolveOnMaster    bool                `asn1:"optional,explicit,tag:16"`
 	OperationIdentifier    int                 `asn1:"optional,explicit,tag:17"`
@@ -128,9 +128,9 @@ type DomainInfo = asn1.RawValue
 //	  ... }
 type ChainingResults struct {
 	Info               DomainInfo         `asn1:"optional,explicit,tag:0"`
-	CrossReferences    [](asn1.RawValue)  `asn1:"optional,explicit,tag:1"`
+	CrossReferences    [](asn1.RawValue)  `asn1:"optional,explicit,tag:1,omitempty"`
 	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:2,set"`
-	AlreadySearched    Exclusions         `asn1:"optional,explicit,tag:3"`
+	AlreadySearched    Exclusions         `asn1:"optional,explicit,tag:3,omitempty"`
 }
 
 func (x *ChainingResults) GetSecurityParameters() SecurityParameters {
@@ -225,7 +225,7 @@ const (
 type AccessPoint struct {
 	Ae_title            Name                    `asn1:"explicit,tag:0"`
 	Address             PresentationAddress     `asn1:"explicit,tag:1"`
-	ProtocolInformation [](ProtocolInformation) `asn1:"optional,explicit,tag:2,set"`
+	ProtocolInformation [](ProtocolInformation) `asn1:"optional,explicit,tag:2,set,omitempty"`
 }
 
 func (ap *AccessPoint) GetAETitle() Name {
@@ -254,7 +254,7 @@ func (ap *AccessPoint) GetProtocolInformation() []ProtocolInformation {
 type MasterOrShadowAccessPoint struct {
 	Ae_title            Name                               `asn1:"explicit,tag:0"`
 	Address             PresentationAddress                `asn1:"explicit,tag:1"`
-	ProtocolInformation [](ProtocolInformation)            `asn1:"optional,explicit,tag:2,set"`
+	ProtocolInformation [](ProtocolInformation)            `asn1:"optional,explicit,tag:2,set,omitempty"`
 	Category            MasterOrShadowAccessPoint_category `asn1:"optional,explicit,tag:3,default:0"`
 	ChainingRequired    bool                               `asn1:"optional,explicit,tag:5"`
 }
@@ -295,10 +295,10 @@ type MasterAndShadowAccessPoints = [](asn1.RawValue)
 type AccessPointInformation struct {
 	Ae_title            Name                               `asn1:"explicit,tag:0"`
 	Address             PresentationAddress                `asn1:"explicit,tag:1"`
-	ProtocolInformation [](ProtocolInformation)            `asn1:"optional,explicit,tag:2,set"`
+	ProtocolInformation [](ProtocolInformation)            `asn1:"optional,explicit,tag:2,set,omitempty"`
 	Category            MasterOrShadowAccessPoint_category `asn1:"optional,explicit,tag:3"`
 	ChainingRequired    bool                               `asn1:"optional,explicit,tag:5"`
-	AdditionalPoints    MasterAndShadowAccessPoints        `asn1:"optional,explicit,tag:4"`
+	AdditionalPoints    MasterAndShadowAccessPoints        `asn1:"optional,explicit,tag:4,omitempty"`
 }
 
 func (ap *AccessPointInformation) GetAETitle() Name {
@@ -329,7 +329,7 @@ func (ap *AccessPointInformation) GetChainingRequired() bool {
 //	  ... }
 type DitBridgeKnowledge struct {
 	DomainLocalID UnboundedDirectoryString    `asn1:"optional"`
-	AccessPoints  MasterAndShadowAccessPoints `asn1:"set"`
+	AccessPoints  MasterAndShadowAccessPoints `asn1:"set,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -359,7 +359,7 @@ type ContinuationReference struct {
 	ReferenceType       ReferenceType              `asn1:"explicit,tag:4"`
 	AccessPoints        [](AccessPointInformation) `asn1:"explicit,tag:5,set"`
 	EntryOnly           bool                       `asn1:"optional,explicit,tag:6"`
-	Exclusions          Exclusions                 `asn1:"optional,explicit,tag:7"`
+	Exclusions          Exclusions                 `asn1:"optional,explicit,tag:7,omitempty"`
 	ReturnToDUA         bool                       `asn1:"optional,explicit,tag:8"`
 	NameResolveOnMaster bool                       `asn1:"optional,explicit,tag:9"`
 }

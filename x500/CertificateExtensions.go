@@ -20,7 +20,7 @@ import (
 //	                         authorityCertSerialNumber  ABSENT } )
 type AuthorityKeyIdentifier struct {
 	KeyIdentifier             KeyIdentifier           `asn1:"optional,tag:0"`
-	AuthorityCertIssuer       GeneralNames            `asn1:"optional,tag:1"`
+	AuthorityCertIssuer       GeneralNames            `asn1:"optional,tag:1,omitempty"`
 	AuthorityCertSerialNumber CertificateSerialNumber `asn1:"optional,tag:2"`
 }
 
@@ -97,7 +97,7 @@ type CertificatePoliciesSyntax = [](PolicyInformation)
 //	  ... }
 type PolicyInformation struct {
 	PolicyIdentifier CertPolicyId
-	PolicyQualifiers [](PolicyQualifierInfo) `asn1:"optional"`
+	PolicyQualifiers [](PolicyQualifierInfo) `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -197,8 +197,8 @@ type BasicConstraintsSyntax struct {
 //	  (WITH COMPONENTS {..., permittedSubtrees  PRESENT } |
 //	   WITH COMPONENTS {..., excludedSubtrees   PRESENT } )
 type NameConstraintsSyntax struct {
-	PermittedSubtrees GeneralSubtrees `asn1:"optional,tag:0"`
-	ExcludedSubtrees  GeneralSubtrees `asn1:"optional,tag:1"`
+	PermittedSubtrees GeneralSubtrees `asn1:"optional,tag:0,omitempty"`
+	ExcludedSubtrees  GeneralSubtrees `asn1:"optional,tag:1,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -266,7 +266,7 @@ type PerAuthorityScope struct {
 	OnlySomeReasons    ReasonFlags           `asn1:"optional,tag:4"`
 	SerialNumberRange  NumberRange           `asn1:"optional,tag:5"`
 	SubjectKeyIdRange  NumberRange           `asn1:"optional,tag:6"`
-	NameSubtrees       GeneralNames          `asn1:"optional,tag:7"`
+	NameSubtrees       GeneralNames          `asn1:"optional,tag:7,omitempty"`
 	BaseRevocationInfo BaseRevocationInfo    `asn1:"optional,tag:9"`
 }
 
@@ -335,12 +335,12 @@ type StatusReferral = asn1.RawValue
 //	  ...
 //	}
 type CRLReferral struct {
-	Issuer         GeneralName  `asn1:"optional,tag:0"`
-	Location       GeneralName  `asn1:"optional,tag:1"`
-	DeltaRefInfo   DeltaRefInfo `asn1:"optional,tag:2"`
-	CRLScope       CRLScopeSyntax
-	LastUpdate     time.Time `asn1:"optional,tag:3"`
-	LastChangedCRL time.Time `asn1:"optional,tag:4"`
+	Issuer         GeneralName    `asn1:"optional,tag:0"`
+	Location       GeneralName    `asn1:"optional,tag:1"`
+	DeltaRefInfo   DeltaRefInfo   `asn1:"optional,tag:2"`
+	CRLScope       CRLScopeSyntax `asn1:"omitempty"`
+	LastUpdate     time.Time      `asn1:"optional,tag:3"`
+	LastChangedCRL time.Time      `asn1:"optional,tag:4"`
 }
 
 // # ASN.1 Definition:
@@ -522,7 +522,7 @@ type CRLDistPointsSyntax = [](DistributionPoint)
 type DistributionPoint struct {
 	DistributionPoint DistributionPointName `asn1:"optional,tag:0"`
 	Reasons           ReasonFlags           `asn1:"optional,tag:1"`
-	CRLIssuer         GeneralNames          `asn1:"optional,tag:2"`
+	CRLIssuer         GeneralNames          `asn1:"optional,tag:2,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -676,7 +676,7 @@ type CertificateAssertion struct {
 	SubjectPublicKeyAlgID  asn1.ObjectIdentifier   `asn1:"optional,tag:6"`
 	KeyUsage               KeyUsage                `asn1:"optional,tag:7"`
 	SubjectAltName         AltNameType             `asn1:"optional,tag:8"`
-	Policy                 CertPolicySet           `asn1:"optional,tag:9"`
+	Policy                 CertPolicySet           `asn1:"optional,tag:9,omitempty"`
 	PathToName             Name                    `asn1:"optional,tag:10"`
 	Subject                Name                    `asn1:"optional,tag:11"`
 	NameConstraints        NameConstraintsSyntax   `asn1:"optional,tag:12"`
@@ -802,8 +802,8 @@ type EnhancedCertificateAssertion struct {
 	SubjectPublicKeyAlgID  asn1.ObjectIdentifier   `asn1:"optional,tag:6"`
 	KeyUsage               KeyUsage                `asn1:"optional,tag:7"`
 	SubjectAltName         AltName                 `asn1:"optional,tag:8"`
-	Policy                 CertPolicySet           `asn1:"optional,tag:9"`
-	PathToName             GeneralNames            `asn1:"optional,tag:10"`
+	Policy                 CertPolicySet           `asn1:"optional,tag:9,omitempty"`
+	PathToName             GeneralNames            `asn1:"optional,tag:10,omitempty"`
 	Subject                Name                    `asn1:"optional,tag:11"`
 	NameConstraints        NameConstraintsSyntax   `asn1:"optional,tag:12"`
 }

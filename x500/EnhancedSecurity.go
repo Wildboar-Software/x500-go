@@ -51,7 +51,7 @@ type SecurityLabel struct {
 	Security_policy_identifier SecurityPolicyIdentifier `asn1:"optional"`
 	Security_classification    SecurityClassification   `asn1:"optional"`
 	Privacy_mark               PrivacyMark              `asn1:"optional"`
-	Security_categories        SecurityCategories       `asn1:"optional"`
+	Security_categories        SecurityCategories       `asn1:"optional,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -102,7 +102,7 @@ type SecurityCategories = [](SecurityCategory)
 type Clearance struct {
 	PolicyId           asn1.ObjectIdentifier
 	ClassList          ClassList            `asn1:"optional"`
-	SecurityCategories [](SecurityCategory) `asn1:"optional,set"`
+	SecurityCategories [](SecurityCategory) `asn1:"optional,set,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -253,7 +253,7 @@ type AVIHash = HASH
 type AttributeTypeValueContexts struct {
 	Type        asn1.ObjectIdentifier
 	Value       asn1.RawValue
-	ContextList [](Context) `asn1:"optional,set"`
+	ContextList [](Context) `asn1:"optional,set,omitempty"`
 }
 
 // # ASN.1 Definition:

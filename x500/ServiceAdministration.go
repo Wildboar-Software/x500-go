@@ -4,6 +4,10 @@ import (
 	"encoding/asn1"
 )
 
+// NOTE: InputAttributeTypes is represented as an `asn1.RawValue` so as to
+// preserve whether the component was omitted or an empty sequence, since that
+// matters for interpretation.
+//
 // # ASN.1 Definition:
 //
 //	SearchRule ::= SEQUENCE {
@@ -29,16 +33,16 @@ type SearchRule struct {
 	DmdId                asn1.ObjectIdentifier `asn1:"explicit,tag:0"`
 	ServiceType          asn1.ObjectIdentifier `asn1:"optional,explicit,tag:1"`
 	UserClass            int                   `asn1:"optional,explicit,tag:2"`
-	InputAttributeTypes  [](RequestAttribute)  `asn1:"optional,explicit,tag:3"`
+	InputAttributeTypes  asn1.RawValue         `asn1:"optional,explicit,tag:3"`
 	AttributeCombination AttributeCombination  `asn1:"optional,explicit,tag:4"`
-	OutputAttributeTypes [](ResultAttribute)   `asn1:"optional,explicit,tag:5"`
+	OutputAttributeTypes [](ResultAttribute)   `asn1:"optional,explicit,tag:5,omitempty"`
 	DefaultControls      ControlOptions        `asn1:"optional,explicit,tag:6"`
 	MandatoryControls    ControlOptions        `asn1:"optional,explicit,tag:7"`
 	SearchRuleControls   ControlOptions        `asn1:"optional,explicit,tag:8"`
 	FamilyGrouping       FamilyGrouping        `asn1:"optional,explicit,tag:9"`
 	FamilyReturn         FamilyReturn          `asn1:"optional,explicit,tag:10"`
 	Relaxation           RelaxationPolicy      `asn1:"optional,explicit,tag:11"`
-	AdditionalControl    [](AttributeType)     `asn1:"optional,explicit,tag:12"`
+	AdditionalControl    [](AttributeType)     `asn1:"optional,explicit,tag:12,omitempty"`
 	AllowedSubset        AllowedSubset         `asn1:"optional,explicit,tag:13"`
 	ImposedSubset        ImposedSubset         `asn1:"optional,explicit,tag:14"`
 	EntryLimit           EntryLimit            `asn1:"optional,explicit,tag:15"`
@@ -76,6 +80,10 @@ const (
 	ImposedSubset_WholeSubtree ImposedSubset = 2
 )
 
+// NOTE: SelectedValues, DefaultValues, and Contexts are represented as an
+// `asn1.RawValue` because we need to preserve whether they were an empty
+// sequence or omitted entirely.
+//
 // # ASN.1 Definition:
 //
 //	RequestAttribute ::= SEQUENCE {
@@ -94,12 +102,12 @@ const (
 //	  ... }
 type RequestAttribute struct {
 	AttributeType      asn1.ObjectIdentifier
-	IncludeSubtypes    bool                                    `asn1:"optional,explicit,tag:0"`
-	SelectedValues     [](asn1.RawValue)                       `asn1:"optional,explicit,tag:1"`
-	DefaultValues      [](RequestAttribute_defaultValues_Item) `asn1:"optional,explicit,tag:2"`
-	Contexts           [](ContextProfile)                      `asn1:"optional,explicit,tag:3"`
-	ContextCombination ContextCombination                      `asn1:"optional,explicit,tag:4"`
-	MatchingUse        [](MatchingUse)                         `asn1:"optional,explicit,tag:5"`
+	IncludeSubtypes    bool               `asn1:"optional,explicit,tag:0"`
+	SelectedValues     asn1.RawValue      `asn1:"optional,explicit,tag:1"`
+	DefaultValues      asn1.RawValue      `asn1:"optional,explicit,tag:2"`
+	Contexts           asn1.RawValue      `asn1:"optional,explicit,tag:3"`
+	ContextCombination ContextCombination `asn1:"optional,explicit,tag:4"`
+	MatchingUse        [](MatchingUse)    `asn1:"optional,explicit,tag:5"`
 }
 
 // # ASN.1 Definition:
@@ -159,7 +167,7 @@ type AttributeCombination = asn1.RawValue
 type ResultAttribute struct {
 	AttributeType asn1.ObjectIdentifier
 	OutputValues  ResultAttribute_outputValues `asn1:"optional"`
-	Contexts      [](ContextProfile)           `asn1:"optional,explicit,tag:0"`
+	Contexts      [](ContextProfile)           `asn1:"optional,explicit,tag:0,omitempty"`
 }
 
 // # ASN.1 Definition:
@@ -197,8 +205,8 @@ type EntryLimit struct {
 //	  ... }
 type RelaxationPolicy struct {
 	Basic       MRMapping     `asn1:"optional,explicit,tag:0"`
-	Tightenings [](MRMapping) `asn1:"optional,explicit,tag:1"`
-	Relaxations [](MRMapping) `asn1:"optional,explicit,tag:2"`
+	Tightenings [](MRMapping) `asn1:"optional,explicit,tag:1,omitempty"`
+	Relaxations [](MRMapping) `asn1:"optional,explicit,tag:2,omitempty"`
 	Maximum     int           `asn1:"optional,explicit,tag:3"`
 	Minimum     int           `asn1:"optional,explicit,tag:4,default:1"`
 }
@@ -210,8 +218,8 @@ type RelaxationPolicy struct {
 //	  substitution  [1]  SEQUENCE SIZE (1..MAX) OF MRSubstitution OPTIONAL,
 //	  ... }
 type MRMapping struct {
-	Mapping      [](Mapping)        `asn1:"optional,explicit,tag:0"`
-	Substitution [](MRSubstitution) `asn1:"optional,explicit,tag:1"`
+	Mapping      [](Mapping)        `asn1:"optional,explicit,tag:0,omitempty"`
+	Substitution [](MRSubstitution) `asn1:"optional,explicit,tag:1,omitempty"`
 }
 
 // # ASN.1 Definition:
