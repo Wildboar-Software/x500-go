@@ -43,7 +43,7 @@ implementations out there, written by yours truly.
 - [x] Separate DirectoryString library?
 - [x] Use `omitempty`
 - [ ] Even higher-level API
-- [ ] Change `int64` enums to `int`
+- [x] Change `int64` enums to `int`
 - [ ] Define and implement interfaces
   - [x] `CommonArguments`
   - [x] `CommonResults`

@@ -5,7 +5,6 @@ import (
 	"encoding/asn1"
 	"errors"
 	"fmt"
-
 	"github.com/Wildboar-Software/x500-go/teletex"
 )
 
@@ -101,7 +100,7 @@ func universalStringFromBytes(bytes []byte) (s string, err error) {
 	if len(bytes) == 0 {
 		return "", nil
 	}
-	runes := make([]rune, len(bytes)/4)
+	runes := make([]rune, 0, len(bytes)/4)
 
 	l := len(bytes)
 	hasNullTerminator := bytes[l-1] == 0 && bytes[l-2] == 0 && bytes[l-3] == 0 && bytes[l-4] == 0
