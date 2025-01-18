@@ -12,6 +12,10 @@ import (
 //	OPTIONALLY-PROTECTED-SEQ { EstablishOperationalBindingArgumentData }
 type EstablishOperationalBindingArgument = OPTIONALLY_PROTECTED_SEQ
 
+// NOTE: Initiator was split into three separate fields to fix encoding and
+// decoding ambiguities that Golang would get wrong. Only use one of these
+// when encoding.
+//
 // # ASN.1 Definition:
 //
 //	EstablishOperationalBindingArgumentData ::= SEQUENCE {
@@ -35,10 +39,12 @@ type EstablishOperationalBindingArgumentData struct {
 	BindingType        asn1.ObjectIdentifier `asn1:"explicit,tag:0"`
 	BindingID          OperationalBindingID  `asn1:"optional,explicit,tag:1"`
 	AccessPoint        AccessPoint           `asn1:"explicit,tag:2,set"`
-	Initiator          EstablishOperationalBindingArgumentData_initiator
-	Agreement          asn1.RawValue      `asn1:"explicit,tag:6"`
-	Valid              OBValidity         `asn1:"optional,explicit,tag:7"`
-	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:8,set"`
+	InitiatorSymmetric asn1.RawValue         `asn1:"optional,tag:3"`
+	InitiatorRoleA     asn1.RawValue         `asn1:"optional,tag:4"`
+	InitiatorRoleB     asn1.RawValue         `asn1:"optional,tag:5"`
+	Agreement          asn1.RawValue         `asn1:"explicit,tag:6"`
+	Valid              OBValidity            `asn1:"optional,explicit,tag:7"`
+	SecurityParameters SecurityParameters    `asn1:"optional,explicit,tag:8,set"`
 }
 
 func (x *EstablishOperationalBindingArgumentData) GetSecurityParameters() SecurityParameters {
@@ -78,6 +84,10 @@ type OBValidity struct {
 //	EstablishOperationalBindingResult ::= OPTIONALLY-PROTECTED-SEQ { EstablishOperationalBindingResultData }
 type EstablishOperationalBindingResult = OPTIONALLY_PROTECTED_SEQ
 
+// NOTE: Initiator was split into three separate fields to fix encoding and
+// decoding ambiguities that Golang would get wrong. Only use one of these
+// when encoding.
+//
 // # ASN.1 Definition:
 //
 //	EstablishOperationalBindingResultData ::= SEQUENCE {
@@ -99,11 +109,13 @@ type EstablishOperationalBindingResultData struct {
 	BindingType        asn1.ObjectIdentifier `asn1:"explicit,tag:0"`
 	BindingID          OperationalBindingID  `asn1:"optional,explicit,tag:1"`
 	AccessPoint        AccessPoint           `asn1:"explicit,tag:2,set"`
-	Initiator          EstablishOperationalBindingResultData_initiator
-	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
-	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
-	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
+	InitiatorSymmetric asn1.RawValue         `asn1:"optional,tag:3"`
+	InitiatorRoleA     asn1.RawValue         `asn1:"optional,tag:4"`
+	InitiatorRoleB     asn1.RawValue         `asn1:"optional,tag:5"`
+	SecurityParameters SecurityParameters    `asn1:"optional,explicit,tag:30,set"`
+	Performer          DistinguishedName     `asn1:"optional,explicit,tag:29"`
+	AliasDereferenced  bool                  `asn1:"optional,explicit,tag:28"`
+	Notification       [](Attribute)         `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
 func (x *EstablishOperationalBindingResultData) GetSecurityParameters() SecurityParameters {
@@ -127,6 +139,10 @@ func (x *EstablishOperationalBindingResultData) GetNotification() []Attribute {
 //	ModifyOperationalBindingArgument ::= OPTIONALLY-PROTECTED-SEQ { ModifyOperationalBindingArgumentData }
 type ModifyOperationalBindingArgument = OPTIONALLY_PROTECTED_SEQ
 
+// NOTE: Initiator was split into three separate fields to fix encoding and
+// decoding ambiguities that Golang would get wrong. Only use one of these
+// when encoding.
+//
 // # ASN.1 Definition:
 //
 //	ModifyOperationalBindingArgumentData ::= SEQUENCE {
@@ -148,14 +164,16 @@ type ModifyOperationalBindingArgument = OPTIONALLY_PROTECTED_SEQ
 //	  securityParameters  [9]  SecurityParameters OPTIONAL,
 //	  ...}
 type ModifyOperationalBindingArgumentData struct {
-	BindingType        asn1.ObjectIdentifier                          `asn1:"explicit,tag:0"`
-	BindingID          OperationalBindingID                           `asn1:"explicit,tag:1"`
-	AccessPoint        AccessPoint                                    `asn1:"optional,explicit,tag:2,set"`
-	Initiator          ModifyOperationalBindingArgumentData_initiator `asn1:"optional"`
-	NewBindingID       OperationalBindingID                           `asn1:"explicit,tag:6"`
-	NewAgreement       asn1.RawValue                                  `asn1:"optional,explicit,tag:7"`
-	Valid              ModifiedValidity                               `asn1:"optional,explicit,tag:8"`
-	SecurityParameters SecurityParameters                             `asn1:"optional,explicit,tag:9,set"`
+	BindingType        asn1.ObjectIdentifier `asn1:"explicit,tag:0"`
+	BindingID          OperationalBindingID  `asn1:"explicit,tag:1"`
+	AccessPoint        AccessPoint           `asn1:"optional,explicit,tag:2,set"`
+	InitiatorSymmetric asn1.RawValue         `asn1:"optional,tag:3"`
+	InitiatorRoleA     asn1.RawValue         `asn1:"optional,tag:4"`
+	InitiatorRoleB     asn1.RawValue         `asn1:"optional,tag:5"`
+	NewBindingID       OperationalBindingID  `asn1:"explicit,tag:6"`
+	NewAgreement       asn1.RawValue         `asn1:"optional,explicit,tag:7"`
+	Valid              ModifiedValidity      `asn1:"optional,explicit,tag:8"`
+	SecurityParameters SecurityParameters    `asn1:"optional,explicit,tag:9,set"`
 }
 
 func (x *ModifyOperationalBindingArgumentData) GetSecurityParameters() SecurityParameters {
@@ -231,6 +249,10 @@ func (x *ModifyOperationalBindingResultData) GetNotification() []Attribute {
 //	TerminateOperationalBindingArgument ::= OPTIONALLY-PROTECTED-SEQ { TerminateOperationalBindingArgumentData }
 type TerminateOperationalBindingArgument = OPTIONALLY_PROTECTED_SEQ
 
+// NOTE: Initiator was split into three separate fields to fix encoding and
+// decoding ambiguities that Golang would get wrong. Only use one of these
+// when encoding.
+//
 // # ASN.1 Definition:
 //
 //	TerminateOperationalBindingArgumentData ::= SEQUENCE {
@@ -248,11 +270,13 @@ type TerminateOperationalBindingArgument = OPTIONALLY_PROTECTED_SEQ
 //	  securityParameters  [6]  SecurityParameters OPTIONAL,
 //	  ...}
 type TerminateOperationalBindingArgumentData struct {
-	BindingType        asn1.ObjectIdentifier                             `asn1:"explicit,tag:0"`
-	BindingID          OperationalBindingID                              `asn1:"explicit,tag:1"`
-	Initiator          TerminateOperationalBindingArgumentData_initiator `asn1:"optional"`
-	TerminateAt        Time                                              `asn1:"optional,explicit,tag:5"`
-	SecurityParameters SecurityParameters                                `asn1:"optional,explicit,tag:6,set"`
+	BindingType        asn1.ObjectIdentifier `asn1:"explicit,tag:0"`
+	BindingID          OperationalBindingID  `asn1:"explicit,tag:1"`
+	InitiatorSymmetric asn1.RawValue         `asn1:"optional,tag:2"`
+	InitiatorRoleA     asn1.RawValue         `asn1:"optional,tag:3"`
+	InitiatorRoleB     asn1.RawValue         `asn1:"optional,tag:4"`
+	TerminateAt        Time                  `asn1:"optional,explicit,tag:5"`
+	SecurityParameters SecurityParameters    `asn1:"optional,explicit,tag:6,set"`
 }
 
 func (x *TerminateOperationalBindingArgumentData) GetSecurityParameters() SecurityParameters {

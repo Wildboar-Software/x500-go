@@ -23,6 +23,10 @@ type OPTIONALLY_PROTECTED_SEQ = asn1.RawValue
 //	SignedSecurityLabel ::= SIGNED{SignedSecurityLabelContent}
 type SignedSecurityLabel = SIGNED
 
+// NOTE: The issuer field has been split into three fields to prevent
+// an issue with Go's ASN.1 implementation from wrongly interpreting
+// the KeyIdentifier field as the name. Only fill in one when encoding.
+//
 // # ASN.1 Definition:
 //
 //	SignedSecurityLabelContent ::= SEQUENCE {
@@ -33,9 +37,11 @@ type SignedSecurityLabel = SIGNED
 //	  ... }
 type SignedSecurityLabelContent struct {
 	AttHash       HASH
-	Issuer        Name          `asn1:"optional"`
-	KeyIdentifier KeyIdentifier `asn1:"optional"`
-	SecurityLabel SecurityLabel `asn1:"set"`
+	Issuer        DistinguishedName     `asn1:"optional"`
+	IssuerOID     asn1.ObjectIdentifier `asn1:"optional"`
+	IssuerDNS     string                `asn1:"optional"`
+	KeyIdentifier KeyIdentifier         `asn1:"optional"`
+	SecurityLabel SecurityLabel         `asn1:"set"`
 }
 
 // # ASN.1 Definition:
@@ -184,6 +190,10 @@ type IssuerAndSerialNumber struct {
 	Serial CertificateSerialNumber
 }
 
+// WARNING: The Serial field was split into Serial1 and Serial2 to fix an issue
+// with ambiguity of parsing by Go. If you are encoding a value of this type,
+// ALWAYS use Serial2 and make sure Serial1 is empty / zeroed.
+//
 // # ASN.1 Definition:
 //
 //	SpecificallyIdentified ::= SEQUENCE {
@@ -193,9 +203,10 @@ type IssuerAndSerialNumber struct {
 //	  (WITH COMPONENTS { ..., issuer PRESENT, serial PRESENT } |
 //	  (WITH COMPONENTS { ..., issuer ABSENT, serial ABSENT }))
 type SpecificallyIdentified struct {
-	Name   GeneralName
-	Issuer GeneralName             `asn1:"optional"`
-	Serial CertificateSerialNumber `asn1:"optional"`
+	Name    GeneralName
+	Serial1 CertificateSerialNumber `asn1:"optional"`
+	Issuer  GeneralName             `asn1:"optional"`
+	Serial2 CertificateSerialNumber `asn1:"optional"`
 }
 
 // # ASN.1 Definition:

@@ -12,6 +12,11 @@ libraries (and perhaps even tools, one day) written in Go. They are:
   over Internet Directly Mapped (IDM) protocol client, as described in ITU-T
   Recommendation X.519.
 
+## Warnings
+
+Almost all types in `SchemaAdministration.asn1` will be parsed incorrectly by
+Go's implementation of ASN.1.
+
 ## X.500 Directory Implementation
 
 If you are interested in working with X.500 directories, consider checking
@@ -29,7 +34,7 @@ implementations out there, written by yours truly.
 
 ### MVP
 
-- [ ] Investigate issue with ordering of elements in `struct`s.
+- [x] Investigate issue with ordering of elements in `struct`s.
   - This bit me in `ListResultData_listInfo.name`. By being first in the `struct`, it was
     consuming `subordinates` if absent, then `subordinates` could not be found. I had to
     move it to the end of the `struct`.
@@ -39,26 +44,16 @@ implementations out there, written by yours truly.
 - [x] Do you handle `BOOLEAN DEFAULT TRUE` correctly?
 - [x] `DirectoryString(s str)`
 - [x] `FromDirectoryString(ds DirectoryString)`
-- [ ] Test directory string encoding and decoding
+- [x] Test directory string encoding and decoding
 - [x] Separate DirectoryString library?
 - [x] Use `omitempty`
 - [ ] Even higher-level API
 - [x] Change `int64` enums to `int`
-- [ ] Define and implement interfaces
-  - [x] `CommonArguments`
-  - [x] `CommonResults`
-  - [x] `AccessPoint`
-  - [x] `MasterOrShadowAccessPoint`
-  - [x] `AVMPcommonComponents`
-  - [x] `SchemaElement`
-  - [x] `WithSecurityParameters`
-  - [x] `TargetedObjectName`
-  - [x] `ObjectIdentifierIdentified`
-  - [x] `WithProblemCode`
-  - [ ] `WithEntryCount`
+- [x] Define and implement interfaces
 - [ ] Use `X500OperationError` (I might not do this...)
 - [x] List and Search Result Iterator
 - [ ] Test signing
+- [ ] Fix ambiguous parsing in `SchemaAdministration` caused by `UnboundedDirectoryString`
 - [ ] Documentation
 
 ### Future

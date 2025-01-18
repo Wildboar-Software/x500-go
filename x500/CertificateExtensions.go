@@ -746,6 +746,13 @@ type CertificateListExactAssertion struct {
 	DistributionPoint DistributionPointName `asn1:"optional"`
 }
 
+// NOTE: Issuer was split up into three fields to prevent an issue
+// with an omitted issuer field from consuming the next component.
+// Only populate one field.
+//
+// In addition to this, the DateAndTime field was split into
+// GeneralizedTime and UTCTime for the same reason.
+//
 // # ASN.1 Definition:
 //
 //	CertificateListAssertion ::= SEQUENCE {
@@ -758,11 +765,14 @@ type CertificateListExactAssertion struct {
 //	  authorityKeyIdentifier  [3]  AuthorityKeyIdentifier OPTIONAL,
 //	  ... }
 type CertificateListAssertion struct {
-	Issuer                 Name                   `asn1:"optional"`
+	Issuer                 DistinguishedName      `asn1:"optional"`
+	IssuerOID              asn1.ObjectIdentifier  `asn1:"optional"`
+	IssuerDNS              string                 `asn1:"optional,utf8"`
 	MinCRLNumber           CRLNumber              `asn1:"optional,tag:0"`
 	MaxCRLNumber           CRLNumber              `asn1:"optional,tag:1"`
 	ReasonFlags            ReasonFlags            `asn1:"optional"`
-	DateAndTime            Time                   `asn1:"optional"`
+	DateAndTime            time.Time              `asn1:"optional"`
+	DateAndTimeUTC         time.Time              `asn1:"optional,utc"`
 	DistributionPoint      DistributionPointName  `asn1:"optional,tag:2"`
 	AuthorityKeyIdentifier AuthorityKeyIdentifier `asn1:"optional,tag:3"`
 }

@@ -154,6 +154,12 @@ type MatchingUse struct {
 //	  ... }
 type AttributeCombination = asn1.RawValue
 
+// WARNING: The Contexts field was split into Contexts1 and Contexts2 to prevent
+// issues with ambiguity of decoding unique to Go's ASN.1 implementation.
+// When encoding values of this type, ensure that Contexts1 is empty if
+// OutputValues is provided and use Contexts2 instead. When decoding, the value
+// of Contexts may appear in either Contexts1 or Contexts2.
+//
 // # ASN.1 Definition:
 //
 //	ResultAttribute ::= SEQUENCE {
@@ -166,8 +172,9 @@ type AttributeCombination = asn1.RawValue
 //	  ... }
 type ResultAttribute struct {
 	AttributeType asn1.ObjectIdentifier
+	Contexts1     [](ContextProfile)           `asn1:"optional,explicit,tag:0,omitempty"`
 	OutputValues  ResultAttribute_outputValues `asn1:"optional"`
-	Contexts      [](ContextProfile)           `asn1:"optional,explicit,tag:0,omitempty"`
+	Contexts2     [](ContextProfile)           `asn1:"optional,explicit,tag:0,omitempty"`
 }
 
 // # ASN.1 Definition:

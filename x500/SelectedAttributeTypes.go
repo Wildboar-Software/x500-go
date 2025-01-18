@@ -340,8 +340,9 @@ type MRMappings = [](MRMapping)
 //	    changeAfterReset (1),
 //	    ... } OPTIONAL}
 type PwdResponse struct {
-	Warning PwdResponse_warning `asn1:"optional"`
-	Error   PwdResponse_error   `asn1:"optional"`
+	TimeLeft       int               `asn1:"optional,explicit,tag:0"`
+	GraceRemaining int               `asn1:"optional,explicit,tag:1"`
+	Error          PwdResponse_error `asn1:"optional"`
 }
 
 // # ASN.1 Definition:
@@ -1890,13 +1891,18 @@ const (
 	EpcFormat_fields_Item_result_Alpha7bits EpcFormat_fields_Item_result = 2
 )
 
+// NOTE: The CharField field was split into the Characters and MaxValue
+// alternatives to fix issues of ambiguous decoding that are unique to Go's
+// ASN.1 implementation.
+//
 // # ASN.1 Definition:
 //
 //	EpcFormat-fields-Item ::= SEQUENCE { -- REMOVED_FROM_UNNESTING -- }
 type EpcFormat_fields_Item struct {
-	Bits      int
-	CharField EpcFormat_fields_Item_charField
-	Result    EpcFormat_fields_Item_result `asn1:"optional,default:0"`
+	Bits       int
+	Characters int                          `asn1:"optional,explicit,tag:0"`
+	MaxValue   int                          `asn1:"optional,explicit,tag:1"`
+	Result     EpcFormat_fields_Item_result `asn1:"optional,default:0"`
 }
 
 // # ASN.1 Definition:

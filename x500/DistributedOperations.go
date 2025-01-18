@@ -321,6 +321,12 @@ func (ap *AccessPointInformation) GetChainingRequired() bool {
 	return ap.ChainingRequired
 }
 
+// WARNING: AccessPoints was split into AccessPoints1 and AccessPoints2 to fix
+// an issue with ambiguous parsing that is unique to Go's implementation of
+// ASN.1. Only use AccessPoints2 when encoding and ensure that AccessPoints1
+// is zeroed / empty. When decoding, either AccessPoints1 or AccessPoints2
+// may be populated.
+//
 // # ASN.1 Definition:
 //
 //	DitBridgeKnowledge ::= SEQUENCE {
@@ -328,8 +334,9 @@ func (ap *AccessPointInformation) GetChainingRequired() bool {
 //	  accessPoints   MasterAndShadowAccessPoints,
 //	  ... }
 type DitBridgeKnowledge struct {
+	AccessPoints1 MasterAndShadowAccessPoints `asn1:"set,omitempty"`
 	DomainLocalID UnboundedDirectoryString    `asn1:"optional"`
-	AccessPoints  MasterAndShadowAccessPoints `asn1:"set,omitempty"`
+	AccessPoints2 MasterAndShadowAccessPoints `asn1:"set,omitempty"`
 }
 
 // # ASN.1 Definition:

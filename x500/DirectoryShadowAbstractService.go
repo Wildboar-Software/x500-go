@@ -33,6 +33,13 @@ type ShadowingAgreementInfo struct {
 	SecondaryShadows bool        `asn1:"optional,tag:2"`
 }
 
+// NOTE: The SupplyContexts field was split into two to prevent an issue with
+// ambiguous decoding that is unique to Go's ASN.1 implementation. When
+// encoding values of this type, always use SupplyContexts2 and ensure that
+// SupplyContexts1 is zeroed / empty (different from ASN.1-encoded NULL).
+// When decoding, either SupplyContexts1 or SupplyContexts2 may be
+// populated with the value of SupplyContexts.
+//
 // # ASN.1 Definition:
 //
 //	UnitOfReplication ::= SEQUENCE {
@@ -50,8 +57,9 @@ type UnitOfReplication struct {
 	Attributes       AttributeSelection
 	Knowledge        Knowledge                        `asn1:"optional"`
 	Subordinates     bool                             `asn1:"optional"`
+	SupplyContexts1  UnitOfReplication_supplyContexts `asn1:"optional,tag:0"`
 	ContextSelection ContextSelection                 `asn1:"optional"`
-	SupplyContexts   UnitOfReplication_supplyContexts `asn1:"optional,tag:0"`
+	SupplyContexts2  UnitOfReplication_supplyContexts `asn1:"optional,tag:0"`
 }
 
 // # ASN.1 Definition:
@@ -446,6 +454,13 @@ type Subtree struct {
 //	IncrementalRefresh ::= SEQUENCE OF IncrementalStepRefresh
 type IncrementalRefresh = [](IncrementalStepRefresh)
 
+// WARNING: SubordinateUpdates has been split into two fields to prevent issues
+// with ambiguous decoding that are unique to Go's ASN.1 implementation.
+// Always use SubordinateUpdates2 when encoding and ensure that
+// SubordinateUpdates1 is zeroed / empty. When decoding, either
+// SubordinateUpdates1 or SubordinateUpdates2 may be populated with the value
+// of SubordinateUpdates.
+//
 // # ASN.1 Definition:
 //
 //	IncrementalStepRefresh ::= SEQUENCE {
@@ -456,10 +471,16 @@ type IncrementalRefresh = [](IncrementalStepRefresh)
 //	            ...} OPTIONAL,
 //	  subordinateUpdates  SEQUENCE SIZE (1..MAX) OF SubordinateChanges OPTIONAL }
 type IncrementalStepRefresh struct {
-	SDSEChanges        IncrementalStepRefresh_sDSEChanges `asn1:"optional"`
-	SubordinateUpdates [](SubordinateChanges)             `asn1:"optional,omitempty"`
+	SubordinateUpdates1 [](SubordinateChanges)             `asn1:"optional,omitempty"`
+	SDSEChanges         IncrementalStepRefresh_sDSEChanges `asn1:"optional"`
+	SubordinateUpdates2 [](SubordinateChanges)             `asn1:"optional,omitempty"`
 }
 
+// NOTE: The `rename` and `attributeChanges` fields were split up into their
+// respective alternatives to fix ambiguity issues in decoding that are unique
+// to Go's implementation of ASN.1 decoding. Only populate one of each
+// alternative when encoding.
+//
 // # ASN.1 Definition:
 //
 //	ContentChange ::= SEQUENCE {
@@ -475,12 +496,15 @@ type IncrementalStepRefresh struct {
 //	  attValIncomplete  SET OF AttributeType DEFAULT {},
 //	  ... }
 type ContentChange struct {
-	Rename           ContentChange_rename           `asn1:"optional"`
-	AttributeChanges ContentChange_attributeChanges `asn1:"optional"`
-	SDSEType         SDSEType
-	SubComplete      bool              `asn1:"optional,tag:2"`
-	AttComplete      bool              `asn1:"optional,tag:3"`
-	AttValIncomplete [](AttributeType) `asn1:"optional,set"`
+	RenameRDN           RelativeDistinguishedName      `asn1:"optional,set"`
+	RenameDN            DistinguishedName              `asn1:"optional"`
+	AttributeReplaceSET []Attribute                    `asn1:"optional,tag:0,set,omitempty"`
+	AttributeChange     []EntryModification            `asn1:"optional,tag:1,omitempty"`
+	AttributeChanges    ContentChange_attributeChanges `asn1:"optional"`
+	SDSEType            SDSEType
+	SubComplete         bool              `asn1:"optional,tag:2"`
+	AttComplete         bool              `asn1:"optional,tag:3"`
+	AttValIncomplete    [](AttributeType) `asn1:"optional,set"`
 }
 
 // # ASN.1 Definition:

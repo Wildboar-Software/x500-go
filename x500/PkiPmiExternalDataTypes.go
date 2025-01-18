@@ -165,17 +165,19 @@ type ORAddress struct {
 //	  organizational-unit-names   [6]  OrganizationalUnitNames OPTIONAL
 //	  -- see also teletex-organizational-unit-names --}
 type BuiltInStandardAttributes struct {
-	Country_name               X400CountryName          `asn1:"optional"`
-	Administration_domain_name AdministrationDomainName `asn1:"optional"`
-	Network_address            NetworkAddress           `asn1:"optional,explicit,tag:0"`
+	Country_name               X400CountryName          `asn1:"optional,explicit,application,tag:1"`
+	Administration_domain_name AdministrationDomainName `asn1:"optional,explicit,application,tag:2"`
+	Network_address            NetworkAddress           `asn1:"optional,explicit,tag:0,numeric"`
 	Terminal_identifier        TerminalIdentifier       `asn1:"optional,explicit,tag:1"`
 	Private_domain_name        PrivateDomainName        `asn1:"optional,explicit,tag:2"`
 	Organization_name          OrganizationName         `asn1:"optional,explicit,tag:3"`
-	Numeric_user_identifier    NumericUserIdentifier    `asn1:"optional,explicit,tag:4"`
+	Numeric_user_identifier    NumericUserIdentifier    `asn1:"optional,explicit,tag:4,numeric"`
 	Personal_name              PersonalName             `asn1:"optional,explicit,tag:5,set"`
 	Organizational_unit_names  OrganizationalUnitNames  `asn1:"optional,explicit,tag:6,omitempty"`
 }
 
+// NOTE: The outer tag is handled in [BuiltInStandardAttributes].
+//
 // # ASN.1 Definition:
 //
 //	CountryName ::= [APPLICATION 1]  CHOICE {
@@ -183,6 +185,8 @@ type BuiltInStandardAttributes struct {
 //	  iso-3166-alpha2-code  PrintableString(SIZE (ub-country-name-alpha-length)) }
 type X400CountryName = asn1.RawValue
 
+// NOTE: The outer tag is handled in [BuiltInStandardAttributes].
+//
 // # ASN.1 Definition:
 //
 //	AdministrationDomainName ::= [APPLICATION 2]  CHOICE {
@@ -195,10 +199,13 @@ type AdministrationDomainName = asn1.RawValue
 //	NetworkAddress ::= X121Address
 type NetworkAddress = X121Address
 
+// NOTE: This was changed to an asn1.RawValue so it can declared a PrintableString
+// instead of silently serialized as a UTF8String by Go.
+//
 // # ASN.1 Definition:
 //
 //	TerminalIdentifier ::= PrintableString(SIZE (1..ub-terminal-id-length))
-type TerminalIdentifier = string
+type TerminalIdentifier = asn1.RawValue
 
 // # ASN.1 Definition:
 //
@@ -217,6 +224,8 @@ type OrganizationName = string
 //	NumericUserIdentifier ::= NumericString(SIZE (1..ub-numeric-user-id-length))
 type NumericUserIdentifier = string
 
+// NOTE: asn1.RawValue used for fields here so PrintableString can be specified.
+//
 // # ASN.1 Definition:
 //
 //	PersonalName ::= SET {
@@ -228,10 +237,10 @@ type NumericUserIdentifier = string
 //	  generation-qualifier
 //	    [3]  PrintableString(SIZE (1..ub-generation-qualifier-length)) OPTIONAL }
 type PersonalName struct {
-	Surname              string `asn1:"explicit,tag:0"`
-	Given_name           string `asn1:"optional,explicit,tag:1"`
-	Initials             string `asn1:"optional,explicit,tag:2"`
-	Generation_qualifier string `asn1:"optional,explicit,tag:3"`
+	Surname              asn1.RawValue `asn1:"explicit,tag:0"`
+	Given_name           asn1.RawValue `asn1:"optional,explicit,tag:1"`
+	Initials             asn1.RawValue `asn1:"optional,explicit,tag:2"`
+	Generation_qualifier asn1.RawValue `asn1:"optional,explicit,tag:3"`
 }
 
 // # ASN.1 Definition:
@@ -239,12 +248,12 @@ type PersonalName struct {
 //	OrganizationalUnitNames ::= SEQUENCE SIZE (1..ub-organizational-units) OF OrganizationalUnitName
 type OrganizationalUnitNames = [](OrganizationalUnitName)
 
+// NOTE: asn1.RawValue used so PrintableString can be specified.
+//
 // # ASN.1 Definition:
 //
-// OrganizationalUnitName  ::=
-//
-//	PrintableString(SIZE (1..ub-organizational-unit-name-length))
-type OrganizationalUnitName = string
+//	OrganizationalUnitName ::= PrintableString(SIZE (1..ub-organizational-unit-name-length))
+type OrganizationalUnitName = asn1.RawValue
 
 // # ASN.1 Definition:
 //
@@ -259,8 +268,8 @@ type BuiltInDomainDefinedAttributes = [](BuiltInDomainDefinedAttribute)
 //	  type   PrintableString(SIZE (1..ub-domain-defined-attribute-type-length)),
 //	  value  PrintableString(SIZE (1..ub-domain-defined-attribute-value-length)) }
 type BuiltInDomainDefinedAttribute struct {
-	Type  string
-	Value string
+	Type  asn1.RawValue
+	Value asn1.RawValue
 }
 
 // # ASN.1 Definition:
@@ -317,10 +326,10 @@ type UniversalOrganizationName = UniversalOrBMPString
 //	  generation-qualifier
 //	    [3]  TeletexString(SIZE (1..ub-generation-qualifier-length)) OPTIONAL }
 type TeletexPersonalName struct {
-	Surname              string `asn1:"explicit,tag:0"`
-	Given_name           string `asn1:"optional,explicit,tag:1"`
-	Initials             string `asn1:"optional,explicit,tag:2"`
-	Generation_qualifier string `asn1:"optional,explicit,tag:3"`
+	Surname              asn1.RawValue `asn1:"explicit,tag:0"`
+	Given_name           asn1.RawValue `asn1:"optional,explicit,tag:1"`
+	Initials             asn1.RawValue `asn1:"optional,explicit,tag:2"`
+	Generation_qualifier asn1.RawValue `asn1:"optional,explicit,tag:3"`
 }
 
 // # ASN.1 Definition:
@@ -337,10 +346,10 @@ type TeletexPersonalName struct {
 //	  generation-qualifier
 //	    [3]  UniversalOrBMPString{ub-universal-generation-qualifier-length} OPTIONAL }
 type UniversalPersonalName struct {
-	Surname              UniversalOrBMPString `asn1:"explicit,tag:0"`
-	Given_name           UniversalOrBMPString `asn1:"optional,explicit,tag:1"`
-	Initials             UniversalOrBMPString `asn1:"optional,explicit,tag:2"`
-	Generation_qualifier UniversalOrBMPString `asn1:"optional,explicit,tag:3"`
+	Surname              UniversalOrBMPString `asn1:"explicit,tag:0,set"`
+	Given_name           UniversalOrBMPString `asn1:"optional,explicit,tag:1,set"`
+	Initials             UniversalOrBMPString `asn1:"optional,explicit,tag:2,set"`
+	Generation_qualifier UniversalOrBMPString `asn1:"optional,explicit,tag:3,set"`
 }
 
 // # ASN.1 Definition:

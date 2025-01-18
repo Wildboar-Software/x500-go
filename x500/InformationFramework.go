@@ -59,7 +59,7 @@ type Context struct {
 type AttributeValueAssertion struct {
 	Type             asn1.ObjectIdentifier
 	Assertion        asn1.RawValue
-	AssertedContexts AttributeValueAssertion_assertedContexts `asn1:"optional,omitempty"`
+	AssertedContexts AttributeValueAssertion_assertedContexts `asn1:"optional"`
 }
 
 // # ASN.1 Definition:

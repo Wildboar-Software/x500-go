@@ -324,6 +324,12 @@ const ServiceControlOptions_DontMatchFriends int32 = 13
 
 const ServiceControlOptions_AllowWriteableCopy int32 = 14
 
+// NOTE: The `attributes` and `extraAttributes` fields were split up into
+// their respective alternatives to prevent issues with ambiguity of decoding.
+// Also, the `contextSelection` field was moved to the bottom of this struct
+// for the same reason. This shouldn't really affect the encoding, because
+// this type is defined as a SET, not a SEQUENCE.
+//
 // # ASN.1 Definition:
 //
 //	EntryInformationSelection ::= SET {
@@ -342,12 +348,14 @@ const ServiceControlOptions_AllowWriteableCopy int32 = 14
 //	  familyReturn                   FamilyReturn DEFAULT
 //	                                   {memberSelect contributingEntriesOnly} }
 type EntryInformationSelection struct {
-	Attributes       EntryInformationSelection_attributes      `asn1:"optional"`
-	InfoTypes        EntryInformationSelection_infoTypes       `asn1:"optional,explicit,tag:2"`
-	ExtraAttributes  EntryInformationSelection_extraAttributes `asn1:"optional"`
-	ContextSelection ContextSelection                          `asn1:"optional"`
-	ReturnContexts   bool                                      `asn1:"optional"`
-	FamilyReturn     FamilyReturn                              `asn1:"optional"`
+	AllUserAttributes              asn1.RawValue                       `asn1:"optional,explicit,tag:0"`
+	SelectSET                      []asn1.ObjectIdentifier             `asn1:"optional,explicit,tag:1,set"`
+	InfoTypes                      EntryInformationSelection_infoTypes `asn1:"optional,explicit,tag:2"`
+	AllOperationalAttributes       asn1.RawValue                       `asn1:"optional,explicit,tag:3"`
+	SelectOperationalAttributesSET []asn1.ObjectIdentifier             `asn1:"optional,explicit,tag:4,set"`
+	ReturnContexts                 bool                                `asn1:"optional"`
+	FamilyReturn                   FamilyReturn                        `asn1:"optional"`
+	ContextSelection               ContextSelection                    `asn1:"optional"`
 }
 
 // # ASN.1 Definition:
@@ -1032,6 +1040,10 @@ func (x *CompareArgumentData) GetFamilyGrouping() FamilyGrouping {
 //	CompareResult ::= OPTIONALLY-PROTECTED { CompareResultData }
 type CompareResult = OPTIONALLY_PROTECTED
 
+// The Name field was split into three fields to prevent an issue with an
+// omitted name from causing the matched field from being interpreted as
+// the name.
+//
 // NOTE: FromEntry is represented as an `asn1.RawValue` because there is no way
 // to correctly encode and decode a BOOLEAN that defaults to TRUE using Go's
 // `encoding/asn1` other than by just preserving the original raw value. It's
@@ -1048,18 +1060,21 @@ type CompareResult = OPTIONALLY_PROTECTED
 //	  ...,
 //	  COMPONENTS OF        CommonResults }
 type CompareResultData struct {
-	Name               Name               `asn1:"optional"`
-	Matched            bool               `asn1:"explicit,tag:0"`
-	FromEntry          asn1.RawValue      `asn1:"optional,explicit,tag:1"`
-	MatchedSubtype     AttributeType      `asn1:"optional,explicit,tag:2"`
-	SecurityParameters SecurityParameters `asn1:"optional,explicit,tag:30,set"`
-	Performer          DistinguishedName  `asn1:"optional,explicit,tag:29"`
-	AliasDereferenced  bool               `asn1:"optional,explicit,tag:28"`
-	Notification       [](Attribute)      `asn1:"optional,explicit,tag:27,omitempty"`
+	Name               DistinguishedName     `asn1:"optional"`
+	NameOID            asn1.ObjectIdentifier `asn1:"optional"`
+	NameDNS            string                `asn1:"optional,utf8"`
+	Matched            bool                  `asn1:"explicit,tag:0"`
+	FromEntry          asn1.RawValue         `asn1:"optional,explicit,tag:1"`
+	MatchedSubtype     AttributeType         `asn1:"optional,explicit,tag:2"`
+	SecurityParameters SecurityParameters    `asn1:"optional,explicit,tag:30,set"`
+	Performer          DistinguishedName     `asn1:"optional,explicit,tag:29"`
+	AliasDereferenced  bool                  `asn1:"optional,explicit,tag:28"`
+	Notification       [](Attribute)         `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
+// FIXME: Return a name.
 func (x *CompareResultData) GetTargetObject() (*Name, *DistinguishedName) {
-	return &x.Name, nil
+	return nil, &x.Name
 }
 
 func (x *CompareResultData) GetSecurityParameters() SecurityParameters {
@@ -1240,6 +1255,10 @@ type ListResult = OPTIONALLY_PROTECTED
 //	  ... }
 type ListResultData = asn1.RawValue
 
+// NOTE: The `entryCount` field was split into its alternatives to prevent an
+// issue with ambiguous decoding that is specific to Go's ASN.1 implementation.
+// When encoding, only populate one field.
+//
 // # ASN.1 Definition:
 //
 //	PartialOutcomeQualifier ::= SET {
@@ -1258,14 +1277,16 @@ type ListResultData = asn1.RawValue
 //	    ...} OPTIONAL
 //	  --                            [10] Not to be used -- }
 type PartialOutcomeQualifier struct {
-	LimitProblem                  LimitProblem                       `asn1:"optional,explicit,tag:0"`
-	Unexplored                    [](ContinuationReference)          `asn1:"optional,explicit,tag:1,omitempty"`
-	UnavailableCriticalExtensions bool                               `asn1:"optional,explicit,tag:2"`
-	UnknownErrors                 [](asn1.RawValue)                  `asn1:"optional,explicit,tag:3,set,omitempty"`
-	QueryReference                []byte                             `asn1:"optional,explicit,tag:4"`
-	OverspecFilter                Filter                             `asn1:"optional,explicit,tag:5"`
-	Notification                  [](Attribute)                      `asn1:"optional,explicit,tag:6,set,omitempty"`
-	EntryCount                    PartialOutcomeQualifier_entryCount `asn1:"optional"`
+	LimitProblem                  LimitProblem              `asn1:"optional,explicit,tag:0"`
+	Unexplored                    [](ContinuationReference) `asn1:"optional,explicit,tag:1,omitempty"`
+	UnavailableCriticalExtensions bool                      `asn1:"optional,explicit,tag:2"`
+	UnknownErrors                 [](asn1.RawValue)         `asn1:"optional,explicit,tag:3,set,omitempty"`
+	QueryReference                []byte                    `asn1:"optional,explicit,tag:4"`
+	OverspecFilter                Filter                    `asn1:"optional,explicit,tag:5"`
+	Notification                  [](Attribute)             `asn1:"optional,explicit,tag:6,set,omitempty"`
+	BestEstimate                  int                       `asn1:"optional,explicit,tag:7"`
+	LowEstimate                   int                       `asn1:"optional,explicit,tag:8"`
+	Exact                         int                       `asn1:"optional,explicit,tag:9"`
 }
 
 // # ASN.1 Definition:
