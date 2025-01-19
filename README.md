@@ -14,8 +14,9 @@ libraries (and perhaps even tools, one day) written in Go. They are:
 
 ## Warnings
 
-Almost all types in `SchemaAdministration.asn1` will be parsed incorrectly by
-Go's implementation of ASN.1.
+Almost all types in `SchemaAdministration.asn1` will decode with errors if the
+`UniversalString` alternative is used for the `description` fields. I kind of
+had no choice to but to do it like this. Blame Go's `encodings/asn1` module.
 
 ## X.500 Directory Implementation
 
@@ -46,7 +47,7 @@ update with tags, text, keywords, etc.
 - [ ] Even higher-level API
 - [x] Change `int32` to `int`
 - [ ] Use `X500OperationError` (I might not do this...)
-- [ ] Fix ambiguous parsing in `SchemaAdministration` caused by `UnboundedDirectoryString`
+- [x] Fix ambiguous parsing in `SchemaAdministration` caused by `UnboundedDirectoryString`
 - [ ] Documentation
 
 ### Future

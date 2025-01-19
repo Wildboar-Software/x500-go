@@ -17,7 +17,7 @@ type DITStructureRuleDescription struct {
 	NameForm               asn1.ObjectIdentifier
 	SuperiorStructureRules [](RuleIdentifier)           `asn1:"optional,set"`
 	Name                   [](UnboundedDirectoryString) `asn1:"optional,explicit,tag:1,set,omitempty"`
-	Description            UnboundedDirectoryString     `asn1:"optional"`
+	Description            string                       `asn1:"optional"`
 	Obsolete               bool                         `asn1:"optional"`
 }
 
@@ -25,7 +25,7 @@ func (x *DITStructureRuleDescription) GetName() []UnboundedDirectoryString {
 	return x.Name
 }
 
-func (x *DITStructureRuleDescription) GetDescription() UnboundedDirectoryString {
+func (x *DITStructureRuleDescription) GetDescription() string {
 	return x.Description
 }
 
@@ -48,7 +48,7 @@ type DITContentRuleDescription struct {
 	Optional              [](asn1.ObjectIdentifier)    `asn1:"optional,explicit,tag:2,set"`
 	Precluded             [](asn1.ObjectIdentifier)    `asn1:"optional,explicit,tag:3,set"`
 	Name                  [](UnboundedDirectoryString) `asn1:"optional,explicit,tag:4,set,omitempty"`
-	Description           UnboundedDirectoryString     `asn1:"optional"`
+	Description           string                       `asn1:"optional"`
 	Obsolete              bool                         `asn1:"optional"`
 }
 
@@ -60,7 +60,7 @@ func (x *DITContentRuleDescription) GetName() []UnboundedDirectoryString {
 	return x.Name
 }
 
-func (x *DITContentRuleDescription) GetDescription() UnboundedDirectoryString {
+func (x *DITContentRuleDescription) GetDescription() string {
 	return x.Description
 }
 
@@ -81,7 +81,7 @@ func (x *DITContentRuleDescription) GetObsolete() bool {
 type MatchingRuleDescription struct {
 	Identifier  asn1.ObjectIdentifier
 	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
-	Description UnboundedDirectoryString     `asn1:"optional"`
+	Description string                       `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information UnboundedDirectoryString     `asn1:"optional,explicit,tag:0"`
 }
@@ -94,7 +94,7 @@ func (x *MatchingRuleDescription) GetName() []UnboundedDirectoryString {
 	return x.Name
 }
 
-func (x *MatchingRuleDescription) GetDescription() UnboundedDirectoryString {
+func (x *MatchingRuleDescription) GetDescription() string {
 	return x.Description
 }
 
@@ -114,7 +114,7 @@ func (x *MatchingRuleDescription) GetObsolete() bool {
 type AttributeTypeDescription struct {
 	Identifier  asn1.ObjectIdentifier
 	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
-	Description UnboundedDirectoryString     `asn1:"optional"`
+	Description string                       `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information AttributeTypeInformation     `asn1:"explicit,tag:0"`
 }
@@ -127,7 +127,7 @@ func (x *AttributeTypeDescription) GetName() []UnboundedDirectoryString {
 	return x.Name
 }
 
-func (x *AttributeTypeDescription) GetDescription() UnboundedDirectoryString {
+func (x *AttributeTypeDescription) GetDescription() string {
 	return x.Description
 }
 
@@ -178,7 +178,7 @@ type AttributeTypeInformation struct {
 type ObjectClassDescription struct {
 	Identifier  asn1.ObjectIdentifier
 	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
-	Description UnboundedDirectoryString     `asn1:"optional"`
+	Description string                       `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information ObjectClassInformation       `asn1:"explicit,tag:0"`
 }
@@ -191,7 +191,7 @@ func (x *ObjectClassDescription) GetName() []UnboundedDirectoryString {
 	return x.Name
 }
 
-func (x *ObjectClassDescription) GetDescription() UnboundedDirectoryString {
+func (x *ObjectClassDescription) GetDescription() string {
 	return x.Description
 }
 
@@ -226,7 +226,7 @@ type ObjectClassInformation struct {
 type NameFormDescription struct {
 	Identifier  asn1.ObjectIdentifier
 	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
-	Description UnboundedDirectoryString     `asn1:"optional"`
+	Description string                       `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information NameFormInformation          `asn1:"explicit,tag:0"`
 }
@@ -239,7 +239,7 @@ func (x *NameFormDescription) GetName() []UnboundedDirectoryString {
 	return x.Name
 }
 
-func (x *NameFormDescription) GetDescription() UnboundedDirectoryString {
+func (x *NameFormDescription) GetDescription() string {
 	return x.Description
 }
 
@@ -272,7 +272,7 @@ type NameFormInformation struct {
 type MatchingRuleUseDescription struct {
 	Identifier  asn1.ObjectIdentifier
 	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
-	Description UnboundedDirectoryString     `asn1:"optional"`
+	Description string                       `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information [](asn1.ObjectIdentifier)    `asn1:"explicit,tag:0,set"`
 }
@@ -285,7 +285,7 @@ func (x *MatchingRuleUseDescription) GetName() []UnboundedDirectoryString {
 	return x.Name
 }
 
-func (x *MatchingRuleUseDescription) GetDescription() UnboundedDirectoryString {
+func (x *MatchingRuleUseDescription) GetDescription() string {
 	return x.Description
 }
 
@@ -305,7 +305,7 @@ func (x *MatchingRuleUseDescription) GetObsolete() bool {
 type ContextDescription struct {
 	Identifier  asn1.ObjectIdentifier
 	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
-	Description UnboundedDirectoryString     `asn1:"optional"`
+	Description string                       `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information ContextInformation           `asn1:"explicit,tag:0"`
 }
@@ -318,7 +318,7 @@ func (x *ContextDescription) GetName() []UnboundedDirectoryString {
 	return x.Name
 }
 
-func (x *ContextDescription) GetDescription() UnboundedDirectoryString {
+func (x *ContextDescription) GetDescription() string {
 	return x.Description
 }
 
@@ -349,7 +349,7 @@ type ContextInformation struct {
 type DITContextUseDescription struct {
 	Identifier  asn1.ObjectIdentifier
 	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
-	Description UnboundedDirectoryString     `asn1:"optional"`
+	Description string                       `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Information DITContextUseInformation     `asn1:"explicit,tag:0"`
 }
@@ -362,7 +362,7 @@ func (x *DITContextUseDescription) GetName() []UnboundedDirectoryString {
 	return x.Name
 }
 
-func (x *DITContextUseDescription) GetDescription() UnboundedDirectoryString {
+func (x *DITContextUseDescription) GetDescription() string {
 	return x.Description
 }
 
@@ -393,7 +393,7 @@ type DITContextUseInformation struct {
 type FriendsDescription struct {
 	Anchor      asn1.ObjectIdentifier
 	Name        [](UnboundedDirectoryString) `asn1:"optional,set,omitempty"`
-	Description UnboundedDirectoryString     `asn1:"optional"`
+	Description string                       `asn1:"optional"`
 	Obsolete    bool                         `asn1:"optional"`
 	Friends     [](asn1.ObjectIdentifier)    `asn1:"explicit,tag:0,set,omitempty"`
 }
@@ -406,7 +406,7 @@ func (x *FriendsDescription) GetName() []UnboundedDirectoryString {
 	return x.Name
 }
 
-func (x *FriendsDescription) GetDescription() UnboundedDirectoryString {
+func (x *FriendsDescription) GetDescription() string {
 	return x.Description
 }
 
