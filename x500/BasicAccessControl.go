@@ -192,57 +192,57 @@ type AuthenticationLevel = asn1.RawValue
 //	  denyInvoke           (25) }
 type GrantsAndDenials = asn1.BitString
 
-const GrantsAndDenials_GrantAdd int32 = 0
+const GrantsAndDenials_GrantAdd int = 0
 
-const GrantsAndDenials_DenyAdd int32 = 1
+const GrantsAndDenials_DenyAdd int = 1
 
-const GrantsAndDenials_GrantDiscloseOnError int32 = 2
+const GrantsAndDenials_GrantDiscloseOnError int = 2
 
-const GrantsAndDenials_DenyDiscloseOnError int32 = 3
+const GrantsAndDenials_DenyDiscloseOnError int = 3
 
-const GrantsAndDenials_GrantRead int32 = 4
+const GrantsAndDenials_GrantRead int = 4
 
-const GrantsAndDenials_DenyRead int32 = 5
+const GrantsAndDenials_DenyRead int = 5
 
-const GrantsAndDenials_GrantRemove int32 = 6
+const GrantsAndDenials_GrantRemove int = 6
 
-const GrantsAndDenials_DenyRemove int32 = 7
+const GrantsAndDenials_DenyRemove int = 7
 
-const GrantsAndDenials_GrantBrowse int32 = 8
+const GrantsAndDenials_GrantBrowse int = 8
 
-const GrantsAndDenials_DenyBrowse int32 = 9
+const GrantsAndDenials_DenyBrowse int = 9
 
-const GrantsAndDenials_GrantExport int32 = 10
+const GrantsAndDenials_GrantExport int = 10
 
-const GrantsAndDenials_DenyExport int32 = 11
+const GrantsAndDenials_DenyExport int = 11
 
-const GrantsAndDenials_GrantImport int32 = 12
+const GrantsAndDenials_GrantImport int = 12
 
-const GrantsAndDenials_DenyImport int32 = 13
+const GrantsAndDenials_DenyImport int = 13
 
-const GrantsAndDenials_GrantModify int32 = 14
+const GrantsAndDenials_GrantModify int = 14
 
-const GrantsAndDenials_DenyModify int32 = 15
+const GrantsAndDenials_DenyModify int = 15
 
-const GrantsAndDenials_GrantRename int32 = 16
+const GrantsAndDenials_GrantRename int = 16
 
-const GrantsAndDenials_DenyRename int32 = 17
+const GrantsAndDenials_DenyRename int = 17
 
-const GrantsAndDenials_GrantReturnDN int32 = 18
+const GrantsAndDenials_GrantReturnDN int = 18
 
-const GrantsAndDenials_DenyReturnDN int32 = 19
+const GrantsAndDenials_DenyReturnDN int = 19
 
-const GrantsAndDenials_GrantCompare int32 = 20
+const GrantsAndDenials_GrantCompare int = 20
 
-const GrantsAndDenials_DenyCompare int32 = 21
+const GrantsAndDenials_DenyCompare int = 21
 
-const GrantsAndDenials_GrantFilterMatch int32 = 22
+const GrantsAndDenials_GrantFilterMatch int = 22
 
-const GrantsAndDenials_DenyFilterMatch int32 = 23
+const GrantsAndDenials_DenyFilterMatch int = 23
 
-const GrantsAndDenials_GrantInvoke int32 = 24
+const GrantsAndDenials_GrantInvoke int = 24
 
-const GrantsAndDenials_DenyInvoke int32 = 25
+const GrantsAndDenials_DenyInvoke int = 25
 
 // # ASN.1 Definition:
 //

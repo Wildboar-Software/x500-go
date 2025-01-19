@@ -122,17 +122,17 @@ type Clearance struct {
 //	  topSecret     (5)}
 type ClassList = asn1.BitString
 
-const ClassList_Unmarked int32 = 0
+const ClassList_Unmarked int = 0
 
-const ClassList_Unclassified int32 = 1
+const ClassList_Unclassified int = 1
 
-const ClassList_Restricted int32 = 2
+const ClassList_Restricted int = 2
 
-const ClassList_Confidential int32 = 3
+const ClassList_Confidential int = 3
 
-const ClassList_Secret int32 = 4
+const ClassList_Secret int = 4
 
-const ClassList_TopSecret int32 = 5
+const ClassList_TopSecret int = 5
 
 // # ASN.1 Definition:
 //

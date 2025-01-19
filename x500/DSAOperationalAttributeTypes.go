@@ -27,41 +27,41 @@ import (
 //	  ditBridge      (18)}
 type DSEType = asn1.BitString
 
-const DSEType_Root int32 = 0
+const DSEType_Root int = 0
 
-const DSEType_Glue int32 = 1
+const DSEType_Glue int = 1
 
-const DSEType_Cp int32 = 2
+const DSEType_Cp int = 2
 
-const DSEType_Entry int32 = 3
+const DSEType_Entry int = 3
 
-const DSEType_Alias int32 = 4
+const DSEType_Alias int = 4
 
-const DSEType_Subr int32 = 5
+const DSEType_Subr int = 5
 
-const DSEType_Nssr int32 = 6
+const DSEType_Nssr int = 6
 
-const DSEType_Supr int32 = 7
+const DSEType_Supr int = 7
 
-const DSEType_Xr int32 = 8
+const DSEType_Xr int = 8
 
-const DSEType_AdmPoint int32 = 9
+const DSEType_AdmPoint int = 9
 
-const DSEType_Subentry int32 = 10
+const DSEType_Subentry int = 10
 
-const DSEType_Shadow int32 = 11
+const DSEType_Shadow int = 11
 
-const DSEType_ImmSupr int32 = 13
+const DSEType_ImmSupr int = 13
 
-const DSEType_Rhob int32 = 14
+const DSEType_Rhob int = 14
 
-const DSEType_Sa int32 = 15
+const DSEType_Sa int = 15
 
-const DSEType_DsSubentry int32 = 16
+const DSEType_DsSubentry int = 16
 
-const DSEType_FamilyMember int32 = 17
+const DSEType_FamilyMember int = 17
 
-const DSEType_DitBridge int32 = 18
+const DSEType_DitBridge int = 18
 
 // # ASN.1 Definition:
 //

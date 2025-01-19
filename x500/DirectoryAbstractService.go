@@ -294,35 +294,35 @@ type ServiceControls struct {
 //	  allowWriteableCopy      (14)}
 type ServiceControlOptions = asn1.BitString
 
-const ServiceControlOptions_PreferChaining int32 = 0
+const ServiceControlOptions_PreferChaining int = 0
 
-const ServiceControlOptions_ChainingProhibited int32 = 1
+const ServiceControlOptions_ChainingProhibited int = 1
 
-const ServiceControlOptions_LocalScope int32 = 2
+const ServiceControlOptions_LocalScope int = 2
 
-const ServiceControlOptions_DontUseCopy int32 = 3
+const ServiceControlOptions_DontUseCopy int = 3
 
-const ServiceControlOptions_DontDereferenceAliases int32 = 4
+const ServiceControlOptions_DontDereferenceAliases int = 4
 
-const ServiceControlOptions_Subentries int32 = 5
+const ServiceControlOptions_Subentries int = 5
 
-const ServiceControlOptions_CopyShallDo int32 = 6
+const ServiceControlOptions_CopyShallDo int = 6
 
-const ServiceControlOptions_PartialNameResolution int32 = 7
+const ServiceControlOptions_PartialNameResolution int = 7
 
-const ServiceControlOptions_ManageDSAIT int32 = 8
+const ServiceControlOptions_ManageDSAIT int = 8
 
-const ServiceControlOptions_NoSubtypeMatch int32 = 9
+const ServiceControlOptions_NoSubtypeMatch int = 9
 
-const ServiceControlOptions_NoSubtypeSelection int32 = 10
+const ServiceControlOptions_NoSubtypeSelection int = 10
 
-const ServiceControlOptions_CountFamily int32 = 11
+const ServiceControlOptions_CountFamily int = 11
 
-const ServiceControlOptions_DontSelectFriends int32 = 12
+const ServiceControlOptions_DontSelectFriends int = 12
 
-const ServiceControlOptions_DontMatchFriends int32 = 13
+const ServiceControlOptions_DontMatchFriends int = 13
 
-const ServiceControlOptions_AllowWriteableCopy int32 = 14
+const ServiceControlOptions_AllowWriteableCopy int = 14
 
 // NOTE: The `attributes` and `extraAttributes` fields were split up into
 // their respective alternatives to prevent issues with ambiguity of decoding.
@@ -698,9 +698,9 @@ type TokenContent struct {
 //	Versions ::= BIT STRING {v1(0), v2(1)}
 type Versions = asn1.BitString
 
-const Versions_V1 int32 = 0
+const Versions_V1 int = 0
 
-const Versions_V2 int32 = 1
+const Versions_V2 int = 1
 
 // # ASN.1 Definition:
 //
@@ -1437,25 +1437,25 @@ func (x *SearchArgumentData) GetFamilyGrouping() FamilyGrouping {
 //	  all                   (9) }
 type HierarchySelections = asn1.BitString
 
-const HierarchySelections_Self int32 = 0
+const HierarchySelections_Self int = 0
 
-const HierarchySelections_Children int32 = 1
+const HierarchySelections_Children int = 1
 
-const HierarchySelections_Parent int32 = 2
+const HierarchySelections_Parent int = 2
 
-const HierarchySelections_Hierarchy int32 = 3
+const HierarchySelections_Hierarchy int = 3
 
-const HierarchySelections_Top int32 = 4
+const HierarchySelections_Top int = 4
 
-const HierarchySelections_Subtree int32 = 5
+const HierarchySelections_Subtree int = 5
 
-const HierarchySelections_Siblings int32 = 6
+const HierarchySelections_Siblings int = 6
 
-const HierarchySelections_SiblingChildren int32 = 7
+const HierarchySelections_SiblingChildren int = 7
 
-const HierarchySelections_SiblingSubtree int32 = 8
+const HierarchySelections_SiblingSubtree int = 8
 
-const HierarchySelections_All int32 = 9
+const HierarchySelections_All int = 9
 
 // # ASN.1 Definition:
 //
@@ -1474,29 +1474,29 @@ const HierarchySelections_All int32 = 9
 //	  searchFamily          (11) }
 type SearchControlOptions = asn1.BitString
 
-const SearchControlOptions_SearchAliases int32 = 0
+const SearchControlOptions_SearchAliases int = 0
 
-const SearchControlOptions_MatchedValuesOnly int32 = 1
+const SearchControlOptions_MatchedValuesOnly int = 1
 
-const SearchControlOptions_CheckOverspecified int32 = 2
+const SearchControlOptions_CheckOverspecified int = 2
 
-const SearchControlOptions_PerformExactly int32 = 3
+const SearchControlOptions_PerformExactly int = 3
 
-const SearchControlOptions_IncludeAllAreas int32 = 4
+const SearchControlOptions_IncludeAllAreas int = 4
 
-const SearchControlOptions_NoSystemRelaxation int32 = 5
+const SearchControlOptions_NoSystemRelaxation int = 5
 
-const SearchControlOptions_DnAttribute int32 = 6
+const SearchControlOptions_DnAttribute int = 6
 
-const SearchControlOptions_MatchOnResidualName int32 = 7
+const SearchControlOptions_MatchOnResidualName int = 7
 
-const SearchControlOptions_EntryCount int32 = 8
+const SearchControlOptions_EntryCount int = 8
 
-const SearchControlOptions_UseSubset int32 = 9
+const SearchControlOptions_UseSubset int = 9
 
-const SearchControlOptions_SeparateFamilyMembers int32 = 10
+const SearchControlOptions_SeparateFamilyMembers int = 10
 
-const SearchControlOptions_SearchFamily int32 = 11
+const SearchControlOptions_SearchFamily int = 11
 
 // # ASN.1 Definition:
 //
@@ -3094,13 +3094,13 @@ type ModifyRights_Item_item = asn1.RawValue
 //	ModifyRights-Item-permission ::= BIT STRING { -- REMOVED_FROM_UNNESTING -- }
 type ModifyRights_Item_permission = asn1.BitString
 
-const ModifyRights_Item_permission_Add int32 = 0
+const ModifyRights_Item_permission_Add int = 0
 
-const ModifyRights_Item_permission_Remove int32 = 1
+const ModifyRights_Item_permission_Remove int = 1
 
-const ModifyRights_Item_permission_Rename int32 = 2
+const ModifyRights_Item_permission_Rename int = 2
 
-const ModifyRights_Item_permission_Move int32 = 3
+const ModifyRights_Item_permission_Move int = 3
 
 // # ASN.1 Definition:
 //

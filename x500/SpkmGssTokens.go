@@ -143,19 +143,19 @@ type ChannelId = []byte
 //	  conf-avail(4), integ-avail(5), target-certif-data-required(6)}
 type Options = asn1.BitString
 
-const Options_Delegation_state int32 = 0
+const Options_Delegation_state int = 0
 
-const Options_Mutual_state int32 = 1
+const Options_Mutual_state int = 1
 
-const Options_Replay_det_state int32 = 2
+const Options_Replay_det_state int = 2
 
-const Options_Sequence_state int32 = 3
+const Options_Sequence_state int = 3
 
-const Options_Conf_avail int32 = 4
+const Options_Conf_avail int = 4
 
-const Options_Integ_avail int32 = 5
+const Options_Integ_avail int = 5
 
-const Options_Target_certif_data_required int32 = 6
+const Options_Target_certif_data_required int = 6
 
 // # ASN.1 Definition:
 //

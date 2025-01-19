@@ -666,7 +666,7 @@ type OsiBind_mode_selector struct {
 //	OsiBind-normal-mode-parameters-protocol-version ::= BIT STRING { -- REMOVED_FROM_UNNESTING -- }
 type OsiBind_normal_mode_parameters_protocol_version = asn1.BitString
 
-const OsiBind_normal_mode_parameters_protocol_version_Version_1 int32 = 0
+const OsiBind_normal_mode_parameters_protocol_version_Version_1 int = 0
 
 // # ASN.1 Definition:
 //
@@ -712,7 +712,7 @@ type Context_list_Item struct {
 //	AARQ-apdu-protocol-version ::= BIT STRING { -- REMOVED_FROM_UNNESTING -- }
 type AARQ_apdu_protocol_version = asn1.BitString
 
-const AARQ_apdu_protocol_version_Version1 int32 = 0
+const AARQ_apdu_protocol_version_Version1 int = 0
 
 // # ASN.1 Definition:
 //
@@ -726,7 +726,7 @@ type OsiBindResult_mode_selector struct {
 //	OsiBindResult-normal-mode-parameters-protocol-version ::= BIT STRING { -- REMOVED_FROM_UNNESTING -- }
 type OsiBindResult_normal_mode_parameters_protocol_version = asn1.BitString
 
-const OsiBindResult_normal_mode_parameters_protocol_version_Version_1 int32 = 0
+const OsiBindResult_normal_mode_parameters_protocol_version_Version_1 int = 0
 
 // # ASN.1 Definition:
 //
@@ -770,7 +770,7 @@ type OsiBindResult_normal_mode_parameters struct {
 //	AARE-apdu-protocol-version ::= BIT STRING { -- REMOVED_FROM_UNNESTING -- }
 type AARE_apdu_protocol_version = asn1.BitString
 
-const AARE_apdu_protocol_version_Version1 int32 = 0
+const AARE_apdu_protocol_version_Version1 int = 0
 
 // # ASN.1 Definition:
 //
@@ -815,7 +815,7 @@ const Associate_source_diagnostic_acse_service_provider_No_common_acse_version A
 //	OsiBindError-normal-mode-parameters-protocol-version ::= BIT STRING { -- REMOVED_FROM_UNNESTING -- }
 type OsiBindError_normal_mode_parameters_protocol_version = asn1.BitString
 
-const OsiBindError_normal_mode_parameters_protocol_version_Version_1 int32 = 0
+const OsiBindError_normal_mode_parameters_protocol_version_Version_1 int = 0
 
 // # ASN.1 Definition:
 //
@@ -872,7 +872,7 @@ type Result_list_Item struct {
 //	AAREerr-apdu-protocol-version ::= BIT STRING { -- REMOVED_FROM_UNNESTING -- }
 type AAREerr_apdu_protocol_version = asn1.BitString
 
-const AAREerr_apdu_protocol_version_Version1 int32 = 0
+const AAREerr_apdu_protocol_version_Version1 int = 0
 
 // # ASN.1 Definition:
 //

@@ -1948,19 +1948,19 @@ type TimeSpecification_time = asn1.RawValue
 //	Period-days-bitDay ::= BIT STRING { -- REMOVED_FROM_UNNESTING -- }
 type Period_days_bitDay = asn1.BitString
 
-const Period_days_bitDay_Sunday int32 = 0
+const Period_days_bitDay_Sunday int = 0
 
-const Period_days_bitDay_Monday int32 = 1
+const Period_days_bitDay_Monday int = 1
 
-const Period_days_bitDay_Tuesday int32 = 2
+const Period_days_bitDay_Tuesday int = 2
 
-const Period_days_bitDay_Wednesday int32 = 3
+const Period_days_bitDay_Wednesday int = 3
 
-const Period_days_bitDay_Thursday int32 = 4
+const Period_days_bitDay_Thursday int = 4
 
-const Period_days_bitDay_Friday int32 = 5
+const Period_days_bitDay_Friday int = 5
 
-const Period_days_bitDay_Saturday int32 = 6
+const Period_days_bitDay_Saturday int = 6
 
 // # ASN.1 Definition:
 //
@@ -1972,15 +1972,15 @@ type Period_days = asn1.RawValue
 //	Period-weeks-bitWeek ::= BIT STRING { -- REMOVED_FROM_UNNESTING -- }
 type Period_weeks_bitWeek = asn1.BitString
 
-const Period_weeks_bitWeek_Week1 int32 = 0
+const Period_weeks_bitWeek_Week1 int = 0
 
-const Period_weeks_bitWeek_Week2 int32 = 1
+const Period_weeks_bitWeek_Week2 int = 1
 
-const Period_weeks_bitWeek_Week3 int32 = 2
+const Period_weeks_bitWeek_Week3 int = 2
 
-const Period_weeks_bitWeek_Week4 int32 = 3
+const Period_weeks_bitWeek_Week4 int = 3
 
-const Period_weeks_bitWeek_Week5 int32 = 4
+const Period_weeks_bitWeek_Week5 int = 4
 
 // # ASN.1 Definition:
 //
@@ -1992,29 +1992,29 @@ type Period_weeks = asn1.RawValue
 //	Period-months-bitMonth ::= BIT STRING { -- REMOVED_FROM_UNNESTING -- }
 type Period_months_bitMonth = asn1.BitString
 
-const Period_months_bitMonth_January int32 = 0
+const Period_months_bitMonth_January int = 0
 
-const Period_months_bitMonth_February int32 = 1
+const Period_months_bitMonth_February int = 1
 
-const Period_months_bitMonth_March int32 = 2
+const Period_months_bitMonth_March int = 2
 
-const Period_months_bitMonth_April int32 = 3
+const Period_months_bitMonth_April int = 3
 
-const Period_months_bitMonth_May int32 = 4
+const Period_months_bitMonth_May int = 4
 
-const Period_months_bitMonth_June int32 = 5
+const Period_months_bitMonth_June int = 5
 
-const Period_months_bitMonth_July int32 = 6
+const Period_months_bitMonth_July int = 6
 
-const Period_months_bitMonth_August int32 = 7
+const Period_months_bitMonth_August int = 7
 
-const Period_months_bitMonth_September int32 = 8
+const Period_months_bitMonth_September int = 8
 
-const Period_months_bitMonth_October int32 = 9
+const Period_months_bitMonth_October int = 9
 
-const Period_months_bitMonth_November int32 = 10
+const Period_months_bitMonth_November int = 10
 
-const Period_months_bitMonth_December int32 = 11
+const Period_months_bitMonth_December int = 11
 
 // # ASN.1 Definition:
 //
@@ -2041,19 +2041,19 @@ const (
 //	NamedDay-bitNamedDays ::= BIT STRING { -- REMOVED_FROM_UNNESTING -- }
 type NamedDay_bitNamedDays = asn1.BitString
 
-const NamedDay_bitNamedDays_Sunday int32 = 0
+const NamedDay_bitNamedDays_Sunday int = 0
 
-const NamedDay_bitNamedDays_Monday int32 = 1
+const NamedDay_bitNamedDays_Monday int = 1
 
-const NamedDay_bitNamedDays_Tuesday int32 = 2
+const NamedDay_bitNamedDays_Tuesday int = 2
 
-const NamedDay_bitNamedDays_Wednesday int32 = 3
+const NamedDay_bitNamedDays_Wednesday int = 3
 
-const NamedDay_bitNamedDays_Thursday int32 = 4
+const NamedDay_bitNamedDays_Thursday int = 4
 
-const NamedDay_bitNamedDays_Friday int32 = 5
+const NamedDay_bitNamedDays_Friday int = 5
 
-const NamedDay_bitNamedDays_Saturday int32 = 6
+const NamedDay_bitNamedDays_Saturday int = 6
 
 // # ASN.1 Definition:
 //

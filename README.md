@@ -43,21 +43,9 @@ update with tags, text, keywords, etc.
 
 ### MVP
 
-- [x] Investigate issue with ordering of elements in `struct`s.
-- [x] Document how to publish new versions (It wasn't obvious to me)
-- [x] Teletex Handling
-- [x] Do you handle `BOOLEAN DEFAULT TRUE` correctly?
-- [x] `DirectoryString(s str)`
-- [x] `FromDirectoryString(ds DirectoryString)`
-- [x] Test directory string encoding and decoding
-- [x] Separate DirectoryString library?
-- [x] Use `omitempty`
 - [ ] Even higher-level API
-- [x] Change `int64` enums to `int`
-- [x] Define and implement interfaces
+- [x] Change `int32` to `int`
 - [ ] Use `X500OperationError` (I might not do this...)
-- [x] List and Search Result Iterator
-- [x] Test signing
 - [ ] Fix ambiguous parsing in `SchemaAdministration` caused by `UnboundedDirectoryString`
 - [ ] Documentation
 

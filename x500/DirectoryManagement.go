@@ -20,9 +20,9 @@ type AdministrativeRole = asn1.ObjectIdentifier
 //	AssociationEstablishment ::= BIT STRING {inward(0), outward(1)}
 type AssociationEstablishment = asn1.BitString
 
-const AssociationEstablishment_Inward int32 = 0
+const AssociationEstablishment_Inward int = 0
 
-const AssociationEstablishment_Outward int32 = 1
+const AssociationEstablishment_Outward int = 1
 
 // # ASN.1 Definition:
 //
@@ -145,17 +145,17 @@ type MgtPrintableString = string
 //	  external(5)}
 type PeerEntityAuthenticationPolicy = asn1.BitString
 
-const PeerEntityAuthenticationPolicy_None int32 = 0
+const PeerEntityAuthenticationPolicy_None int = 0
 
-const PeerEntityAuthenticationPolicy_NameOnly int32 = 1
+const PeerEntityAuthenticationPolicy_NameOnly int = 1
 
-const PeerEntityAuthenticationPolicy_SimpleUnprotected int32 = 2
+const PeerEntityAuthenticationPolicy_SimpleUnprotected int = 2
 
-const PeerEntityAuthenticationPolicy_SimpleProtected int32 = 3
+const PeerEntityAuthenticationPolicy_SimpleProtected int = 3
 
-const PeerEntityAuthenticationPolicy_Strong int32 = 4
+const PeerEntityAuthenticationPolicy_Strong int = 4
 
-const PeerEntityAuthenticationPolicy_External int32 = 5
+const PeerEntityAuthenticationPolicy_External int = 5
 
 // # ASN.1 Definition:
 //
@@ -167,11 +167,11 @@ type RemoteDSAList = [](AccessPoint)
 //	RequestAuthenticationPolicy ::= BIT STRING {none(0), simpleName(1), strong(2)}
 type RequestAuthenticationPolicy = asn1.BitString
 
-const RequestAuthenticationPolicy_None int32 = 0
+const RequestAuthenticationPolicy_None int = 0
 
-const RequestAuthenticationPolicy_SimpleName int32 = 1
+const RequestAuthenticationPolicy_SimpleName int = 1
 
-const RequestAuthenticationPolicy_Strong int32 = 2
+const RequestAuthenticationPolicy_Strong int = 2
 
 // # ASN.1 Definition:
 //
@@ -1462,23 +1462,23 @@ var Id_mpa_opIdDN asn1.ObjectIdentifier = []int{2, 5, 30, 5, 27}
 //	DirectoryInformationServiceElement-operationType ::= BIT STRING { -- REMOVED_FROM_UNNESTING -- }
 type DirectoryInformationServiceElement_operationType = asn1.BitString
 
-const DirectoryInformationServiceElement_operationType_Read int32 = 0
+const DirectoryInformationServiceElement_operationType_Read int = 0
 
-const DirectoryInformationServiceElement_operationType_Compare int32 = 1
+const DirectoryInformationServiceElement_operationType_Compare int = 1
 
-const DirectoryInformationServiceElement_operationType_Abandon int32 = 2
+const DirectoryInformationServiceElement_operationType_Abandon int = 2
 
-const DirectoryInformationServiceElement_operationType_List int32 = 3
+const DirectoryInformationServiceElement_operationType_List int = 3
 
-const DirectoryInformationServiceElement_operationType_Search int32 = 4
+const DirectoryInformationServiceElement_operationType_Search int = 4
 
-const DirectoryInformationServiceElement_operationType_AddEntry int32 = 5
+const DirectoryInformationServiceElement_operationType_AddEntry int = 5
 
-const DirectoryInformationServiceElement_operationType_RemoveEntry int32 = 6
+const DirectoryInformationServiceElement_operationType_RemoveEntry int = 6
 
-const DirectoryInformationServiceElement_operationType_ModifyEntry int32 = 7
+const DirectoryInformationServiceElement_operationType_ModifyEntry int = 7
 
-const DirectoryInformationServiceElement_operationType_ModifyDN int32 = 8
+const DirectoryInformationServiceElement_operationType_ModifyDN int = 8
 
 // # ASN.1 Definition:
 //

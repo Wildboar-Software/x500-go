@@ -87,53 +87,53 @@ var Id_ad_ocsp asn1.ObjectIdentifier = []int{1, 3, 6, 1, 5, 5, 7, 48, 1}
 //	  processable-mode-26(71)}
 type G3FacsimileNonBasicParameters = asn1.BitString
 
-const G3FacsimileNonBasicParameters_Two_dimensional int32 = 8
+const G3FacsimileNonBasicParameters_Two_dimensional int = 8
 
-const G3FacsimileNonBasicParameters_Fine_resolution int32 = 9
+const G3FacsimileNonBasicParameters_Fine_resolution int = 9
 
-const G3FacsimileNonBasicParameters_Unlimited_length int32 = 20
+const G3FacsimileNonBasicParameters_Unlimited_length int = 20
 
-const G3FacsimileNonBasicParameters_B4_length int32 = 21
+const G3FacsimileNonBasicParameters_B4_length int = 21
 
-const G3FacsimileNonBasicParameters_A3_width int32 = 22
+const G3FacsimileNonBasicParameters_A3_width int = 22
 
-const G3FacsimileNonBasicParameters_B4_width int32 = 23
+const G3FacsimileNonBasicParameters_B4_width int = 23
 
-const G3FacsimileNonBasicParameters_T6_coding int32 = 25
+const G3FacsimileNonBasicParameters_T6_coding int = 25
 
-const G3FacsimileNonBasicParameters_Uncompressed int32 = 30
+const G3FacsimileNonBasicParameters_Uncompressed int = 30
 
-const G3FacsimileNonBasicParameters_Width_middle_864_of_1728 int32 = 37
+const G3FacsimileNonBasicParameters_Width_middle_864_of_1728 int = 37
 
-const G3FacsimileNonBasicParameters_Width_middle_1216_of_1728 int32 = 38
+const G3FacsimileNonBasicParameters_Width_middle_1216_of_1728 int = 38
 
-const G3FacsimileNonBasicParameters_Resolution_type int32 = 44
+const G3FacsimileNonBasicParameters_Resolution_type int = 44
 
-const G3FacsimileNonBasicParameters_Resolution_400x400 int32 = 45
+const G3FacsimileNonBasicParameters_Resolution_400x400 int = 45
 
-const G3FacsimileNonBasicParameters_Resolution_300x300 int32 = 46
+const G3FacsimileNonBasicParameters_Resolution_300x300 int = 46
 
-const G3FacsimileNonBasicParameters_Resolution_8x15 int32 = 47
+const G3FacsimileNonBasicParameters_Resolution_8x15 int = 47
 
-const G3FacsimileNonBasicParameters_Edi int32 = 49
+const G3FacsimileNonBasicParameters_Edi int = 49
 
-const G3FacsimileNonBasicParameters_Dtm int32 = 50
+const G3FacsimileNonBasicParameters_Dtm int = 50
 
-const G3FacsimileNonBasicParameters_Bft int32 = 51
+const G3FacsimileNonBasicParameters_Bft int = 51
 
-const G3FacsimileNonBasicParameters_Mixed_mode int32 = 58
+const G3FacsimileNonBasicParameters_Mixed_mode int = 58
 
-const G3FacsimileNonBasicParameters_Character_mode int32 = 60
+const G3FacsimileNonBasicParameters_Character_mode int = 60
 
-const G3FacsimileNonBasicParameters_Twelve_bits int32 = 65
+const G3FacsimileNonBasicParameters_Twelve_bits int = 65
 
-const G3FacsimileNonBasicParameters_Preferred_huffmann int32 = 66
+const G3FacsimileNonBasicParameters_Preferred_huffmann int = 66
 
-const G3FacsimileNonBasicParameters_Full_colour int32 = 67
+const G3FacsimileNonBasicParameters_Full_colour int = 67
 
-const G3FacsimileNonBasicParameters_Jpeg int32 = 68
+const G3FacsimileNonBasicParameters_Jpeg int = 68
 
-const G3FacsimileNonBasicParameters_Processable_mode_26 int32 = 71
+const G3FacsimileNonBasicParameters_Processable_mode_26 int = 71
 
 // # ASN.1 Definition:
 //

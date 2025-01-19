@@ -24,11 +24,11 @@ type UserPwd = asn1.RawValue
 //	    noGeographicalNames (2) }
 type PwdVocabulary = asn1.BitString
 
-const PwdVocabulary_NoDictionaryWords int32 = 0
+const PwdVocabulary_NoDictionaryWords int = 0
 
-const PwdVocabulary_NoPersonNames int32 = 1
+const PwdVocabulary_NoPersonNames int = 1
 
-const PwdVocabulary_NoGeographicalNames int32 = 2
+const PwdVocabulary_NoGeographicalNames int = 2
 
 // # ASN.1 Definition:
 //

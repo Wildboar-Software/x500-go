@@ -48,23 +48,23 @@ type SubjectKeyIdentifier = KeyIdentifier
 //	  decipherOnly      (8) }
 type KeyUsage = asn1.BitString
 
-const KeyUsage_DigitalSignature int32 = 0
+const KeyUsage_DigitalSignature int = 0
 
-const KeyUsage_ContentCommitment int32 = 1
+const KeyUsage_ContentCommitment int = 1
 
-const KeyUsage_KeyEncipherment int32 = 2
+const KeyUsage_KeyEncipherment int = 2
 
-const KeyUsage_DataEncipherment int32 = 3
+const KeyUsage_DataEncipherment int = 3
 
-const KeyUsage_KeyAgreement int32 = 4
+const KeyUsage_KeyAgreement int = 4
 
-const KeyUsage_KeyCertSign int32 = 5
+const KeyUsage_KeyCertSign int = 5
 
-const KeyUsage_CRLSign int32 = 6
+const KeyUsage_CRLSign int = 6
 
-const KeyUsage_EncipherOnly int32 = 7
+const KeyUsage_EncipherOnly int = 7
 
-const KeyUsage_DecipherOnly int32 = 8
+const KeyUsage_DecipherOnly int = 8
 
 // # ASN.1 Definition:
 //
@@ -278,11 +278,11 @@ type PerAuthorityScope struct {
 //	  attribute (2)}
 type OnlyCertificateTypes = asn1.BitString
 
-const OnlyCertificateTypes_User int32 = 0
+const OnlyCertificateTypes_User int = 0
 
-const OnlyCertificateTypes_Authority int32 = 1
+const OnlyCertificateTypes_Authority int = 1
 
-const OnlyCertificateTypes_Attribute int32 = 2
+const OnlyCertificateTypes_Attribute int = 2
 
 // # ASN.1 Definition:
 //
@@ -548,25 +548,25 @@ type DistributionPointName = asn1.RawValue
 //	  weakAlgorithmOrKey    (9) }
 type ReasonFlags = asn1.BitString
 
-const ReasonFlags_Unused int32 = 0
+const ReasonFlags_Unused int = 0
 
-const ReasonFlags_KeyCompromise int32 = 1
+const ReasonFlags_KeyCompromise int = 1
 
-const ReasonFlags_CACompromise int32 = 2
+const ReasonFlags_CACompromise int = 2
 
-const ReasonFlags_AffiliationChanged int32 = 3
+const ReasonFlags_AffiliationChanged int = 3
 
-const ReasonFlags_Superseded int32 = 4
+const ReasonFlags_Superseded int = 4
 
-const ReasonFlags_CessationOfOperation int32 = 5
+const ReasonFlags_CessationOfOperation int = 5
 
-const ReasonFlags_CertificateHold int32 = 6
+const ReasonFlags_CertificateHold int = 6
 
-const ReasonFlags_PrivilegeWithdrawn int32 = 7
+const ReasonFlags_PrivilegeWithdrawn int = 7
 
-const ReasonFlags_AACompromise int32 = 8
+const ReasonFlags_AACompromise int = 8
 
-const ReasonFlags_WeakAlgorithmOrKey int32 = 9
+const ReasonFlags_WeakAlgorithmOrKey int = 9
 
 // # ASN.1 Definition:
 //

@@ -63,11 +63,11 @@ type SearchRuleId struct {
 //	AllowedSubset ::= BIT STRING {baseObject(0), oneLevel(1), wholeSubtree(2)}
 type AllowedSubset = asn1.BitString
 
-const AllowedSubset_BaseObject int32 = 0
+const AllowedSubset_BaseObject int = 0
 
-const AllowedSubset_OneLevel int32 = 1
+const AllowedSubset_OneLevel int = 1
 
-const AllowedSubset_WholeSubtree int32 = 2
+const AllowedSubset_WholeSubtree int = 2
 
 // # ASN.1 Definition:
 //
