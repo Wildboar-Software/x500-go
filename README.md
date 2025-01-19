@@ -35,12 +35,8 @@ implementations out there, written by yours truly.
 ### MVP
 
 - [x] Investigate issue with ordering of elements in `struct`s.
-  - This bit me in `ListResultData_listInfo.name`. By being first in the `struct`, it was
-    consuming `subordinates` if absent, then `subordinates` could not be found. I had to
-    move it to the end of the `struct`.
 - [ ] Document how to publish new versions (It wasn't obvious to me)
 - [x] Teletex Handling
-- [ ] Separate NSAP library
 - [x] Do you handle `BOOLEAN DEFAULT TRUE` correctly?
 - [x] `DirectoryString(s str)`
 - [x] `FromDirectoryString(ds DirectoryString)`
@@ -52,12 +48,13 @@ implementations out there, written by yours truly.
 - [x] Define and implement interfaces
 - [ ] Use `X500OperationError` (I might not do this...)
 - [x] List and Search Result Iterator
-- [ ] Test signing
+- [x] Test signing
 - [ ] Fix ambiguous parsing in `SchemaAdministration` caused by `UnboundedDirectoryString`
 - [ ] Documentation
 
 ### Future
 
+- [ ] Complete NSAP library
 - [ ] Add types defined in newer X.500 specifications
   - I think I will wait until the newest version is released.
 - [ ] Support other SASL methods:

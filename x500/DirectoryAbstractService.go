@@ -542,7 +542,7 @@ type SortKey struct {
 //	  errorCode                   [9]  Code OPTIONAL,
 //	  ... }
 type SecurityParameters struct {
-	Certification_path CertificationPath      `asn1:"optional,explicit,tag:0"`
+	Certification_path CertificationPathRaw   `asn1:"optional,explicit,tag:0"`
 	Name               DistinguishedName      `asn1:"optional,explicit,tag:1"`
 	Time               Time                   `asn1:"optional,explicit,tag:2"`
 	Random             asn1.BitString         `asn1:"optional,explicit,tag:3"`
@@ -3124,21 +3124,26 @@ type ListResultData_listInfo_subordinates_Item struct {
 	FromEntry  asn1.RawValue `asn1:"optional,explicit,tag:1"`
 }
 
+// NOTE: Name was split into separate fields to fix a problem with Go's
+// shitty implementation of ASN.1 decoding.
+//
 // # ASN.1 Definition:
 //
 //	ListResultData-listInfo ::= SEQUENCE { -- REMOVED_FROM_UNNESTING -- }
 type ListResultData_listInfo struct {
+	Name                    DistinguishedName                             `asn1:"optional"`
+	NameOID                 asn1.ObjectIdentifier                         `asn1:"optional"`
+	NameDNS                 string                                        `asn1:"optional,utf8"`
 	Subordinates            [](ListResultData_listInfo_subordinates_Item) `asn1:"explicit,tag:1,set"`
 	PartialOutcomeQualifier PartialOutcomeQualifier                       `asn1:"optional,explicit,tag:2,set"`
 	SecurityParameters      SecurityParameters                            `asn1:"optional,explicit,tag:30,set"`
 	Performer               DistinguishedName                             `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced       bool                                          `asn1:"optional,explicit,tag:28"`
 	Notification            [](Attribute)                                 `asn1:"optional,explicit,tag:27,omitempty"`
-	Name                    Name                                          `asn1:"optional"`
 }
 
 func (x *ListResultData_listInfo) GetTargetObject() (*Name, *DistinguishedName) {
-	return &x.Name, nil
+	return nil, &x.Name
 }
 
 func (x *ListResultData_listInfo) GetSecurityParameters() SecurityParameters {
@@ -3195,12 +3200,16 @@ const (
 	JoinArgument_joinSubset_WholeSubtree JoinArgument_joinSubset = 2
 )
 
-// NOTE: `Name` was moved to the bottom to fix a bug in Go's shitty `encoding/asn1`.
+// NOTE: Name was split into separate fields to fix a problem with Go's
+// shitty implementation of ASN.1 decoding.
 //
 // # ASN.1 Definition:
 //
 //	SearchResultData-searchInfo ::= SEQUENCE { -- REMOVED_FROM_UNNESTING -- }
 type SearchResultData_searchInfo struct {
+	Name                    DistinguishedName       `asn1:"optional"`
+	NameOID                 asn1.ObjectIdentifier   `asn1:"optional"`
+	NameDNS                 string                  `asn1:"optional,utf8"`
 	Entries                 [](EntryInformation)    `asn1:"explicit,tag:0,set"`
 	PartialOutcomeQualifier PartialOutcomeQualifier `asn1:"optional,explicit,tag:2,set"`
 	AltMatching             bool                    `asn1:"optional,explicit,tag:3"`
@@ -3208,11 +3217,10 @@ type SearchResultData_searchInfo struct {
 	Performer               DistinguishedName       `asn1:"optional,explicit,tag:29"`
 	AliasDereferenced       bool                    `asn1:"optional,explicit,tag:28"`
 	Notification            [](Attribute)           `asn1:"optional,explicit,tag:27,omitempty"`
-	Name                    Name                    `asn1:"optional"`
 }
 
 func (x *SearchResultData_searchInfo) GetTargetObject() (*Name, *DistinguishedName) {
-	return &x.Name, nil
+	return nil, &x.Name
 }
 
 func (x *SearchResultData_searchInfo) GetSecurityParameters() SecurityParameters {

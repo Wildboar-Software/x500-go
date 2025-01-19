@@ -1,4 +1,4 @@
-package x500
+package x500_dap_client
 
 import (
 	"context"
@@ -1294,7 +1294,7 @@ func createSecurityParameters(
 ) (sp x500.SecurityParameters, err error) {
 	// 1 hour is long enough for any operation to complete, but not be easy to replay.
 	sp_time := time.Now().Add(time.Duration(1) * time.Hour)
-	time_bytes, err := asn1.Marshal(sp_time)
+	time_bytes, err := asn1.MarshalWithParams(sp_time, "generalized")
 	if err != nil {
 		return sp, err
 	}
@@ -1304,7 +1304,6 @@ func createSecurityParameters(
 		return sp, err
 	}
 	sp = x500.SecurityParameters{
-		Certification_path: *certPath,
 		OperationCode: asn1.RawValue{
 			Class:      asn1.ClassContextSpecific,
 			Tag:        6,
@@ -1323,7 +1322,24 @@ func createSecurityParameters(
 		},
 		Target:          target,
 		ErrorProtection: errorProtection,
-		Name:            *name,
+	}
+	if certPath != nil {
+		cacerts := []x500.CertificatePairRaw{}
+		for _, v := range certPath.TheCACertificates {
+			pair := x500.CertificatePairRaw{
+				IssuedToThisCA: asn1.RawValue{FullBytes: v.IssuedToThisCA.Raw},
+				IssuedByThisCA: asn1.RawValue{FullBytes: v.IssuedByThisCA.Raw},
+			}
+			cacerts = append(cacerts, pair)
+		}
+		cp := x500.CertificationPathRaw{
+			UserCertificate:   asn1.RawValue{FullBytes: certPath.UserCertificate.Raw},
+			TheCACertificates: cacerts,
+		}
+		sp.Certification_path = cp
+	}
+	if name != nil {
+		sp.Name = *name
 	}
 	return sp, nil
 }
@@ -2422,16 +2438,7 @@ func (stack *IDMProtocolStack) ReadSimple(ctx context.Context, dn x500.Distingui
 		},
 	}
 	if len(userAttributes) > 0 {
-		attrBytes, err := asn1.MarshalWithParams(userAttributes, "set")
-		if err != nil {
-			return X500OpOutcome{}, nil, err
-		}
-		read_arg.Selection.Attributes = asn1.RawValue{
-			Class:      asn1.ClassContextSpecific,
-			Tag:        1,
-			IsCompound: true,
-			Bytes:      attrBytes,
-		}
+		read_arg.Selection.SelectSET = userAttributes
 	}
 	return stack.Read(ctx, read_arg)
 }

@@ -1,13 +1,13 @@
 // X.500 Directory Access Protocol (DAP) client
-package x500
+package x500_dap_client
 
 import (
 	"context"
 	"crypto/x509"
 	"encoding/asn1"
+	"github.com/Wildboar-Software/x500-go/x500"
 	"math/big"
 	"time"
-  "github.com/Wildboar-Software/x500-go/x500"
 )
 
 type OutcomeType = int
@@ -52,12 +52,12 @@ type X500OperationError struct {
 	ApplicationContext asn1.ObjectIdentifier
 	InvokeId           x500.InvokeId
 	Code               int
-	Problem            int                       // Present in many error types
-	MatchedObject      x500.Name                      // Used by attributeError and nameError
-	AbandonedOperation x500.InvokeId                  // Used by abandoned
-	Candidate          x500.ContinuationReference     // Used by referral
-	ContextPrefix      x500.DistinguishedName         // Used by dsaReferral
-	AttributeProblems  []AttributeOrValueProblem // Used by updateError and attributeError
+	Problem            int                        // Present in many error types
+	MatchedObject      x500.Name                  // Used by attributeError and nameError
+	AbandonedOperation x500.InvokeId              // Used by abandoned
+	Candidate          x500.ContinuationReference // Used by referral
+	ContextPrefix      x500.DistinguishedName     // Used by dsaReferral
+	AttributeProblems  []AttributeOrValueProblem  // Used by updateError and attributeError
 	SecurityParameters x500.SecurityParameters
 	Performer          x500.DistinguishedName
 	AliasDereferenced  bool
@@ -140,9 +140,9 @@ type X500AssociateOutcome struct {
 	V1                         bool
 	V2                         bool
 	Credentials                x500.Credentials     // NULL value if unset
-	PwdResponseTimeLeft        int             // -1 if unset
-	PwdResponseGracesRemaining int             // -1 if unset
-	PwdResponseError           int             // -1 if unset
+	PwdResponseTimeLeft        int                  // -1 if unset
+	PwdResponseGracesRemaining int                  // -1 if unset
+	PwdResponseError           int                  // -1 if unset
 	ServiceError               x500.ServiceProblem  // Set to -1 if unset
 	SecurityError              x500.SecurityProblem // Set to -1 if unset
 	SecurityParameters         x500.SecurityParameters
@@ -172,9 +172,9 @@ type X500Abort struct {
 // lower layers, such as a TCP socket closure.
 type X500OpOutcome struct {
 	OutcomeType   OutcomeType
-	InvokeId      x500.InvokeId      // This is always set for any outcome type.
-	OpCode        x500.Code          // Only set if OutcomeType == OPERATION_OUTCOME_TYPE_RESULT
-	ErrCode       x500.Code          // Only set if OutcomeType == OPERATION_OUTCOME_TYPE_ERROR
+	InvokeId      x500.InvokeId // This is always set for any outcome type.
+	OpCode        x500.Code     // Only set if OutcomeType == OPERATION_OUTCOME_TYPE_RESULT
+	ErrCode       x500.Code     // Only set if OutcomeType == OPERATION_OUTCOME_TYPE_ERROR
 	Parameter     asn1.RawValue // The result or error.
 	RejectProblem RejectProblem // Only set if OutcomeType == OPERATION_OUTCOME_TYPE_REJECT
 	Abort         X500Abort     // Only set if OutcomeType == OPERATION_OUTCOME_TYPE_ABORT
@@ -727,4 +727,3 @@ type DirectoryStringIdentified interface {
 type IntIdentified interface {
 	GetIntIdentifier() int
 }
-
