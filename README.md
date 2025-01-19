@@ -24,6 +24,15 @@ out [Meerkat DSA](https://wildboar-software.github.io/directory/), which,
 to my knowledge, is one of the two free and open source X.500 directory
 implementations out there, written by yours truly.
 
+## How to Publish New Versions
+
+(It wasn't obvious to me how to do this, so I am documenting it here.)
+If you upgrade `x500`, create a Git tag `x500/v#.#.#`. Then run
+` GOPROXY=proxy.golang.org go list -m github.com/Wildboar-Software/x500-go/x500@v#.#.#`.
+This will cause the Go packages index to update... but it will take a half an
+hour for it to show up. It seems to take even longer for the search index to
+update with tags, text, keywords, etc.
+
 ## Developer Notes
 
 `SET OF SEQUENCE` = Just use the `set` tag
@@ -35,7 +44,7 @@ implementations out there, written by yours truly.
 ### MVP
 
 - [x] Investigate issue with ordering of elements in `struct`s.
-- [ ] Document how to publish new versions (It wasn't obvious to me)
+- [x] Document how to publish new versions (It wasn't obvious to me)
 - [x] Teletex Handling
 - [x] Do you handle `BOOLEAN DEFAULT TRUE` correctly?
 - [x] `DirectoryString(s str)`
