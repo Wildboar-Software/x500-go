@@ -5,9 +5,10 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/asn1"
-	"github.com/Wildboar-Software/x500-go/x500"
 	"math/big"
 	"time"
+
+	"github.com/Wildboar-Software/x500-go/x500"
 )
 
 type OutcomeType = int
@@ -309,6 +310,16 @@ type DirectoryAccessClient interface {
 	// Invoke the `administerPassword` operation on the entry named by
 	// distinguished name `dn` using the unencrypted value `new` for `newPwd`.
 	AdministerPasswordSimple(ctx context.Context, dn DN, new string) (resp X500OpOutcome, result *x500.AdministerPasswordResultData, err error)
+
+	// Entry Modifications
+
+	AddAttribute(ctx context.Context, dn DN, attr x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	RemoveAttribute(ctx context.Context, dn DN, attr x500.AttributeType) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	AddValues(ctx context.Context, dn DN, values x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	RemoveValues(ctx context.Context, dn DN, values x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	AlterValues(ctx context.Context, dn DN, attrtype x500.AttributeType, addend int) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	ResetValue(ctx context.Context, dn DN, attr x500.AttributeType) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+	ReplaceValues(ctx context.Context, dn DN, attr x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
 }
 
 type DN = x500.DistinguishedName
@@ -643,16 +654,6 @@ type SchemaAwareDirectoryAccessClient interface {
 
 	AddAdministrativeRole(ctx context.Context, dn DN, role asn1.ObjectIdentifier) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
 	RemoveAdministrativeRole(ctx context.Context, dn DN, role asn1.ObjectIdentifier) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
-
-	// Entry Modifications
-
-	AddAttribute(ctx context.Context, dn DN, attr x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
-	RemoveAttribute(ctx context.Context, dn DN, attr x500.AttributeType) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
-	AddValues(ctx context.Context, dn DN, values x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
-	RemoveValues(ctx context.Context, dn DN, values x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
-	AlterValues(ctx context.Context, dn DN, attrtype x500.AttributeType, addend int) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
-	ResetValue(ctx context.Context, dn DN, attr x500.AttributeType) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
-	ReplaceValues(ctx context.Context, dn DN, attr x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
 
 	// Specific Modification Types
 

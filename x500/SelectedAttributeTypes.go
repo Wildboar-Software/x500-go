@@ -254,6 +254,14 @@ type NameAndOptionalUID struct {
 	Uid UniqueIdentifier `asn1:"optional"`
 }
 
+// func (n *NameAndOptionalUID) String() string {
+// 	if len(n.Uid.Bytes) == 0 || n.Uid.BitLength == 0 {
+// 		return n.Dn.String()
+// 	}
+// 	// FIXME:
+// 	return fmt.Sprintf("%s#%s", n.Dn)
+// }
+
 // # ASN.1 Definition:
 //
 //	UiiFormat ::= SEQUENCE {

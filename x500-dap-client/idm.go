@@ -2557,3 +2557,71 @@ func (stack *IDMProtocolStack) AdministerPasswordSimple(ctx context.Context, dn 
 	}
 	return stack.AdministerPassword(ctx, arg)
 }
+
+
+func singleModification[A any](stack *IDMProtocolStack, ctx context.Context, dn DN, arg A, tag int) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
+  dnBytes, err := asn1.Marshal(dn)
+  if err != nil {
+    return X500OpOutcome{}, nil, err
+  }
+  modBytes, err := asn1.Marshal(arg)
+  if err != nil {
+    return X500OpOutcome{}, nil, err
+  }
+  modification := asn1.RawValue{
+    Class: asn1.ClassContextSpecific,
+    Tag: tag,
+    IsCompound: true,
+    Bytes: modBytes,
+  }
+	arg_data := x500.ModifyEntryArgumentData{
+		Object: asn1.RawValue{FullBytes: dnBytes},
+    Changes: []x500.EntryModification{modification},
+	}
+  if tag == 6 {
+    // replaceValues requires a critical extension
+    critex := asn1.BitString{
+      Bytes: []byte{0, 0, 0, 0, 0b0010_0000},
+      BitLength: 35,
+    }
+    arg_data.CriticalExtensions = critex
+  }
+  return stack.ModifyEntry(ctx, arg_data)
+}
+
+func (stack *IDMProtocolStack) AddAttribute(ctx context.Context, dn DN, attr x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
+  return singleModification(stack, ctx, dn, attr, 0)
+}
+
+func (stack *IDMProtocolStack) RemoveAttribute(ctx context.Context, dn DN, attr x500.AttributeType) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
+  return singleModification(stack, ctx, dn, attr, 1)
+}
+
+func (stack *IDMProtocolStack) AddValues(ctx context.Context, dn DN, values x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
+  return singleModification(stack, ctx, dn, values, 2)
+}
+
+func (stack *IDMProtocolStack) RemoveValues(ctx context.Context, dn DN, values x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
+  return singleModification(stack, ctx, dn, values, 3)
+}
+
+func (stack *IDMProtocolStack) AlterValues(ctx context.Context, dn DN, attrtype x500.AttributeType, addend int) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
+  addendBytes, err := asn1.Marshal(addend)
+  if err != nil {
+    return X500OpOutcome{}, nil, err
+  }
+  atav := pkix.AttributeTypeAndValue{
+    Type: attrtype,
+    Value: asn1.RawValue{FullBytes: addendBytes},
+  }
+  return singleModification(stack, ctx, dn, atav, 4)
+}
+
+func (stack *IDMProtocolStack) ResetValue(ctx context.Context, dn DN, attr x500.AttributeType) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
+  return singleModification(stack, ctx, dn, attr, 5)
+}
+
+func (stack *IDMProtocolStack) ReplaceValues(ctx context.Context, dn DN, attr x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
+  return singleModification(stack, ctx, dn, attr, 6)
+}
+

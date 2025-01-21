@@ -22,6 +22,35 @@ type Attribute struct {
 	ValuesWithContext [](Attribute_valuesWithContext_Item) `asn1:"optional,set,omitempty"`
 }
 
+func (a *Attribute) IsEmpty() bool {
+	return len(a.Values) == 0 && len(a.ValuesWithContext) == 0
+}
+
+func (a *Attribute) GetSingleValue() *asn1.RawValue {
+	if len(a.Values) > 0 {
+		return &a.Values[0]
+	}
+	if len(a.ValuesWithContext) > 0 {
+		return &a.ValuesWithContext[0].Value
+	}
+	return nil
+}
+
+func (a *Attribute) Len() int {
+	return len(a.Values) + len(a.ValuesWithContext)
+}
+
+func (a *Attribute) Get(index int) *asn1.RawValue {
+	if index < len(a.Values) {
+		return &a.Values[index]
+	}
+	index -= len(a.Values)
+	if index < len(a.ValuesWithContext) {
+		return &a.ValuesWithContext[0].Value
+	}
+	return nil
+}
+
 // # ASN.1 Definition:
 //
 //	AttributeType ::= ATTRIBUTE.&id
@@ -107,7 +136,7 @@ type DistinguishedName = pkix.RDNSequence
 // # ASN.1 Definition:
 //
 //	RelativeDistinguishedName ::= SET SIZE (1..MAX) OF AttributeTypeAndValue
-type RelativeDistinguishedName = [](pkix.AttributeTypeAndValue)
+type RelativeDistinguishedName = pkix.RelativeDistinguishedNameSET
 
 // # ASN.1 Definition:
 //
@@ -270,14 +299,14 @@ type SearchRuleDescription struct {
 	ImposedSubset        ImposedSubset                `asn1:"optional,explicit,tag:14"`
 	EntryLimit           EntryLimit                   `asn1:"optional,explicit,tag:15"`
 	Name                 [](UnboundedDirectoryString) `asn1:"optional,explicit,tag:28,set,omitempty"`
-	Description          UnboundedDirectoryString     `asn1:"optional,explicit,tag:29"`
+	Description          string                       `asn1:"optional,explicit,tag:29"`
 }
 
 func (x *SearchRuleDescription) GetName() []UnboundedDirectoryString {
 	return x.Name
 }
 
-func (x *SearchRuleDescription) GetDescription() UnboundedDirectoryString {
+func (x *SearchRuleDescription) GetDescription() string {
 	return x.Description
 }
 

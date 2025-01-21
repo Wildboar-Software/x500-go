@@ -48,7 +48,9 @@ update with tags, text, keywords, etc.
 - [x] Change `int32` to `int`
 - [ ] Use `X500OperationError` (I might not do this...)
 - [x] Fix ambiguous parsing in `SchemaAdministration` caused by `UnboundedDirectoryString`
+- [ ] Fill in critical extensions appropriately
 - [ ] Documentation
+- [ ] Reflection API (See Below)
 
 ### Future
 
@@ -61,3 +63,33 @@ update with tags, text, keywords, etc.
   - [ ] `OTP`
 - [ ] Support more `DSAInfo` attributes
 
+### Reflection API
+
+My vision is that it would look something like this:
+
+```go
+type Person struct {
+  CommonName []string `x500:"oid:2.5.4.3,must"`
+  Surname []string `x500:"oid:2.5.4.6,may"`
+}
+```
+
+And it would be used like:
+
+```go
+var attrs []x500.Attribute = idm.CreateAttributes(ctx, &person)
+```
+
+Or
+
+```go
+idm.Create(ctx, &person)
+```
+
+And
+
+```go
+idm.ReadAndUnmarshal(ctx, dn, &person)
+```
+
+Consult: https://cs.opensource.google/go/go/+/refs/tags/go1.23.5:src/encoding/asn1/marshal.go;l=736

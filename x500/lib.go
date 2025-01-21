@@ -52,7 +52,7 @@ type CASPcommonComponentsInterface interface {
 
 type SchemaElement interface {
 	GetName() []UnboundedDirectoryString
-	GetDescription() UnboundedDirectoryString
+	GetDescription() string
 	GetObsolete() bool
 }
 
