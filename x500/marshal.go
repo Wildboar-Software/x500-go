@@ -184,6 +184,13 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 	case csrType:
 		cValue := v.Interface().(x509.CertificateRequest)
 		return asn1.RawValue{FullBytes: cValue.Raw}, err
+	case dnType:
+		dnValue := v.Interface().(DistinguishedName)
+		fullBytes, err := asn1.Marshal(dnValue)
+		if err != nil {
+			return ret, err
+		}
+		return asn1.RawValue{FullBytes: fullBytes}, err
 	}
 
 	// TODO: Will this handle default / zero values?
