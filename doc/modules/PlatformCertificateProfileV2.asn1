@@ -1,0 +1,511 @@
+PlatformCertificateProfileV2
+DEFINITIONS ::=
+BEGIN
+
+-- EXPORTS ALL --
+
+IMPORTS
+
+    ATTRIBUTE
+        FROM InformationFramework
+        {joint-iso-itu-t ds(5) module(1) informationFramework(1) 9}
+        WITH SUCCESSORS
+
+    SubjectPublicKeyInfo
+        FROM AuthenticationFramework
+        {joint-iso-itu-t ds(5) module(1) authenticationFramework(7) 9}
+        WITH SUCCESSORS
+
+    CommonCriteriaMeasures, URIReference
+        FROM EKCredentialProfileV2
+        WITH SUCCESSORS
+
+    ;
+
+-- Object Identifiers
+
+-- TCG specific OIDs
+tcg OBJECT IDENTIFIER ::= {joint-iso-itu-t(2) international-organizations(23) tcg(133)}
+
+tcg-attribute                                   OBJECT IDENTIFIER ::= {tcg 2}
+tcg-platformClass                               OBJECT IDENTIFIER ::= {tcg 5}
+tcg-kp                                          OBJECT IDENTIFIER ::= {tcg 8}
+tcg-ca                                          OBJECT IDENTIFIER ::= {tcg 11}
+tcg-address                                     OBJECT IDENTIFIER ::= {tcg 17}
+tcg-registry                                    OBJECT IDENTIFIER ::= {tcg 18}
+
+tcg-common                                      OBJECT IDENTIFIER ::= {tcg-platformClass 1}
+
+-- TCG Common Attribute OIDs
+tcg-at-platformConfiguration                    OBJECT IDENTIFIER ::= {tcg-common 7}
+
+-- TCG Attribute OIDs
+tcg-at-tcgPlatformSpecification                 OBJECT IDENTIFIER ::= {tcg-attribute 17}
+tcg-at-tcgCredentialSpecification               OBJECT IDENTIFIER ::= {tcg-attribute 23}
+tcg-at-tcgCredentialType                        OBJECT IDENTIFIER ::= {tcg-attribute 25}
+
+-- TCG Key Purposes OIDs
+tcg-kp-PlatformAttributeCertificate             OBJECT IDENTIFIER ::= {tcg-kp 2}
+tcg-kp-PlatformKeyCertificate                   OBJECT IDENTIFIER ::= {tcg-kp 4}
+tcg-kp-DeltaPlatformAttributeCertificate        OBJECT IDENTIFIER ::= {tcg-kp 5}
+
+-- TCG Address OIDs
+tcg-address-ethernetmac                         OBJECT IDENTIFIER ::= {tcg-address 1}
+tcg-address-wlanmac                             OBJECT IDENTIFIER ::= {tcg-address 2}
+tcg-address-bluetoothmac                        OBJECT IDENTIFIER ::= {tcg-address 3}
+
+-- TCG Registry OIDs
+tcg-registry-componentClass                     OBJECT IDENTIFIER ::= {tcg-registry 3}
+tcg-registry-componentClass-pcie                OBJECT IDENTIFIER ::= {tcg-registry-componentClass 4}
+tcg-registry-componentClass-disk                OBJECT IDENTIFIER ::= {tcg-registry-componentClass 5}
+
+-- TCG specific OIDs
+tcg-traits                                      OBJECT IDENTIFIER ::= {tcg 19}
+
+-- TCG Common Attribute OIDs
+tcg-at-platformIdentifier                       OBJECT IDENTIFIER ::= {tcg-common 8}
+
+-- TCG Platform Configuration OIDs
+tcg-at-platformConfiguration-v3                 OBJECT IDENTIFIER ::= {tcg-at-platformConfiguration 3}
+tcg-at-platformConfigUri-v3                     OBJECT IDENTIFIER ::= {tcg-at-platformConfiguration 4}
+
+-- TCG Attribute OIDs
+tcg-at-previousPlatformCertificates             OBJECT IDENTIFIER ::= {tcg-attribute 26}
+tcg-at-tbbSecurityAssertions-v3                 OBJECT IDENTIFIER ::= {tcg-attribute 27}
+tcg-at-cryptographicAnchors                     OBJECT IDENTIFIER ::= {tcg-attribute 28}
+
+-- TCG Key Purposes OIDs
+tcg-kp-DeltaPlatformKeyCertificate              OBJECT IDENTIFIER ::= {tcg-kp 6}
+tcg-kp-AdditionalPlatformAttributeCertificate   OBJECT IDENTIFIER ::= {tcg-kp 7}
+tcg-kp-AdditionalPlatformKeyCertificate         OBJECT IDENTIFIER ::= {tcg-kp 8}
+
+-- TCG Certificate Policy OIDs
+tcg-cap-verifiedPlatformCertificate             OBJECT IDENTIFIER ::= {tcg-ca-policy 4}
+
+-- TCG Registry OIDs
+tcg-registry-componentClass-tcg                 OBJECT IDENTIFIER ::= {tcg-registry-componentClass 1}
+tcg-registry-componentClass-ietf                OBJECT IDENTIFIER ::= {tcg-registry-componentClass 2}
+tcg-registry-componentClass-dmtf                OBJECT IDENTIFIER ::= {tcg-registry-componentClass 3}
+
+-- TCG Trait OIDs
+tcg-tr-ID                                       OBJECT IDENTIFIER ::= {tcg-traits 1}
+tcg-tr-ID-Boolean                               OBJECT IDENTIFIER ::= {tcg-tr-ID 1}
+tcg-tr-ID-certificateIdentifier                 OBJECT IDENTIFIER ::= {tcg-tr-ID 2}
+tcg-tr-ID-CommonCriteria                        OBJECT IDENTIFIER ::= {tcg-tr-ID 3}
+tcg-tr-ID-componentClass                        OBJECT IDENTIFIER ::= {tcg-tr-ID 4}
+tcg-tr-ID-componentIdentifierV11                OBJECT IDENTIFIER ::= {tcg-tr-ID 5}
+tcg-tr-ID-FIPSLevel                             OBJECT IDENTIFIER ::= {tcg-tr-ID 6}
+tcg-tr-ID-ISO9000Level                          OBJECT IDENTIFIER ::= {tcg-tr-ID 7}
+tcg-tr-ID-networkMAC                            OBJECT IDENTIFIER ::= {tcg-tr-ID 8}
+tcg-tr-ID-OID                                   OBJECT IDENTIFIER ::= {tcg-tr-ID 9}
+tcg-tr-ID-PEN                                   OBJECT IDENTIFIER ::= {tcg-tr-ID 10}
+tcg-tr-ID-platformFirmwareCapabilities          OBJECT IDENTIFIER ::= {tcg-tr-ID 11}
+tcg-tr-ID-platformFirmwareSignatureVerification OBJECT IDENTIFIER ::= {tcg-tr-ID 12}
+tcg-tr-ID-platformFirmwareUpdateCompliance      OBJECT IDENTIFIER ::= {tcg-tr-ID 13}
+tcg-tr-ID-platformHardwareCapabilities          OBJECT IDENTIFIER ::= {tcg-tr-ID 14}
+tcg-tr-ID-RTM                                   OBJECT IDENTIFIER ::= {tcg-tr-ID 15}
+tcg-tr-ID-status                                OBJECT IDENTIFIER ::= {tcg-tr-ID 16}
+tcg-tr-ID-URI                                   OBJECT IDENTIFIER ::= {tcg-tr-ID 17}
+tcg-tr-ID-UTF8String                            OBJECT IDENTIFIER ::= {tcg-tr-ID 18}
+tcg-tr-ID-IA5String                             OBJECT IDENTIFIER ::= {tcg-tr-ID 19}
+tcg-tr-ID-PEMCertString                         OBJECT IDENTIFIER ::= {tcg-tr-ID 20}
+tcg-tr-ID-PublicKey                             OBJECT IDENTIFIER ::= {tcg-tr-ID 21}
+
+-- TCG Trait Category OIDs
+tcg-tr-category                                     OBJECT IDENTIFIER ::= {tcg-traits 2}
+tcg-tr-cat-platformManufacturer                     OBJECT IDENTIFIER ::= {tcg-tr-category 1}
+tcg-tr-cat-platformModel                            OBJECT IDENTIFIER ::= {tcg-tr-category 2}
+tcg-tr-cat-platformVersion                          OBJECT IDENTIFIER ::= {tcg-tr-category 3}
+tcg-tr-cat-platformSerial                           OBJECT IDENTIFIER ::= {tcg-tr-category 4}
+tcg-tr-cat-platformManufacturerIdentifier           OBJECT IDENTIFIER ::= {tcg-tr-category 5}
+tcg-tr-cat-platformOwnership                        OBJECT IDENTIFIER ::= {tcg-tr-category 6}
+tcg-tr-cat-componentClass                           OBJECT IDENTIFIER ::= {tcg-tr-category 7}
+tcg-tr-cat-componentManufacturer                    OBJECT IDENTIFIER ::= {tcg-tr-category 8}
+tcg-tr-cat-componentModel                           OBJECT IDENTIFIER ::= {tcg-tr-category 9}
+tcg-tr-cat-componentSerial                          OBJECT IDENTIFIER ::= {tcg-tr-category 10}
+tcg-tr-cat-componentStatus                          OBJECT IDENTIFIER ::= {tcg-tr-category 11}
+tcg-tr-cat-componentLocation                        OBJECT IDENTIFIER ::= {tcg-tr-category 12}
+tcg-tr-cat-componentRevision                        OBJECT IDENTIFIER ::= {tcg-tr-category 13}
+tcg-tr-cat-componentFieldReplaceable                OBJECT IDENTIFIER ::= {tcg-tr-category 14}
+tcg-tr-cat-EKCertificate                            OBJECT IDENTIFIER ::= {tcg-tr-category 15}
+tcg-tr-cat-IAKCertificate                           OBJECT IDENTIFIER ::= {tcg-tr-category 16}
+tcg-tr-cat-IDevIDCertificate                        OBJECT IDENTIFIER ::= {tcg-tr-category 17}
+tcg-tr-cat-DICECertificate                          OBJECT IDENTIFIER ::= {tcg-tr-category 18}
+tcg-tr-cat-SPDMCertificate                          OBJECT IDENTIFIER ::= {tcg-tr-category 19}
+tcg-tr-cat-PEMCertificate                           OBJECT IDENTIFIER ::= {tcg-tr-category 20}
+tcg-tr-cat-PlatformCertificate                      OBJECT IDENTIFIER ::= {tcg-tr-category 21}
+tcg-tr-cat-DeltaPlatformCertificate                 OBJECT IDENTIFIER ::= {tcg-tr-category 22}
+tcg-tr-cat-RebasePlatformCertificate                OBJECT IDENTIFIER ::= {tcg-tr-category 23}
+tcg-tr-cat-genericCertificate                       OBJECT IDENTIFIER ::= {tcg-tr-category 24}
+tcg-tr-cat-CommonCriteria                           OBJECT IDENTIFIER ::= {tcg-tr-category 25}
+tcg-tr-cat-componentIdentifierV11                   OBJECT IDENTIFIER ::= {tcg-tr-category 26}
+tcg-tr-cat-FIPSLevel                                OBJECT IDENTIFIER ::= {tcg-tr-category 27}
+tcg-tr-cat-ISO9000                                  OBJECT IDENTIFIER ::= {tcg-tr-category 28}
+tcg-tr-cat-networkMAC                               OBJECT IDENTIFIER ::= {tcg-tr-category 29}
+tcg-tr-cat-attestationProtocol                      OBJECT IDENTIFIER ::= {tcg-tr-category 30}
+tcg-tr-cat-PEN                                      OBJECT IDENTIFIER ::= {tcg-tr-category 31}
+tcg-tr-cat-platformFirmwareCapabilities             OBJECT IDENTIFIER ::= {tcg-tr-category 32}
+tcg-tr-cat-platformHardwareCapabilities             OBJECT IDENTIFIER ::= {tcg-tr-category 33}
+tcg-tr-cat-platformFirmwareSignatureVerification    OBJECT IDENTIFIER ::= {tcg-tr-category 34}
+tcg-tr-cat-platformFirmwareUpdateCompliance         OBJECT IDENTIFIER ::= {tcg-tr-category 35}
+tcg-tr-cat-RTM                                      OBJECT IDENTIFIER ::= {tcg-tr-category 36}
+tcg-tr-cat-PublicKey                                OBJECT IDENTIFIER ::= {tcg-tr-category 37}
+
+-- TCG Trait Registry OIDs
+tcg-tr-registry                                     OBJECT IDENTIFIER ::= {tcg-traits 3}
+tcg-tr-reg-none                                     OBJECT IDENTIFIER ::= {tcg-tr-registry 1}
+
+-- Values
+
+-- // TODO: Specification uses STRMAX which is invalid name for a value.
+strmax          INTEGER ::= 256
+urimax          INTEGER ::= 1024
+certstrmax      INTEGER ::= 100000
+
+-- Information Object Classes
+
+TRAIT ::= CLASS {
+    &id OBJECT IDENTIFIER UNIQUE,
+    &TraitValueType
+}
+WITH SYNTAX {
+    SYNTAX &TraitValueType
+    IDENTIFIED BY &id
+}
+
+TraitSet TRAIT ::= {...}
+
+-- Types
+
+Trait ::= SEQUENCE {
+    traitId         TRAIT.&id({TraitSet}), -- Specifies the traitValue encoding
+    traitCategory   OBJECT IDENTIFIER, -- Identifies the information category contained in traitValue
+    traitRegistry   OBJECT IDENTIFIER, -- Identifies the registry used to match against the traitValue
+    description     [0] IMPLICIT UTF8String (SIZE (1..strmax)) OPTIONAL,
+    descriptionURI  [1] IMPLICIT IA5String (SIZE (1..urimax)) OPTIONAL,
+    traitValue      OCTET STRING (CONTAINING TRAIT.&TraitValueType({TraitSet}{@traitId}) ENCODED BY der)
+}
+-- // TODO: Excess } in the spec.
+
+CredentialType ::= OBJECT IDENTIFIER (
+    tcg-kp-PlatformAttributeCertificate
+    | tcg-kp-PlatformKeyCertificate
+    | tcg-kp-AdditionalPlatformAttributeCertificate
+    | tcg-kp-AdditionalPlatformKeyCertificate
+    | tcg-kp-DeltaPlatformAttributeCertificate
+    | tcg-kp-DeltaPlatformKeyCertificate
+)
+
+TCGCredentialType ::= SEQUENCE {
+    certificateType CredentialType
+}
+
+PreviousPlatformCertificates ::= SEQUENCE (SIZE (1..MAX)) OF Trait
+
+TCGSpecificationVersion ::= SEQUENCE {
+    majorVersion    INTEGER,
+    minorVersion    INTEGER,
+    revision        INTEGER
+}
+
+CryptographicAnchors ::= SEQUENCE (SIZE(1..MAX)) OF Trait
+
+TCGPlatformSpecification ::= SEQUENCE {
+    version         TCGSpecificationVersion,
+    platformClass   OCTET STRING (SIZE(4))
+}
+
+TBBSecurityAssertions-v3 ::= SEQUENCE (SIZE(1..MAX)) OF Trait
+
+PlatformConfiguration-v3 ::= SEQUENCE {
+    platformComponents [0] IMPLICIT SEQUENCE (SIZE(1..MAX)) OF ComponentIdentifier OPTIONAL,
+    platformProperties [1] IMPLICIT SEQUENCE (SIZE(1..MAX)) OF Property OPTIONAL
+}
+
+ComponentIdentifier ::= SEQUENCE (SIZE(1..MAX)) OF Trait
+
+Property ::= SEQUENCE {
+    propertyName    UTF8String (SIZE (1..strmax)),
+    propertyValue   UTF8String (SIZE (1..strmax)),
+    status          [0] IMPLICIT AttributeStatus OPTIONAL
+}
+
+AttributeStatus ::= ENUMERATED {
+    added (0),
+    modified (1),
+    removed (2)
+}
+
+PlatformConfigUri-v3 ::= SEQUENCE (SIZE(1..MAX)) OF Trait
+
+PlatformOwnership ::= SEQUENCE (SIZE(1..MAX)) OF Trait
+
+CertificateIdentifier ::= SEQUENCE {
+    hashedCertIdentifier        [0] IMPLICIT HashedCertificateIdentifier OPTIONAL,
+    genericCertIdentifier       [1] IMPLICIT IssuerSerial OPTIONAL
+}
+
+HashedCertificateIdentifier ::= SEQUENCE {
+    hashAlgorithm               AlgorithmIdentifier,
+    hashOverSignatureValue      OCTET STRING
+}
+
+CommonCriteriaEvaluation ::= SEQUENCE {
+    cCMeasures                  CommonCriteriaMeasures,
+    cCCertificateNumber         UTF8String (SIZE (1..strmax)),
+    cCCertificateAuthority      UTF8String (SIZE (1..strmax)),
+    evaluationScheme            [0] IMPLICIT UTF8String (SIZE (1..strmax)) OPTIONAL,
+    cCCertificateIssuanceDate   [1] IMPLICIT GeneralizedTime OPTIONAL,
+    cCCertificateExpiryDate     [2] IMPLICIT GeneralizedTime OPTIONAL
+}
+
+ComponentIdentifierV11 ::= SEQUENCE {
+    componentClass              ComponentClass,
+    componentManufacturer       UTF8String (SIZE (1..STRMAX)),
+    componentModel              UTF8String (SIZE (1..STRMAX)),
+    componentSerial             [0] IMPLICIT UTF8String (SIZE (1..STRMAX)) OPTIONAL,
+    componentRevision           [1] IMPLICIT UTF8String (SIZE (1..STRMAX)) OPTIONAL,
+    componentManufacturerId     [2] IMPLICIT PrivateEnterpriseNumber OPTIONAL,
+    fieldReplaceable            [3] IMPLICIT BOOLEAN OPTIONAL,
+    componentAddresses          [4] IMPLICIT SEQUENCE (SIZE(1.. MAX)) OF ComponentAddress OPTIONAL,
+    componentPlatformCert       [5] IMPLICIT CertificateIdentifier OPTIONAL,
+    componentPlatformCertUri    [6] IMPLICIT URIReference OPTIONAL,
+    status                      [7] IMPLICIT AttributeStatus OPTIONAL
+}
+
+ComponentClass ::= SEQUENCE {
+    componentClassRegistry      ComponentClassRegistry,
+    componentClassValue         OCTET STRING (SIZE(4))
+}
+
+ComponentClassRegistry ::= OBJECT IDENTIFIER (
+    tcg-registry-componentClass-tcg
+    | tcg-registry-componentClass-dmtf
+    | tcg-registry-componentClass-pcie
+    | tcg-registry-componentClass-storage
+)
+
+PrivateEnterpriseNumber ::= OBJECT IDENTIFIER
+
+ComponentAddress ::= SEQUENCE {
+    addressType         AddressType,
+    addressValue        UTF8String (SIZE (1..strmax))
+}
+
+AddressType ::= OBJECT IDENTIFIER (
+    tcg-address-ethernetmac
+    | tcg-address-wlanmac
+    | tcg-address-bluetoothmac
+)
+
+FIPSLevel ::= SEQUENCE {
+    version             IA5STRING (SIZE (1..strmax)), -- “140-1”, “140-2”, or “140-3”
+    level               SecurityLevel,
+    plus                BOOLEAN DEFAULT FALSE
+}
+
+SecurityLevel ::= ENUMERATED {
+    level1 (1),
+    level2 (2),
+    level3 (3),
+    level4 (4)
+}
+
+ISO9000Certification ::= SEQUENCE {
+    iso9000Certified    BOOLEAN DEFAULT FALSE,
+    iso9000Uri          IA5STRING (SIZE (1..URIMAX)) OPTIONAL
+}
+
+PlatformFirmwareCapabilities ::= BIT STRING {
+    fwSetupAuthLocal (0),
+    fwSetupAuthRemote (1),
+    sMMProtection (2),
+    fwKernelDMAProtection (3)
+}
+
+PlatformFirmwareSignatureVerification ::= BIT STRING {
+    hardwareSRTM (0),
+    secureBoot (1)
+}
+
+PlatformFirmwareUpdateCompliance ::= BIT STRING {
+    sp800-147 (0),
+    sp800-147B (1),
+    sp800-193 (2)
+}
+
+PlatformHardwareCapabilities ::= BIT STRING {
+    iOMMUSupport (0),
+    trustedExecutionEnvironment (1),
+    physicalTamperProtection (2),
+    physicalTamperDetection (3),
+    firmwareFlashWP (4),
+    externalDMASupport (5)
+}
+
+RTMTypes ::= BIT STRING {
+    static (0),
+    dynamic (1),
+    nonHost (2),
+    virtual (3),
+    hardwareStatic (4),
+    bMC (5)
+}
+
+-- Attributes
+
+tCGCredentialType ATTRIBUTE ::= {
+    WITH SYNTAX     TCGCredentialType
+    ID              tcg-at-tcgCredentialType
+}
+
+previousPlatformCertificates ATTRIBUTE ::= {
+    WITH SYNTAX     PreviousPlatformCertificates
+    ID              tcg-at-previousPlatformCertificates
+}
+
+tCGCredentialSpecification ATTRIBUTE ::= {
+    WITH SYNTAX     TCGSpecificationVersion
+    ID              tcg-at-tcgCredentialSpecification
+}
+
+cryptographicAnchors ATTRIBUTE ::= {
+    WITH SYNTAX     CryptographicAnchors
+    ID              tcg-at-cryptographicAnchors
+}
+
+tCGPlatformSpecification ATTRIBUTE ::= {
+    WITH SYNTAX     TCGPlatformSpecification
+    ID              tcg-at-tcgPlatformSpecification
+}
+
+tBBSecurityAssertions ATTRIBUTE ::= {
+    WITH SYNTAX     TBBSecurityAssertions-v3
+    ID              tcg-at-tbbSecurityAssertions-v3
+}
+
+platformConfiguration ATTRIBUTE ::= {
+    WITH SYNTAX     PlatformConfiguration-v3
+    ID              tcg-at-platformConfiguration-v3
+}
+
+platformConfigUri ATTRIBUTE ::= {
+    WITH SYNTAX     PlatformConfigUri-v3
+    ID              tcg-at-platformConfigUri-v3
+}
+
+platformOwnership ATTRIBUTE ::= {
+    WITH SYNTAX     PlatformOwnership
+    ID              tcg-at-platformOwnership
+}
+
+-- Traits
+
+-- // FIXME: capitalized in the spec.
+booleanTrait TRAIT ::= {
+    SYNTAX          BOOLEAN
+    IDENTIFIED BY   tcg-tr-ID-Boolean
+}
+
+certificateIdentifierTrait TRAIT ::= {
+    SYNTAX          CertificateIdentifier
+    IDENTIFIED BY   tcg-tr-ID-certificateIdentifier
+}
+
+commonCriteriaTrait TRAIT ::= {
+    SYNTAX          CommonCriteriaEvaluation
+    IDENTIFIED BY   tcg-tr-ID-CommonCriteria
+}
+
+componentClassTrait TRAIT ::= {
+    SYNTAX          OCTET STRING (SIZE(4))
+    IDENTIFIED BY   tcg-tr-ID-componentClass
+}
+
+componentIdentifierV11Trait TRAIT ::= {
+    SYNTAX          ComponentIdentifierV11
+    IDENTIFIED BY   tcg-tr-ID-componentIdentifierV11
+}
+
+fipsLevelTrait TRAIT ::= {
+    SYNTAX          FIPSLevel
+    IDENTIFIED BY   tcg-tr-ID-FIPSLevel
+}
+
+iso9000Trait TRAIT ::= {
+    SYNTAX          ISO9000Certification
+    IDENTIFIED BY   tcg-tr-ID-ISO9000
+}
+
+networkMACTrait TRAIT ::= {
+    SYNTAX          ComponentAddress
+    IDENTIFIED BY   tcg-tr-ID-networkMAC
+}
+
+oidTrait TRAIT ::= {
+    SYNTAX          OBJECT IDENTIFIER
+    IDENTIFIED BY   tcg-tr-ID-OID
+}
+
+penTrait TRAIT ::= {
+    SYNTAX          PrivateEnterpriseNumber
+    IDENTIFIED BY   tcg-tr-ID-PEN
+}
+
+platformFirmwareCapabilitiesTrait TRAIT ::= {
+    SYNTAX          PlatformFirmwareCapabilities
+    IDENTIFIED BY   tcg-tr-ID-platformFirmwareCapabilities
+}
+
+platformFirmwareSignatureVerificationTrait TRAIT ::= {
+    SYNTAX          PlatformFirmwareSignatureVerification
+    IDENTIFIED BY   tcg-tr-ID-platformFirmwareSignatureVerification
+}
+
+platformFirmwareUpdateComplianceTrait TRAIT ::= {
+    SYNTAX          PlatformFirmwareUpdateCompliance
+    IDENTIFIED BY   tcg-tr-ID-platformFirmwareUpdateCompliance
+}
+
+platformHardwareCapabilitiesTrait TRAIT ::= {
+    SYNTAX          PlatformHardwareCapabilities
+    IDENTIFIED BY   tcg-tr-ID-platformHardwareCapabilities
+}
+
+rtmTrait TRAIT ::= {
+    SYNTAX          RTMTypes
+    IDENTIFIED BY   tcg-tr-ID-RTM
+}
+
+statusTrait TRAIT ::= {
+    SYNTAX          AttributeStatus
+    IDENTIFIED BY   tcg-tr-ID-status
+}
+
+uriTrait TRAIT ::= {
+    SYNTAX          URIReference
+    IDENTIFIED BY   tcg-tr-ID-URI
+}
+
+utf8StringTrait TRAIT ::= {
+    SYNTAX          UTF8String (SIZE (1..strmax))
+    IDENTIFIED BY   tcg-tr-ID-UTF8String
+}
+
+-- // TODO: This is UTF8StringTrait in the spec
+ia5StringTrait TRAIT ::= {
+    SYNTAX          IA5String (SIZE (1..strmax))
+    IDENTIFIED BY   tcg-tr-ID-IA5String
+}
+
+pemCertStringTrait TRAIT ::= {
+    SYNTAX          UTF8String (SIZE (1..certstrmax))
+    IDENTIFIED BY   tcg-tr-ID-PEMCertString
+}
+
+publicKeyTrait TRAIT ::= {
+    SYNTAX          SubjectPublicKeyInfo
+    IDENTIFIED BY   tcg-tr-ID-PublicKey
+}
+
+END

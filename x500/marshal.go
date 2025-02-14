@@ -26,6 +26,7 @@ var (
 	durationType         = reflect.TypeFor[time.Duration]()
 	rawContentsType      = reflect.TypeFor[asn1.RawContent]()
 	dnType               = reflect.TypeFor[DistinguishedName]()
+  nameAndUidType       = reflect.TypeFor[NameAndOptionalUID]()
 	rdnType              = reflect.TypeFor[pkix.RelativeDistinguishedNameSET]()
 	certType             = reflect.TypeFor[x509.Certificate]()
 	crlType              = reflect.TypeFor[x509.RevocationList]()
@@ -33,12 +34,13 @@ var (
 )
 
 type fieldParameters struct {
-	oid     asn1.ObjectIdentifier
-	must    bool // If true, return error when unmarshalling if a required attribute is missing.
-	tag     int
-	list    bool   // If true, a slice field is treated as being a single value (such as []string for PostalAddress)
-	uselang bool   // If true, take the language context value from the lang tag passed in. Only used when marshalling.
-	lang    string // Only used when marshalling.
+	oid       asn1.ObjectIdentifier
+	must      bool // If true, return error when unmarshalling if a required attribute is missing.
+	tag       int
+	list      bool   // If true, a slice field is treated as being a single value (such as []string for PostalAddress)
+	uselang   bool   // If true, take the language context value from the lang tag passed in. Only used when marshalling.
+	lang      string // Only used when marshalling.
+	omitempty bool   // If 0 or false, do not produce an attribute value
 }
 
 func addLanguageContext(value asn1.RawValue, lang string) Attribute_valuesWithContext_Item {
@@ -109,6 +111,10 @@ func parseFieldParameters(str string) (ret fieldParameters, err error) {
 			ret.tag = asn1.TagSet
 		case part == "uselang":
 			ret.uselang = true
+    case part == "omitempty":
+      ret.omitempty = true
+    case part == "list":
+      ret.list = true
 		}
 	}
 	return
@@ -117,10 +123,26 @@ func parseFieldParameters(str string) (ret fieldParameters, err error) {
 func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, err error) {
 	var bytes []byte
 
+	if !v.IsValid() {
+		// I don't know how or where this would happen, but we handle it here.
+		return asn1.RawValue{}, nil
+	}
+
 	t := v.Type()
+	k := t.Kind()
+	if k == reflect.Pointer {
+		if v.IsNil() {
+			return asn1.RawValue{}, nil
+		}
+	}
+
+  // This switch statement deals with specially-handled types.
 	switch t {
 	case enumeratedType:
 		enumValue := v.Interface().(asn1.Enumerated)
+    if enumValue == 0 && params.omitempty {
+      return asn1.RawValue{}, nil
+    }
 		bytes, err = asn1.Marshal(enumValue)
 		contentOctets := []byte{}
 		if enumValue < 127 {
@@ -143,6 +165,9 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		}, nil
 	case timeType:
 		timeValue := v.Interface().(time.Time)
+    if timeValue.IsZero() && params.omitempty {
+      return asn1.RawValue{}, nil
+    }
 		if params.tag == tagDate { // DATE
 			y, m, d := timeValue.Date()
 			date := fmt.Sprintf("%04d-%02d-%02d", y, m, d)
@@ -165,43 +190,77 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		return asn1.RawValue{FullBytes: bytes}, err
 	case bitStringType:
 		bsValue := v.Interface().(asn1.BitString)
+    if bsValue.BitLength == 0 && params.omitempty {
+      return asn1.RawValue{}, nil
+    }
 		bytes, err = asn1.Marshal(bsValue)
 		return asn1.RawValue{FullBytes: bytes}, err
 	case objectIdentifierType:
 		oidValue := v.Interface().(asn1.ObjectIdentifier)
+		if len(oidValue) == 0 {
+			// If must, we let the error happen
+			return asn1.RawValue{}, err
+		}
 		bytes, err = asn1.Marshal(oidValue)
 		return asn1.RawValue{FullBytes: bytes}, err
 	case bigIntType:
 		bigintValue := v.Interface().(*big.Int)
+		if bigintValue == nil && !params.must {
+			return asn1.RawValue{}, err
+		}
+    if bigintValue == big.NewInt(0) && params.omitempty {
+      return asn1.RawValue{}, err
+    }
 		bytes, err = asn1.Marshal(bigintValue)
 		return asn1.RawValue{FullBytes: bytes}, err
 	case certType:
 		cValue := v.Interface().(x509.Certificate)
+		if len(cValue.Raw) == 0 {
+			return asn1.RawValue{}, err
+		}
 		return asn1.RawValue{FullBytes: cValue.Raw}, err
 	case crlType:
 		cValue := v.Interface().(x509.RevocationList)
+		if len(cValue.Raw) == 0 {
+			return asn1.RawValue{}, err
+		}
 		return asn1.RawValue{FullBytes: cValue.Raw}, err
 	case csrType:
 		cValue := v.Interface().(x509.CertificateRequest)
+		if len(cValue.Raw) == 0 {
+			return asn1.RawValue{}, err
+		}
 		return asn1.RawValue{FullBytes: cValue.Raw}, err
 	case dnType:
 		dnValue := v.Interface().(DistinguishedName)
+    if len(dnValue) == 0 && params.omitempty {
+      return asn1.RawValue{}, err
+    }
 		fullBytes, err := asn1.Marshal(dnValue)
 		if err != nil {
 			return ret, err
 		}
 		return asn1.RawValue{FullBytes: fullBytes}, err
+  case nameAndUidType:
+    naouid := v.Interface().(NameAndOptionalUID)
+    if len(naouid.Dn) == 0 && params.omitempty {
+      return asn1.RawValue{}, err
+    }
 	}
 
-	// TODO: Will this handle default / zero values?
 	switch v.Kind() {
 	case reflect.Bool:
-		// bytes, err = asn1.Marshal(v.Bool())
 		fallthrough
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		// bytes, err = asn1.Marshal(v.Int())
+    if v.IsZero() && params.omitempty {
+      return asn1.RawValue{}, nil
+    }
 		bytes, err = asn1.Marshal(v.Interface())
 	case reflect.String:
+		s := v.String()
+		if len(s) == 0 {
+			return asn1.RawValue{}, err
+		}
 		switch params.tag {
 		case asn1.TagIA5String:
 			bytes, err = asn1.MarshalWithParams(v.String(), "ia5")
@@ -217,13 +276,20 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 	case reflect.Slice:
 		sliceType := t
 		if sliceType.Elem().Kind() == reflect.Uint8 {
+      b := v.Bytes()
+      if len(b) == 0 && params.omitempty {
+        return asn1.RawValue{}, nil
+      }
 			return asn1.RawValue{
 				Class: asn1.ClassUniversal,
 				Tag:   asn1.TagOctetString,
-				Bytes: v.Bytes(),
+				Bytes: b,
 			}, nil
 		}
 		l := v.Len()
+    if l == 0 {
+      return asn1.RawValue{}, nil
+    }
 		m := make([]asn1.RawValue, l)
 		for i := 0; i < l; i++ {
 			m[i], err = marshalValue(v.Index(i), params)
@@ -233,9 +299,12 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		}
 		if params.tag == asn1.TagSet {
 			bytes, err = asn1.MarshalWithParams(m, "set")
+      ret.Tag = asn1.TagSet
 		} else {
 			bytes, err = asn1.Marshal(m)
+      ret.Tag = asn1.TagSequence
 		}
+    ret.IsCompound = true
 	case reflect.Struct:
 		n := t.NumField()
 		if n > 0 && t.Field(0).Type == rawContentsType {
@@ -243,11 +312,13 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		} else {
 			bytes, err = asn1.Marshal(v.Interface())
 		}
+    ret.IsCompound = true
 	default:
 		// Any other type is unhandled. Just let asn1 generate the error.
 		bytes, err = asn1.Marshal(v)
 	}
-	return asn1.RawValue{FullBytes: bytes}, err
+  ret.FullBytes = bytes
+	return ret, err
 }
 
 func marshalField(v reflect.Value, params fieldParameters) (attr Attribute, err error) {
@@ -263,13 +334,18 @@ func marshalField(v reflect.Value, params fieldParameters) (attr Attribute, err 
 	attr.Type = params.oid
 	if k == reflect.Slice && !params.list && t.Elem().Kind() != reflect.Uint8 && t != objectIdentifierType && t != dnType && t != rdnType {
 		l := v.Len()
-		values := make([]asn1.RawValue, l)
+		values := make([]asn1.RawValue, 0, l)
 		for i := 0; i < l; i++ {
 			innerv, err := marshalValue(v.Index(i), params)
 			if err != nil {
 				return attr, err
 			}
-			values[i] = innerv
+			if reflect.ValueOf(innerv).IsZero() {
+				// Returning asn1.RawValue{} means there was no error:
+				// the value just shouldn't be encoded.
+				continue
+			}
+			values = append(values, innerv)
 		}
 		attr.Values = values
 		if params.uselang && len(params.lang) == 2 {
@@ -284,6 +360,10 @@ func marshalField(v reflect.Value, params fieldParameters) (attr Attribute, err 
 	value, err := marshalValue(v, params)
 	if err != nil {
 		return attr, err
+	}
+	if reflect.ValueOf(value).IsZero() {
+		// Returning an empty attribute means "nothing to encode"
+		return attr, nil
 	}
 	if params.uselang && len(params.lang) == 2 {
 		attr.ValuesWithContext = []Attribute_valuesWithContext_Item{addLanguageContext(value, params.lang)}
@@ -327,6 +407,11 @@ func MarshalWithParams(val any, lang string) (attrs []Attribute, err error) {
 		attr, err := marshalField(v.Field(i), fieldParams)
 		if err != nil {
 			return nil, err
+		}
+		if attr.Len() == 0 {
+			// No values means there was no error:
+			// this attribute just isn't meant to be encoded.
+			continue
 		}
 		attrs = append(attrs, attr)
 	}

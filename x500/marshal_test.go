@@ -628,8 +628,133 @@ func TestMarshalWeirdValues(t *testing.T) {
 	}
 }
 
-// TODO: Test zero values
-// TODO: Test encoding with language contexts
+func TestMarshalZeroValues(t *testing.T) {
+	type WeirdType struct {
+		SomeInt     int                               `x500:"oid:1.2.3.4,omitempty"`
+		SomeBytes   []byte                            `x500:"oid:1.2.3.5,omitempty"`
+		SomeBool    bool                              `x500:"oid:1.2.3.6,omitempty"`
+		SomeOID     asn1.ObjectIdentifier             `x500:"oid:1.2.3.7"`
+		MoreOIDs    []asn1.ObjectIdentifier           `x500:"oid:1.2.3.8"`
+		SomeEnum    asn1.Enumerated                   `x500:"oid:1.2.3.9,omitempty"`
+		SomeBigInt  *big.Int                          `x500:"oid:1.2.3.10"`
+		SomeBits    asn1.BitString                    `x500:"oid:1.2.3.11,omitempty"`
+		MoreEnums   []asn1.Enumerated                 `x500:"oid:1.2.3.12"`
+		SomeTime    time.Time                         `x500:"oid:1.2.3.13,omitempty"`
+		SomeName    NameAndOptionalUID                `x500:"oid:1.2.3.14,omitempty"`
+		SomeDN      DistinguishedName                 `x500:"oid:1.2.3.15,omitempty"`
+		SomeRDN     pkix.RelativeDistinguishedNameSET `x500:"oid:1.2.3.16,set"`
+		Cert        x509.Certificate                  `x500:"oid:1.2.3.17"`
+		SomeCRL     x509.RevocationList               `x500:"oid:1.2.3.18"`
+		CertReq     x509.CertificateRequest           `x500:"oid:1.2.3.19"`
+		NonX500Type int
+	}
+	value := WeirdType{
+		SomeInt: 0,
+	}
+	attrs, err := MarshalWithParams(value, "")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(attrs) != 0 {
+		t.Error("non-empty attributes")
+		return
+	}
+}
+
+func TestLanguageContext(t *testing.T) {
+	type Person struct {
+		CommonName []string `x500:"oid:2.5.4.3"`
+		Surname    []string `x500:"oid:2.5.4.4,uselang"`
+	}
+	p := Person{
+		CommonName: []string{"Jonathan"},
+		Surname:    []string{"Wildboar"},
+	}
+	attrs, err := MarshalWithParams(p, "en")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(attrs) != 2 {
+		t.Error("invalid number of attributes")
+		return
+	}
+  if len(attrs[0].ValuesWithContext) != 0 {
+    t.Error("values with context on wrong attribute")
+    return
+  }
+	if len(attrs[1].ValuesWithContext) != 1 {
+		t.Error("no values with context")
+		return
+	}
+  vwc := attrs[1].ValuesWithContext[0]
+  if len(vwc.Value.FullBytes) != 10 {
+    t.Error("value with context not preserved")
+    return
+  }
+  if len(vwc.ContextList) != 1 {
+    t.Error("no contexts on vwc")
+    return
+  }
+  ctxt := vwc.ContextList[0]
+  if !ctxt.ContextType.Equal(Id_avc_language) {
+    t.Error("non-language context added")
+    return
+  }
+  if len(ctxt.ContextValues) != 1 {
+    t.Error("no context values")
+    return
+  }
+  cv := ctxt.ContextValues[0]
+  if !bytes.Equal(cv.Bytes, []byte("en")) {
+    t.Error("context value incorrect")
+    return
+  }
+}
+
+func TestListValues(t *testing.T) {
+  type PostalThing struct {
+    PostalAddress []string `x500:"oid:2.5.4.43,list"`
+  }
+  p := PostalThing{
+    PostalAddress: []string{
+      "P. Sherman",
+      "42 Wallaby Way",
+      "Sydney, AU",
+    },
+  }
+  attrs, err := MarshalWithParams(p, "")
+  if err != nil {
+    t.Error(err)
+    return
+  }
+  if len(attrs) != 1 {
+    t.Error("incorrect number of attributes")
+    return
+  }
+  attr := attrs[0]
+  if attr.Len() != 1 {
+    t.Errorf("incorrect number of values: %d", attr.Len())
+    return
+  }
+  value := attr.GetSingleValue()
+  if value.Tag != asn1.TagSequence {
+    t.Errorf("invalid tag: %d", value.Tag)
+    return
+  }
+  if !value.IsCompound {
+    t.Error("not compound value")
+    return
+  }
+  if len(value.FullBytes) < 20 {
+    t.Error("invalid encoding")
+    return
+  }
+}
+
 // TODO: Test encoding list values
 // TODO: Test encoding different string types
 // TODO: Make RDN always encode and decode as a SET, despite tag or not
+// TODO: Test using asn1 tag for implicitly tagged things.
+// TODO: modify patch that adds upper bounds on temporal contexts when values are updated

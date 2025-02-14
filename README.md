@@ -63,33 +63,8 @@ update with tags, text, keywords, etc.
   - [ ] `OTP`
 - [ ] Support more `DSAInfo` attributes
 
-### Reflection API
+## Reflection API
 
-My vision is that it would look something like this:
+### Marshalling Structs to Attributes
 
-```go
-type Person struct {
-  CommonName []string `x500:"oid:2.5.4.3,must"`
-  Surname []string `x500:"oid:2.5.4.6,may"`
-}
-```
-
-And it would be used like:
-
-```go
-var attrs []x500.Attribute = idm.CreateAttributes(ctx, &person)
-```
-
-Or
-
-```go
-idm.Create(ctx, &person)
-```
-
-And
-
-```go
-idm.ReadAndUnmarshal(ctx, dn, &person)
-```
-
-Consult: https://cs.opensource.google/go/go/+/refs/tags/go1.23.5:src/encoding/asn1/marshal.go;l=736
+- Empty strings, zero-length object identifiers, and nil pointers never get marshalled to attribute values.
