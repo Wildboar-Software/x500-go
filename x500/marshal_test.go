@@ -680,81 +680,162 @@ func TestLanguageContext(t *testing.T) {
 		t.Error("invalid number of attributes")
 		return
 	}
-  if len(attrs[0].ValuesWithContext) != 0 {
-    t.Error("values with context on wrong attribute")
-    return
-  }
+	if len(attrs[0].ValuesWithContext) != 0 {
+		t.Error("values with context on wrong attribute")
+		return
+	}
 	if len(attrs[1].ValuesWithContext) != 1 {
 		t.Error("no values with context")
 		return
 	}
-  vwc := attrs[1].ValuesWithContext[0]
-  if len(vwc.Value.FullBytes) != 10 {
-    t.Error("value with context not preserved")
-    return
-  }
-  if len(vwc.ContextList) != 1 {
-    t.Error("no contexts on vwc")
-    return
-  }
-  ctxt := vwc.ContextList[0]
-  if !ctxt.ContextType.Equal(Id_avc_language) {
-    t.Error("non-language context added")
-    return
-  }
-  if len(ctxt.ContextValues) != 1 {
-    t.Error("no context values")
-    return
-  }
-  cv := ctxt.ContextValues[0]
-  if !bytes.Equal(cv.Bytes, []byte("en")) {
-    t.Error("context value incorrect")
-    return
-  }
+	vwc := attrs[1].ValuesWithContext[0]
+	if len(vwc.Value.FullBytes) != 10 {
+		t.Error("value with context not preserved")
+		return
+	}
+	if len(vwc.ContextList) != 1 {
+		t.Error("no contexts on vwc")
+		return
+	}
+	ctxt := vwc.ContextList[0]
+	if !ctxt.ContextType.Equal(Id_avc_language) {
+		t.Error("non-language context added")
+		return
+	}
+	if len(ctxt.ContextValues) != 1 {
+		t.Error("no context values")
+		return
+	}
+	cv := ctxt.ContextValues[0]
+	if !bytes.Equal(cv.Bytes, []byte("en")) {
+		t.Error("context value incorrect")
+		return
+	}
 }
 
 func TestListValues(t *testing.T) {
-  type PostalThing struct {
-    PostalAddress []string `x500:"oid:2.5.4.43,list"`
-  }
-  p := PostalThing{
-    PostalAddress: []string{
-      "P. Sherman",
-      "42 Wallaby Way",
-      "Sydney, AU",
-    },
-  }
-  attrs, err := MarshalWithParams(p, "")
-  if err != nil {
-    t.Error(err)
-    return
-  }
-  if len(attrs) != 1 {
-    t.Error("incorrect number of attributes")
-    return
-  }
-  attr := attrs[0]
-  if attr.Len() != 1 {
-    t.Errorf("incorrect number of values: %d", attr.Len())
-    return
-  }
-  value := attr.GetSingleValue()
-  if value.Tag != asn1.TagSequence {
-    t.Errorf("invalid tag: %d", value.Tag)
-    return
-  }
-  if !value.IsCompound {
-    t.Error("not compound value")
-    return
-  }
-  if len(value.FullBytes) < 20 {
-    t.Error("invalid encoding")
-    return
-  }
+	type PostalThing struct {
+		PostalAddress []string `x500:"oid:2.5.4.43,list"`
+	}
+	p := PostalThing{
+		PostalAddress: []string{
+			"P. Sherman",
+			"42 Wallaby Way",
+			"Sydney, AU",
+		},
+	}
+	attrs, err := MarshalWithParams(p, "")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(attrs) != 1 {
+		t.Error("incorrect number of attributes")
+		return
+	}
+	attr := attrs[0]
+	if attr.Len() != 1 {
+		t.Errorf("incorrect number of values: %d", attr.Len())
+		return
+	}
+	value := attr.GetSingleValue()
+	if value.Tag != asn1.TagSequence {
+		t.Errorf("invalid tag: %d", value.Tag)
+		return
+	}
+	if !value.IsCompound {
+		t.Error("not compound value")
+		return
+	}
+	if len(value.FullBytes) < 20 {
+		t.Error("invalid encoding")
+		return
+	}
 }
 
-// TODO: Test encoding list values
-// TODO: Test encoding different string types
+func TestMarshalStrings(t *testing.T) {
+	type VariousStrings struct {
+		Timestr   string `x500:"oid:1.2.3.4,time"`
+		Ia5       string `x500:"oid:1.2.3.4,ia5"`
+		Numeric   string `x500:"oid:1.2.3.4,num"`
+		Utf8      string `x500:"oid:1.2.3.4,utf8"`
+		Printable string `x500:"oid:1.2.3.4,printable"`
+		General   string `x500:"oid:1.2.3.4,general"`
+		T61       string `x500:"oid:1.2.3.4,t61"`
+		Date      string `x500:"oid:1.2.3.4,date"`
+		Tod       string `x500:"oid:1.2.3.4,tod"`
+		Graphic   string `x500:"oid:1.2.3.4,graphic"`
+		Videotex  string `x500:"oid:1.2.3.4,videotex"`
+		Visible   string `x500:"oid:1.2.3.4,visible"`
+		Universal string `x500:"oid:1.2.3.4,univstr"`
+		Bmp       string `x500:"oid:1.2.3.4,bmp"`
+		Datetime  string `x500:"oid:1.2.3.4,datetime"`
+		Duration  string `x500:"oid:1.2.3.4,duration"`
+		Oidiri    string `x500:"oid:1.2.3.4,oidiri"`
+		Roidiri   string `x500:"oid:1.2.3.4,roidiri"`
+	}
+	strangs := VariousStrings{
+		Timestr:   "2025-W07",
+		Ia5:       "asdf",
+		Numeric:   "990429",
+		Utf8:      "\u4024\u5082 monkey \u01F7",
+		Printable: "hello world",
+		General:   "helo wrld",
+		T61:       "hey earth",
+		Date:      "2025-02-14",
+		Tod:       "12:34:56",
+		Graphic:   "not suitable for young audiences",
+		Videotex:  "videotex",
+		Visible:   "visible",
+		Universal: "welcome to the universe",
+		Bmp:       "basic multilingual plane",
+		Datetime:  "2025-02-14T12:34:56",
+		Duration:  "P5Y",
+		Oidiri:    "/joint-iso-itu-t/ds/attributeTypes/commonName",
+		Roidiri:   "/attributeTypes/commonName",
+	}
+	attrs, err := MarshalWithParams(strangs, "")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(attrs) != 18 {
+		t.Error("wrong number of attributes")
+		return
+	}
+	expectedTags := []int{
+		tagTime,
+		asn1.TagIA5String,
+		asn1.TagNumericString,
+		asn1.TagUTF8String,
+		asn1.TagPrintableString,
+		tagGeneralString,
+		asn1.TagT61String,
+		tagDate,
+		tagTimeOfDay,
+		tagGraphicString,
+		tagVideotexString,
+		tagVisibleString,
+		tagUniversalString,
+		asn1.TagBMPString,
+		tagDateTime,
+		tagDuration,
+		tagOidIri,
+		tagRelativeOidIri,
+	}
+	for i, attr := range attrs {
+		if attr.Len() != 1 {
+			t.Error("unexpected multi-valued attribute")
+			return
+		}
+		value := attr.GetSingleValue()
+		if value.Tag != expectedTags[i] {
+			t.Errorf("wrong tag at %d: found %d", i, value.Tag)
+			return
+		}
+	}
+}
+
 // TODO: Make RDN always encode and decode as a SET, despite tag or not
 // TODO: Test using asn1 tag for implicitly tagged things.
 // TODO: modify patch that adds upper bounds on temporal contexts when values are updated

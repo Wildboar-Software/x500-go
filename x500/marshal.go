@@ -13,9 +13,18 @@ import (
 	"time"
 )
 
+const tagTime = 14
+const tagVideotexString int = 21
+const tagGraphicString int = 25
+const tagVisibleString int = 26
+const tagGeneralString int = 27
+const tagUniversalString = 28
 const tagDate int = 31
 const tagTimeOfDay int = 32
+const tagDateTime int = 33
 const tagDuration = 34
+const tagOidIri = 35
+const tagRelativeOidIri = 36
 
 var (
 	bitStringType        = reflect.TypeFor[asn1.BitString]()
@@ -26,7 +35,7 @@ var (
 	durationType         = reflect.TypeFor[time.Duration]()
 	rawContentsType      = reflect.TypeFor[asn1.RawContent]()
 	dnType               = reflect.TypeFor[DistinguishedName]()
-  nameAndUidType       = reflect.TypeFor[NameAndOptionalUID]()
+	nameAndUidType       = reflect.TypeFor[NameAndOptionalUID]()
 	rdnType              = reflect.TypeFor[pkix.RelativeDistinguishedNameSET]()
 	certType             = reflect.TypeFor[x509.Certificate]()
 	crlType              = reflect.TypeFor[x509.RevocationList]()
@@ -92,6 +101,8 @@ func parseFieldParameters(str string) (ret fieldParameters, err error) {
 			ret.lang = part[5:]
 		case part == "must":
 			ret.must = true
+		case part == "time":
+			ret.tag = tagTime
 		case part == "printable":
 			ret.tag = asn1.TagPrintableString
 		case part == "ia5":
@@ -100,6 +111,20 @@ func parseFieldParameters(str string) (ret fieldParameters, err error) {
 			ret.tag = asn1.TagNumericString
 		case part == "utf8":
 			ret.tag = asn1.TagUTF8String
+		case part == "t61":
+			ret.tag = asn1.TagT61String
+		case part == "videotex":
+			ret.tag = tagVideotexString
+		case part == "graphic":
+			ret.tag = tagGraphicString
+		case part == "visible":
+			ret.tag = tagVisibleString
+		case part == "general":
+			ret.tag = tagGeneralString
+		case part == "bmp":
+			ret.tag = asn1.TagBMPString
+		case part == "univstr":
+			ret.tag = tagUniversalString
 		case part == "null":
 			// TODO: implement
 			ret.tag = asn1.TagNull
@@ -109,12 +134,20 @@ func parseFieldParameters(str string) (ret fieldParameters, err error) {
 			ret.tag = tagTimeOfDay
 		case part == "set":
 			ret.tag = asn1.TagSet
+		case part == "datetime":
+			ret.tag = tagDateTime
+		case part == "duration":
+			ret.tag = tagDuration
+		case part == "oidiri":
+			ret.tag = tagOidIri
+		case part == "roidiri":
+			ret.tag = tagRelativeOidIri
 		case part == "uselang":
 			ret.uselang = true
-    case part == "omitempty":
-      ret.omitempty = true
-    case part == "list":
-      ret.list = true
+		case part == "omitempty":
+			ret.omitempty = true
+		case part == "list":
+			ret.list = true
 		}
 	}
 	return
@@ -122,6 +155,7 @@ func parseFieldParameters(str string) (ret fieldParameters, err error) {
 
 func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, err error) {
 	var bytes []byte
+	tag := 0
 
 	if !v.IsValid() {
 		// I don't know how or where this would happen, but we handle it here.
@@ -136,13 +170,13 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		}
 	}
 
-  // This switch statement deals with specially-handled types.
+	// This switch statement deals with specially-handled types.
 	switch t {
 	case enumeratedType:
 		enumValue := v.Interface().(asn1.Enumerated)
-    if enumValue == 0 && params.omitempty {
-      return asn1.RawValue{}, nil
-    }
+		if enumValue == 0 && params.omitempty {
+			return asn1.RawValue{}, nil
+		}
 		bytes, err = asn1.Marshal(enumValue)
 		contentOctets := []byte{}
 		if enumValue < 127 {
@@ -165,9 +199,9 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		}, nil
 	case timeType:
 		timeValue := v.Interface().(time.Time)
-    if timeValue.IsZero() && params.omitempty {
-      return asn1.RawValue{}, nil
-    }
+		if timeValue.IsZero() && params.omitempty {
+			return asn1.RawValue{}, nil
+		}
 		if params.tag == tagDate { // DATE
 			y, m, d := timeValue.Date()
 			date := fmt.Sprintf("%04d-%02d-%02d", y, m, d)
@@ -190,9 +224,9 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		return asn1.RawValue{FullBytes: bytes}, err
 	case bitStringType:
 		bsValue := v.Interface().(asn1.BitString)
-    if bsValue.BitLength == 0 && params.omitempty {
-      return asn1.RawValue{}, nil
-    }
+		if bsValue.BitLength == 0 && params.omitempty {
+			return asn1.RawValue{}, nil
+		}
 		bytes, err = asn1.Marshal(bsValue)
 		return asn1.RawValue{FullBytes: bytes}, err
 	case objectIdentifierType:
@@ -208,9 +242,9 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		if bigintValue == nil && !params.must {
 			return asn1.RawValue{}, err
 		}
-    if bigintValue == big.NewInt(0) && params.omitempty {
-      return asn1.RawValue{}, err
-    }
+		if bigintValue == big.NewInt(0) && params.omitempty {
+			return asn1.RawValue{}, err
+		}
 		bytes, err = asn1.Marshal(bigintValue)
 		return asn1.RawValue{FullBytes: bytes}, err
 	case certType:
@@ -233,28 +267,28 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		return asn1.RawValue{FullBytes: cValue.Raw}, err
 	case dnType:
 		dnValue := v.Interface().(DistinguishedName)
-    if len(dnValue) == 0 && params.omitempty {
-      return asn1.RawValue{}, err
-    }
+		if len(dnValue) == 0 && params.omitempty {
+			return asn1.RawValue{}, err
+		}
 		fullBytes, err := asn1.Marshal(dnValue)
 		if err != nil {
 			return ret, err
 		}
 		return asn1.RawValue{FullBytes: fullBytes}, err
-  case nameAndUidType:
-    naouid := v.Interface().(NameAndOptionalUID)
-    if len(naouid.Dn) == 0 && params.omitempty {
-      return asn1.RawValue{}, err
-    }
+	case nameAndUidType:
+		naouid := v.Interface().(NameAndOptionalUID)
+		if len(naouid.Dn) == 0 && params.omitempty {
+			return asn1.RawValue{}, err
+		}
 	}
 
 	switch v.Kind() {
 	case reflect.Bool:
 		fallthrough
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-    if v.IsZero() && params.omitempty {
-      return asn1.RawValue{}, nil
-    }
+		if v.IsZero() && params.omitempty {
+			return asn1.RawValue{}, nil
+		}
 		bytes, err = asn1.Marshal(v.Interface())
 	case reflect.String:
 		s := v.String()
@@ -262,34 +296,82 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 			return asn1.RawValue{}, err
 		}
 		switch params.tag {
+		case tagTime:
+			fallthrough
+		case tagDateTime:
+			fallthrough
+		case tagDate:
+			fallthrough
+		case tagTimeOfDay:
+			fallthrough
+		case tagDuration:
+			fallthrough
+		case tagOidIri:
+			fallthrough
+		case tagRelativeOidIri:
+			ret.Tag = params.tag
+			ret.IsCompound = false
+			ret.Bytes = []byte(s)
+			return ret, err
+		case tagGraphicString:
+			fallthrough
+		case tagGeneralString:
+			fallthrough
+		case tagVisibleString:
+			fallthrough
+		case asn1.TagT61String:
+			fallthrough
+		case tagVideotexString:
+			bytes, err = asn1.MarshalWithParams(s, "ia5")
+			if err == nil { // This approach only works because these tag numbers are <= 31
+				bytes[0] = byte(params.tag)
+			}
+			tag = params.tag
+		case asn1.TagUTF8String:
+			bytes, err = asn1.MarshalWithParams(s, "utf8")
+			tag = params.tag
 		case asn1.TagIA5String:
-			bytes, err = asn1.MarshalWithParams(v.String(), "ia5")
+			bytes, err = asn1.MarshalWithParams(s, "ia5")
+			tag = params.tag
 		case asn1.TagNumericString:
-			bytes, err = asn1.MarshalWithParams(v.String(), "numeric")
+			bytes, err = asn1.MarshalWithParams(s, "numeric")
+			tag = params.tag
 		case asn1.TagPrintableString:
-			bytes, err = asn1.MarshalWithParams(v.String(), "printable")
+			bytes, err = asn1.MarshalWithParams(s, "printable")
+			tag = params.tag
+		case asn1.TagBMPString:
+			ret.Tag = params.tag
+			ret.IsCompound = false
+			ret.Bytes = encodeBMPString(s)
+			return ret, err
+		case tagUniversalString:
+			ret.Tag = params.tag
+			ret.IsCompound = false
+			ret.Bytes = encodeUniversalString(s)
+			return ret, err
 		default:
-			bytes, err = asn1.Marshal(v.String())
+			bytes, err = asn1.Marshal(s)
 		}
 	// I think this will be used if you find a way to treat a slice as a
 	// "list" value like PostalAddress
 	case reflect.Slice:
 		sliceType := t
 		if sliceType.Elem().Kind() == reflect.Uint8 {
-      b := v.Bytes()
-      if len(b) == 0 && params.omitempty {
-        return asn1.RawValue{}, nil
-      }
+			b := v.Bytes()
+			if len(b) == 0 && params.omitempty {
+				return asn1.RawValue{}, nil
+			}
 			return asn1.RawValue{
 				Class: asn1.ClassUniversal,
 				Tag:   asn1.TagOctetString,
 				Bytes: b,
 			}, nil
 		}
+		// TODO: Handle rune slices differently?
 		l := v.Len()
-    if l == 0 {
-      return asn1.RawValue{}, nil
-    }
+		if l == 0 {
+			return asn1.RawValue{}, nil
+		}
 		m := make([]asn1.RawValue, l)
 		for i := 0; i < l; i++ {
 			m[i], err = marshalValue(v.Index(i), params)
@@ -299,12 +381,12 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		}
 		if params.tag == asn1.TagSet {
 			bytes, err = asn1.MarshalWithParams(m, "set")
-      ret.Tag = asn1.TagSet
+			ret.Tag = asn1.TagSet
 		} else {
 			bytes, err = asn1.Marshal(m)
-      ret.Tag = asn1.TagSequence
+			ret.Tag = asn1.TagSequence
 		}
-    ret.IsCompound = true
+		ret.IsCompound = true
 	case reflect.Struct:
 		n := t.NumField()
 		if n > 0 && t.Field(0).Type == rawContentsType {
@@ -312,12 +394,15 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		} else {
 			bytes, err = asn1.Marshal(v.Interface())
 		}
-    ret.IsCompound = true
+		ret.IsCompound = true
 	default:
 		// Any other type is unhandled. Just let asn1 generate the error.
 		bytes, err = asn1.Marshal(v)
 	}
-  ret.FullBytes = bytes
+	if tag > 0 {
+		ret.Tag = tag
+	}
+	ret.FullBytes = bytes
 	return ret, err
 }
 
