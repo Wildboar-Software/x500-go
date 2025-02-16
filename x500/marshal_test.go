@@ -597,6 +597,11 @@ func TestMarshalWeirdValues(t *testing.T) {
 		return
 	}
 
+	if rdnEncoded.FullBytes[0] != byte(asn1.TagSet|0b0010_0000) {
+		t.Error("rdn not encoded as a set")
+		return
+	}
+
 	var rdnDecoded pkix.RelativeDistinguishedNameSET
 	rest, err = asn1.UnmarshalWithParams(rdnEncoded.FullBytes, &rdnDecoded, "set")
 	if err != nil {
@@ -755,24 +760,24 @@ func TestListValues(t *testing.T) {
 
 func TestMarshalStrings(t *testing.T) {
 	type VariousStrings struct {
-		Timestr   string `x500:"oid:1.2.3.4,time"`
-		Ia5       string `x500:"oid:1.2.3.4,ia5"`
-		Numeric   string `x500:"oid:1.2.3.4,num"`
+		Timestr   string `x500:"oid:1.2.3.1,time"`
+		Ia5       string `x500:"oid:1.2.3.2,ia5"`
+		Numeric   string `x500:"oid:1.2.3.3,num"`
 		Utf8      string `x500:"oid:1.2.3.4,utf8"`
-		Printable string `x500:"oid:1.2.3.4,printable"`
-		General   string `x500:"oid:1.2.3.4,general"`
-		T61       string `x500:"oid:1.2.3.4,t61"`
-		Date      string `x500:"oid:1.2.3.4,date"`
-		Tod       string `x500:"oid:1.2.3.4,tod"`
-		Graphic   string `x500:"oid:1.2.3.4,graphic"`
-		Videotex  string `x500:"oid:1.2.3.4,videotex"`
-		Visible   string `x500:"oid:1.2.3.4,visible"`
-		Universal string `x500:"oid:1.2.3.4,univstr"`
-		Bmp       string `x500:"oid:1.2.3.4,bmp"`
-		Datetime  string `x500:"oid:1.2.3.4,datetime"`
-		Duration  string `x500:"oid:1.2.3.4,duration"`
-		Oidiri    string `x500:"oid:1.2.3.4,oidiri"`
-		Roidiri   string `x500:"oid:1.2.3.4,roidiri"`
+		Printable string `x500:"oid:1.2.3.5,printable"`
+		General   string `x500:"oid:1.2.3.6,general"`
+		T61       string `x500:"oid:1.2.3.7,t61"`
+		Date      string `x500:"oid:1.2.3.8,date"`
+		Tod       string `x500:"oid:1.2.3.9,tod"`
+		Graphic   string `x500:"oid:1.2.3.10,graphic"`
+		Videotex  string `x500:"oid:1.2.3.11,videotex"`
+		Visible   string `x500:"oid:1.2.3.12,visible"`
+		Universal string `x500:"oid:1.2.3.13,univstr"`
+		Bmp       string `x500:"oid:1.2.3.14,bmp"`
+		Datetime  string `x500:"oid:1.2.3.15,datetime"`
+		Duration  string `x500:"oid:1.2.3.16,duration"`
+		Oidiri    string `x500:"oid:1.2.3.17,oidiri"`
+		Roidiri   string `x500:"oid:1.2.3.18,roidiri"`
 	}
 	strangs := VariousStrings{
 		Timestr:   "2025-W07",
@@ -836,6 +841,4 @@ func TestMarshalStrings(t *testing.T) {
 	}
 }
 
-// TODO: Make RDN always encode and decode as a SET, despite tag or not
-// TODO: Test using asn1 tag for implicitly tagged things.
-// TODO: modify patch that adds upper bounds on temporal contexts when values are updated
+// TODO: Pointer-typed fields

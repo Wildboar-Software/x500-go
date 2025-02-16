@@ -72,7 +72,33 @@ func TestUnmarshalMultivalued(t *testing.T) {
 	}
 }
 
-// TODO: Test zero values
-// TODO: Test encoding list values
+func TestListUnmarshaling(t *testing.T) {
+	type PostalThing struct {
+		PostalAddress []string `x500:"oid:2.5.4.43,list"`
+	}
+	p := PostalThing{
+		PostalAddress: []string{
+			"P. Sherman",
+			"42 Wallaby Way",
+			"Sydney, AU",
+		},
+	}
+	attrs, err := MarshalWithParams(p, "")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	p.PostalAddress = []string{}
+	err = UnmarshalWithParams(attrs, &p, "")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(p.PostalAddress) != 3 {
+		t.Error("not unmarshaled correctly")
+		return
+	}
+}
+
 // TODO: Test encoding different string types
-// TODO: Test set / sequence
+// TODO: Pointer-typed fields

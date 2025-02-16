@@ -196,6 +196,6 @@ func DirectoryStringToString(ds asn1.RawValue) (s string, err error) {
 		}
 		return s, nil
 	default:
-		return "", errors.New(fmt.Sprintf("invalid tag for directorystring: %d", ds.Tag))
+		return "", fmt.Errorf("invalid tag for directorystring: %d", ds.Tag)
 	}
 }

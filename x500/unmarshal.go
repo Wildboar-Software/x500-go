@@ -5,6 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
+	"unicode"
+	"unicode/utf8"
+
+	"github.com/Wildboar-Software/x500-go/teletex"
 )
 
 // An invalidUnmarshalError describes an invalid argument passed to Unmarshal.
@@ -24,14 +29,111 @@ func (e *invalidUnmarshalError) Error() string {
 	return "asn1: Unmarshal recipient value is nil " + e.Type.String()
 }
 
+func isASCII(s []byte) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] > unicode.MaxASCII {
+			return false
+		}
+	}
+	return true
+}
+
+func isASN1TimeChar(b byte) bool {
+	return (b >= '0' && b <= '9') ||
+		b == '+' || b == ',' || b == '-' || b == '.' ||
+		b == '/' || b == ':' || strings.ContainsRune("CDHMRPSTWYZ", rune(b))
+}
+
+func unmarshalTimeString(octets []byte) (string, error) {
+	for i, c := range octets {
+		if !isASN1TimeChar(c) {
+			return "", fmt.Errorf("malformed asn.1 time string: invalid char '%c' at index %d", c, i)
+		}
+	}
+	return string(octets), nil
+}
+
+func unmarshalTimeOfDayAsString(octets []byte) (string, error) {
+	if len(octets) != 8 {
+		return "", fmt.Errorf("malformed asn.1 time-of-day: %d characters instead of 8", len(octets))
+	}
+	for i, c := range octets {
+		if i == 2 || i == 5 {
+			if c != ':' {
+				return "", fmt.Errorf("malformed asn.1 time-of-day: expected a colon but got '%c'", c)
+			} else {
+				continue
+			}
+		}
+		if !unicode.IsDigit(rune(c)) {
+			return "", fmt.Errorf("malformed asn.1 time-of-day: expected a digit but got '%c' at index %d", c, i)
+		}
+	}
+	return string(octets), nil
+}
+
+func unmarshalDateAsString(octets []byte) (string, error) {
+	if len(octets) != 10 {
+		return "", fmt.Errorf("malformed asn.1 date: %d characters instead of 10", len(octets))
+	}
+	for i, c := range octets {
+		if i == 4 || i == 7 {
+			if c != '-' {
+				return "", fmt.Errorf("malformed asn.1 date: expected a hyphen but got '%c'", c)
+			} else {
+				continue
+			}
+		}
+		if !unicode.IsDigit(rune(c)) {
+			return "", fmt.Errorf("malformed asn.1 date: expected a digit but got '%c' at index %d", c, i)
+		}
+	}
+	return string(octets), nil
+}
+
+// 1951-10-14T15:30:00
+func unmarshalDateTimeAsString(octets []byte) (string, error) {
+	if len(octets) != 19 {
+		return "", fmt.Errorf("malformed asn.1 datetime: %d characters instead of 19", len(octets))
+	}
+	for i, c := range octets {
+		if i == 4 || i == 7 {
+			if c != '-' {
+				return "", fmt.Errorf("malformed asn.1 datetime: expected a hyphen but got '%c'", c)
+			} else {
+				continue
+			}
+		}
+		if i == 10 {
+			if c != 'T' {
+				return "", fmt.Errorf("malformed asn.1 datetime: expected a 'T' but got '%c'", c)
+			} else {
+				continue
+			}
+		}
+		if i == 13 || i == 16 {
+			if c != ':' {
+				return "", fmt.Errorf("malformed asn.1 datetime: expected a colon but got '%c'", c)
+			} else {
+				continue
+			}
+		}
+		if !unicode.IsDigit(rune(c)) {
+			return "", fmt.Errorf("malformed asn.1 datetime: expected a digit but got '%c' at index %d", c, i)
+		}
+	}
+	return string(octets), nil
+}
+
 func unmarshalValue(v reflect.Value, encoded asn1.RawValue, params fieldParameters) (err error) {
+	if params.tag != 0 && params.tag != encoded.Tag {
+		return fmt.Errorf("unexpected tag: expected %d but got %d", params.tag, encoded.Tag)
+	}
 	k := v.Kind()
 	switch k {
 	case reflect.Bool:
 		fallthrough
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		fallthrough
-	case reflect.String:
 		rest, err := asn1.Unmarshal(encoded.FullBytes, v.Addr().Interface())
 		if err != nil {
 			return err
@@ -39,6 +141,93 @@ func unmarshalValue(v reflect.Value, encoded asn1.RawValue, params fieldParamete
 		if len(rest) > 0 {
 			return errors.New("trailing data")
 		}
+	case reflect.String:
+		var s string
+		switch encoded.Tag {
+		case tagTime:
+			s, err = unmarshalTimeString(encoded.Bytes)
+		case tagDateTime:
+			s, err = unmarshalDateTimeAsString(encoded.Bytes)
+		case tagDate:
+			s, err = unmarshalDateAsString(encoded.Bytes)
+		case tagTimeOfDay:
+			s, err = unmarshalTimeOfDayAsString(encoded.Bytes)
+		case tagDuration:
+			if len(encoded.Bytes) < 3 {
+				return fmt.Errorf("asn.1 duration too short: encoded on %d bytes", len(encoded.Bytes))
+			}
+			fallthrough
+		case tagOidIri:
+			s = string(encoded.Bytes)
+			if !utf8.ValidString(s) {
+				return errors.New("malformed relative oid-iri string")
+			}
+		case tagRelativeOidIri:
+			s = string(encoded.Bytes)
+			if !utf8.ValidString(s) {
+				return errors.New("malformed oid-iri string")
+			}
+		case asn1.TagT61String:
+			s = teletex.TeletexToUTF8(encoded.Bytes)
+		case tagUniversalString:
+			s, err = universalStringFromBytes(encoded.Bytes)
+		case tagGraphicString:
+			fallthrough
+		case tagGeneralString:
+			fallthrough
+		case tagVisibleString:
+			fallthrough
+		case tagVideotexString:
+			if !isASCII(encoded.Bytes) {
+				return fmt.Errorf("cannot decode non-ASCII string with tag %d", encoded.Tag)
+			}
+			s = string(encoded.Bytes)
+		default: // All other string types are already handled by golang's asn1
+			// https://cs.opensource.google/go/go/+/refs/tags/go1.24.0:src/encoding/asn1/asn1.go;l=699
+			rest, err := asn1.Unmarshal(encoded.FullBytes, v.Addr().Interface())
+			if err != nil {
+				return err
+			}
+			if len(rest) > 0 {
+				return errors.New("trailing data")
+			}
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		v.SetString(s)
+	case reflect.Slice:
+		sliceType := v.Type()
+		if sliceType.Elem().Kind() == reflect.Uint8 {
+			b := v.Bytes()
+			if len(b) == 0 && params.omitempty {
+				// FIXME:
+				return nil
+			}
+			return nil
+		}
+		// This handles list types.
+		subelements := []asn1.RawValue{}
+		unmarshalParams := ""
+		if params.tag == asn1.TagSet {
+			unmarshalParams = "set"
+		}
+		rest, err := asn1.UnmarshalWithParams(encoded.FullBytes, &subelements, unmarshalParams)
+		if err != nil {
+			return err
+		}
+		if len(rest) > 0 {
+			return errors.New("trailing data")
+		}
+		slice := reflect.MakeSlice(sliceType, len(subelements), len(subelements))
+		for i, subel := range subelements {
+			err = unmarshalValue(slice.Index(i), subel, params)
+			if err != nil {
+				return err
+			}
+		}
+		v.Set(slice)
 	}
 	return nil
 }
@@ -47,7 +236,7 @@ func unmarshalField(v reflect.Value, attrs map[string]Attribute, params fieldPar
 	attr, present := attrs[params.oid.String()]
 	if !present || attr.IsEmpty() {
 		if params.must {
-			return errors.New(fmt.Sprintf("missing required attribute %s", params.oid))
+			return fmt.Errorf("missing required attribute %s", params.oid)
 		}
 		// Otherwise, if the attribute is missing, there's nothing to do.
 		return nil
