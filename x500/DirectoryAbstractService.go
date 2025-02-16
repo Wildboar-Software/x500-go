@@ -1072,8 +1072,23 @@ type CompareResultData struct {
 	Notification       [](Attribute)         `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
-// FIXME: Return a name.
-func (x *CompareResultData) GetTargetObject() (*Name, *DistinguishedName) {
+func (x *CompareResultData) GetTargetObject() (n *Name, dn *DistinguishedName) {
+	if len(x.NameOID) > 0 {
+		nameBytes, err := asn1.Marshal(x.NameOID)
+		if err != nil {
+			asn1.Unmarshal(nameBytes, &n)
+			return n, nil
+		}
+	}
+	if len(x.NameDNS) > 0 {
+		n = &asn1.RawValue{
+			Tag:   asn1.TagUTF8String,
+			Bytes: []byte(x.NameDNS),
+		}
+		fullBytes, _ := asn1.Marshal(n)
+		n.FullBytes = fullBytes
+		return n, nil
+	}
 	return nil, &x.Name
 }
 
@@ -3142,7 +3157,23 @@ type ListResultData_listInfo struct {
 	Notification            [](Attribute)                                 `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
-func (x *ListResultData_listInfo) GetTargetObject() (*Name, *DistinguishedName) {
+func (x *ListResultData_listInfo) GetTargetObject() (n *Name, dn *DistinguishedName) {
+	if len(x.NameOID) > 0 {
+		nameBytes, err := asn1.Marshal(x.NameOID)
+		if err != nil {
+			asn1.Unmarshal(nameBytes, &n)
+			return n, nil
+		}
+	}
+	if len(x.NameDNS) > 0 {
+		n = &asn1.RawValue{
+			Tag:   asn1.TagUTF8String,
+			Bytes: []byte(x.NameDNS),
+		}
+		fullBytes, _ := asn1.Marshal(n)
+		n.FullBytes = fullBytes
+		return n, nil
+	}
 	return nil, &x.Name
 }
 
@@ -3219,7 +3250,23 @@ type SearchResultData_searchInfo struct {
 	Notification            [](Attribute)           `asn1:"optional,explicit,tag:27,omitempty"`
 }
 
-func (x *SearchResultData_searchInfo) GetTargetObject() (*Name, *DistinguishedName) {
+func (x *SearchResultData_searchInfo) GetTargetObject() (n *Name, dn *DistinguishedName) {
+	if len(x.NameOID) > 0 {
+		nameBytes, err := asn1.Marshal(x.NameOID)
+		if err != nil {
+			asn1.Unmarshal(nameBytes, &n)
+			return n, nil
+		}
+	}
+	if len(x.NameDNS) > 0 {
+		n = &asn1.RawValue{
+			Tag:   asn1.TagUTF8String,
+			Bytes: []byte(x.NameDNS),
+		}
+		fullBytes, _ := asn1.Marshal(n)
+		n.FullBytes = fullBytes
+		return n, nil
+	}
 	return nil, &x.Name
 }
 

@@ -6,13 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
-	"time"
 	"unicode"
 	"unicode/utf8"
 
 	"github.com/Wildboar-Software/x500-go/teletex"
+	"github.com/sosodev/duration"
 )
 
 // An invalidUnmarshalError describes an invalid argument passed to Unmarshal.
@@ -30,55 +29,6 @@ func (e *invalidUnmarshalError) Error() string {
 		return "asn1: Unmarshal recipient value is non-pointer " + e.Type.String()
 	}
 	return "asn1: Unmarshal recipient value is nil " + e.Type.String()
-}
-
-// parseISODuration parses an ISO 8601 duration string into a time.Duration.
-func parseISODuration(iso string) (time.Duration, error) {
-	if !strings.HasPrefix(iso, "P") {
-		return 0, fmt.Errorf("invalid ISO 8601 duration: must start with 'P'")
-	}
-
-	iso = iso[1:] // Remove the leading 'P'
-	var duration time.Duration
-	var numStr string
-
-	// Mapping unit characters to their corresponding duration multipliers
-	unitMap := map[rune]time.Duration{
-		'Y': time.Hour * ((24 * 365) + 6), // 365.25 days per year
-		'M': 43830 * time.Minute,          // ~30.44 days (730.56 hours) per average month.
-		'W': 7 * 24 * time.Hour,
-		'D': 24 * time.Hour,
-	}
-
-	for _, r := range iso {
-		if r == 'T' {
-			unitMap = map[rune]time.Duration{
-				'H': time.Hour,
-				'M': time.Minute,
-				'S': time.Second,
-			}
-			continue
-		}
-
-		if unicode.IsDigit(r) || r == '.' { // Accumulate numeric part (supports decimals for seconds)
-			numStr += string(r)
-			continue
-		}
-
-		// If we hit a unit character, process the accumulated number
-		if unit, exists := unitMap[r]; exists {
-			value, err := strconv.ParseFloat(numStr, 64)
-			if err != nil {
-				return 0, fmt.Errorf("invalid number in duration: %s", numStr)
-			}
-			duration += time.Duration(value * float64(unit))
-			numStr = "" // Reset for the next number
-		} else {
-			return 0, fmt.Errorf("unexpected character '%c' in duration", r)
-		}
-	}
-
-	return duration, nil
 }
 
 func isASCII(s []byte) bool {
@@ -210,19 +160,16 @@ func unmarshalValue(v reflect.Value, encoded asn1.RawValue, params fieldParamete
 			return errors.New("trailing data")
 		}
 		return nil
-
-	// case rawContentsType:
-	// 	// TODO:
 	case durationType:
 		s, err = unmarshalTimeString(encoded.Bytes)
 		if err != nil {
 			return err
 		}
-		dur, err := parseISODuration(s)
+		dur, err := duration.Parse(s)
 		if err != nil {
 			return err
 		}
-		v.Set(reflect.ValueOf(dur))
+		v.Set(reflect.ValueOf(dur.ToTimeDuration()))
 		return nil
 	case certType:
 		cert, err := x509.ParseCertificate(encoded.FullBytes)

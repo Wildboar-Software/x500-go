@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/sosodev/duration"
 )
 
 const tagTime = 14
@@ -185,11 +187,10 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		return ret, nil
 	case durationType:
 		durValue := v.Interface().(time.Duration)
-		// FIXME: This is not correct.
-		dv := fmt.Sprintf("P%s", strings.ToUpper(durValue.String()))
+		dv := duration.FromTimeDuration(durValue)
 		ret.Class = asn1.ClassUniversal
 		ret.Tag = tagDuration
-		ret.Bytes = []byte(dv)
+		ret.Bytes = []byte(dv.String())
 		ret.FullBytes, _ = asn1.Marshal(ret)
 		return ret, nil
 	case timeType:
@@ -248,6 +249,9 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		return ret, err
 	case certType:
 		cValue := v.Interface().(x509.Certificate)
+		if len(cValue.Raw) == 0 {
+			return asn1.RawValue{}, err
+		}
 		rest, err := asn1.Unmarshal(cValue.Raw, &ret)
 		if len(rest) > 0 {
 			err = errors.New("trailing data")
@@ -255,6 +259,9 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		return ret, err
 	case crlType:
 		cValue := v.Interface().(x509.RevocationList)
+		if len(cValue.Raw) == 0 {
+			return asn1.RawValue{}, err
+		}
 		rest, err := asn1.Unmarshal(cValue.Raw, &ret)
 		if len(rest) > 0 {
 			err = errors.New("trailing data")
@@ -262,6 +269,9 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		return ret, err
 	case csrType:
 		cValue := v.Interface().(x509.CertificateRequest)
+		if len(cValue.Raw) == 0 {
+			return asn1.RawValue{}, err
+		}
 		rest, err := asn1.Unmarshal(cValue.Raw, &ret)
 		if len(rest) > 0 {
 			err = errors.New("trailing data")

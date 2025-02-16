@@ -101,4 +101,3 @@ func TestListUnmarshaling(t *testing.T) {
 }
 
 // TODO: Pointer-typed fields
-// TODO: Test unmarshalling special fields like certs.
