@@ -177,26 +177,21 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		if enumValue == 0 && params.omitempty {
 			return asn1.RawValue{}, nil
 		}
-		bytes, err = asn1.Marshal(enumValue)
-		contentOctets := []byte{}
-		if enumValue < 127 {
-			contentOctets = []byte{byte(enumValue)}
+		fullBytes, err := asn1.Marshal(enumValue)
+		if err != nil {
+			return ret, err
 		}
-		return asn1.RawValue{
-			Class:      asn1.ClassUniversal,
-			Tag:        asn1.TagEnum,
-			IsCompound: false,
-			Bytes:      contentOctets,
-			FullBytes:  bytes,
-		}, err
+		_, _ = asn1.Unmarshal(fullBytes, &ret)
+		return ret, nil
 	case durationType:
 		durValue := v.Interface().(time.Duration)
+		// FIXME: This is not correct.
 		dv := fmt.Sprintf("P%s", strings.ToUpper(durValue.String()))
-		return asn1.RawValue{
-			Class: asn1.ClassUniversal,
-			Tag:   tagDuration,
-			Bytes: []byte(dv),
-		}, nil
+		ret.Class = asn1.ClassUniversal
+		ret.Tag = tagDuration
+		ret.Bytes = []byte(dv)
+		ret.FullBytes, _ = asn1.Marshal(ret)
+		return ret, nil
 	case timeType:
 		timeValue := v.Interface().(time.Time)
 		if timeValue.IsZero() && params.omitempty {
@@ -205,30 +200,32 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		if params.tag == tagDate { // DATE
 			y, m, d := timeValue.Date()
 			date := fmt.Sprintf("%04d-%02d-%02d", y, m, d)
-			return asn1.RawValue{
-				Class: asn1.ClassUniversal,
-				Tag:   tagDate,
-				Bytes: []byte(date),
-			}, nil
+			ret.Class = asn1.ClassUniversal
+			ret.Tag = tagDate
+			ret.Bytes = []byte(date)
+			ret.FullBytes, _ = asn1.Marshal(ret)
+			return ret, nil
 		}
 		if params.tag == tagTimeOfDay { // TIME-OF-DAY
 			h, m, s := timeValue.Clock()
 			tod := fmt.Sprintf("%02d:%02d:%02d", h, m, s)
-			return asn1.RawValue{
-				Class: asn1.ClassUniversal,
-				Tag:   tagTimeOfDay,
-				Bytes: []byte(tod),
-			}, nil
+			ret.Class = asn1.ClassUniversal
+			ret.Tag = tagTimeOfDay
+			ret.Bytes = []byte(tod)
+			ret.FullBytes, _ = asn1.Marshal(ret)
+			return ret, nil
 		}
 		bytes, err = asn1.MarshalWithParams(timeValue, "generalized")
-		return asn1.RawValue{FullBytes: bytes}, err
+		_, _ = asn1.Unmarshal(bytes, &ret)
+		return ret, err
 	case bitStringType:
 		bsValue := v.Interface().(asn1.BitString)
 		if bsValue.BitLength == 0 && params.omitempty {
 			return asn1.RawValue{}, nil
 		}
 		bytes, err = asn1.Marshal(bsValue)
-		return asn1.RawValue{FullBytes: bytes}, err
+		_, _ = asn1.Unmarshal(bytes, &ret)
+		return ret, err
 	case objectIdentifierType:
 		oidValue := v.Interface().(asn1.ObjectIdentifier)
 		if len(oidValue) == 0 {
@@ -236,7 +233,8 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 			return asn1.RawValue{}, err
 		}
 		bytes, err = asn1.Marshal(oidValue)
-		return asn1.RawValue{FullBytes: bytes}, err
+		_, _ = asn1.Unmarshal(bytes, &ret)
+		return ret, err
 	case bigIntType:
 		bigintValue := v.Interface().(*big.Int)
 		if bigintValue == nil && !params.must {
@@ -246,25 +244,29 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 			return asn1.RawValue{}, err
 		}
 		bytes, err = asn1.Marshal(bigintValue)
-		return asn1.RawValue{FullBytes: bytes}, err
+		_, _ = asn1.Unmarshal(bytes, &ret)
+		return ret, err
 	case certType:
 		cValue := v.Interface().(x509.Certificate)
-		if len(cValue.Raw) == 0 {
-			return asn1.RawValue{}, err
+		rest, err := asn1.Unmarshal(cValue.Raw, &ret)
+		if len(rest) > 0 {
+			err = errors.New("trailing data")
 		}
-		return asn1.RawValue{FullBytes: cValue.Raw}, err
+		return ret, err
 	case crlType:
 		cValue := v.Interface().(x509.RevocationList)
-		if len(cValue.Raw) == 0 {
-			return asn1.RawValue{}, err
+		rest, err := asn1.Unmarshal(cValue.Raw, &ret)
+		if len(rest) > 0 {
+			err = errors.New("trailing data")
 		}
-		return asn1.RawValue{FullBytes: cValue.Raw}, err
+		return ret, err
 	case csrType:
 		cValue := v.Interface().(x509.CertificateRequest)
-		if len(cValue.Raw) == 0 {
-			return asn1.RawValue{}, err
+		rest, err := asn1.Unmarshal(cValue.Raw, &ret)
+		if len(rest) > 0 {
+			err = errors.New("trailing data")
 		}
-		return asn1.RawValue{FullBytes: cValue.Raw}, err
+		return ret, err
 	case dnType:
 		dnValue := v.Interface().(DistinguishedName)
 		if len(dnValue) == 0 && params.omitempty {
@@ -274,7 +276,8 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 		if err != nil {
 			return ret, err
 		}
-		return asn1.RawValue{FullBytes: fullBytes}, err
+		_, _ = asn1.Unmarshal(fullBytes, &ret)
+		return ret, err
 	case nameAndUidType:
 		naouid := v.Interface().(NameAndOptionalUID)
 		if len(naouid.Dn) == 0 && params.omitempty {
@@ -343,11 +346,15 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 			ret.Tag = params.tag
 			ret.IsCompound = false
 			ret.Bytes = encodeBMPString(s)
+			fullBytes, _ := asn1.Marshal(ret)
+			ret.FullBytes = fullBytes
 			return ret, err
 		case tagUniversalString:
 			ret.Tag = params.tag
 			ret.IsCompound = false
 			ret.Bytes = encodeUniversalString(s)
+			fullBytes, _ := asn1.Marshal(ret)
+			ret.FullBytes = fullBytes
 			return ret, err
 		default:
 			bytes, err = asn1.Marshal(s)
@@ -402,7 +409,7 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 	if tag > 0 {
 		ret.Tag = tag
 	}
-	ret.FullBytes = bytes
+	_, _ = asn1.Unmarshal(bytes, &ret)
 	return ret, err
 }
 

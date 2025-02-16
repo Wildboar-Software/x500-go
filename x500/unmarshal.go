@@ -1,11 +1,14 @@
 package x500
 
 import (
+	"crypto/x509"
 	"encoding/asn1"
 	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -27,6 +30,55 @@ func (e *invalidUnmarshalError) Error() string {
 		return "asn1: Unmarshal recipient value is non-pointer " + e.Type.String()
 	}
 	return "asn1: Unmarshal recipient value is nil " + e.Type.String()
+}
+
+// parseISODuration parses an ISO 8601 duration string into a time.Duration.
+func parseISODuration(iso string) (time.Duration, error) {
+	if !strings.HasPrefix(iso, "P") {
+		return 0, fmt.Errorf("invalid ISO 8601 duration: must start with 'P'")
+	}
+
+	iso = iso[1:] // Remove the leading 'P'
+	var duration time.Duration
+	var numStr string
+
+	// Mapping unit characters to their corresponding duration multipliers
+	unitMap := map[rune]time.Duration{
+		'Y': time.Hour * ((24 * 365) + 6), // 365.25 days per year
+		'M': 43830 * time.Minute,          // ~30.44 days (730.56 hours) per average month.
+		'W': 7 * 24 * time.Hour,
+		'D': 24 * time.Hour,
+	}
+
+	for _, r := range iso {
+		if r == 'T' {
+			unitMap = map[rune]time.Duration{
+				'H': time.Hour,
+				'M': time.Minute,
+				'S': time.Second,
+			}
+			continue
+		}
+
+		if unicode.IsDigit(r) || r == '.' { // Accumulate numeric part (supports decimals for seconds)
+			numStr += string(r)
+			continue
+		}
+
+		// If we hit a unit character, process the accumulated number
+		if unit, exists := unitMap[r]; exists {
+			value, err := strconv.ParseFloat(numStr, 64)
+			if err != nil {
+				return 0, fmt.Errorf("invalid number in duration: %s", numStr)
+			}
+			duration += time.Duration(value * float64(unit))
+			numStr = "" // Reset for the next number
+		} else {
+			return 0, fmt.Errorf("unexpected character '%c' in duration", r)
+		}
+	}
+
+	return duration, nil
 }
 
 func isASCII(s []byte) bool {
@@ -129,6 +181,72 @@ func unmarshalValue(v reflect.Value, encoded asn1.RawValue, params fieldParamete
 	if params.tag != 0 && params.tag != encoded.Tag {
 		return fmt.Errorf("unexpected tag: expected %d but got %d", params.tag, encoded.Tag)
 	}
+
+	var s string
+	// This switch statement deals with specially-handled types.
+	switch v.Type() {
+	case enumeratedType:
+		fallthrough
+	case bitStringType:
+		fallthrough
+	case objectIdentifierType:
+		fallthrough
+	case timeType:
+		fallthrough
+	case dnType:
+		fallthrough
+	case nameAndUidType:
+		fallthrough
+	case dnType:
+		fallthrough
+	case rdnType:
+		fallthrough
+	case bigIntType:
+		rest, err := asn1.Unmarshal(encoded.FullBytes, v.Addr().Interface())
+		if err != nil {
+			return err
+		}
+		if len(rest) > 0 {
+			return errors.New("trailing data")
+		}
+		return nil
+
+	// case rawContentsType:
+	// 	// TODO:
+	case durationType:
+		s, err = unmarshalTimeString(encoded.Bytes)
+		if err != nil {
+			return err
+		}
+		dur, err := parseISODuration(s)
+		if err != nil {
+			return err
+		}
+		v.Set(reflect.ValueOf(dur))
+		return nil
+	case certType:
+		cert, err := x509.ParseCertificate(encoded.FullBytes)
+		if err != nil {
+			return err
+		}
+		v.Set(reflect.ValueOf(*cert))
+		return nil
+	case crlType:
+		crl, err := x509.ParseRevocationList(encoded.FullBytes)
+		if err != nil {
+			return err
+		}
+		v.Set(reflect.ValueOf(*crl))
+		return nil
+	case csrType:
+		csr, err := x509.ParseCertificateRequest(encoded.FullBytes)
+		if err != nil {
+			return err
+		}
+		v.Set(reflect.ValueOf(*csr))
+		return nil
+	}
+
 	k := v.Kind()
 	switch k {
 	case reflect.Bool:
@@ -142,7 +260,6 @@ func unmarshalValue(v reflect.Value, encoded asn1.RawValue, params fieldParamete
 			return errors.New("trailing data")
 		}
 	case reflect.String:
-		var s string
 		switch encoded.Tag {
 		case tagTime:
 			s, err = unmarshalTimeString(encoded.Bytes)
@@ -199,11 +316,18 @@ func unmarshalValue(v reflect.Value, encoded asn1.RawValue, params fieldParamete
 		v.SetString(s)
 	case reflect.Slice:
 		sliceType := v.Type()
-		if sliceType.Elem().Kind() == reflect.Uint8 {
-			b := v.Bytes()
-			if len(b) == 0 && params.omitempty {
-				// FIXME:
-				return nil
+		if sliceType.Elem().Kind() == reflect.Uint8 { // This handles OCTET STRING
+			if len(encoded.Bytes) > 0 {
+				v.SetBytes(encoded.Bytes)
+			} else {
+				rest, err := asn1.Unmarshal(encoded.FullBytes, v.Addr().Interface())
+				if err != nil {
+					return err
+				}
+				if len(rest) > 0 {
+					return errors.New("trailing data")
+				}
+				v.SetBytes(encoded.Bytes)
 			}
 			return nil
 		}
@@ -228,6 +352,14 @@ func unmarshalValue(v reflect.Value, encoded asn1.RawValue, params fieldParamete
 			}
 		}
 		v.Set(slice)
+	default:
+		rest, err := asn1.Unmarshal(encoded.FullBytes, v.Addr().Interface())
+		if err != nil {
+			return err
+		}
+		if len(rest) > 0 {
+			return errors.New("trailing data")
+		}
 	}
 	return nil
 }
@@ -242,7 +374,8 @@ func unmarshalField(v reflect.Value, attrs map[string]Attribute, params fieldPar
 		return nil
 	}
 	k := v.Kind()
-	if k == reflect.Slice && !params.list {
+	t := v.Type()
+	if k == reflect.Slice && !params.list && t.Elem().Kind() != reflect.Uint8 && t != objectIdentifierType && t != dnType && t != rdnType {
 		l := attr.Len()
 		values := reflect.MakeSlice(v.Type(), l, l)
 		for i := 0; i < l; i++ {
@@ -263,7 +396,7 @@ func unmarshalField(v reflect.Value, attrs map[string]Attribute, params fieldPar
 	return unmarshalValue(v, *encoded, params)
 }
 
-func unmarshalStruct(v reflect.Value, attrs map[string]Attribute, params fieldParameters) (err error) {
+func unmarshalStruct(v reflect.Value, attrs map[string]Attribute, _ fieldParameters) (err error) {
 	if v.Kind() != reflect.Struct {
 		return errors.New("cannot unmarshal x.500 attributes to non-struct")
 	}

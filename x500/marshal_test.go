@@ -6,6 +6,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/pem"
+	"fmt"
 	"math/big"
 	"reflect"
 	"testing"
@@ -631,6 +632,17 @@ func TestMarshalWeirdValues(t *testing.T) {
 		t.Error(err)
 		return
 	}
+
+	w2 := WeirdType{}
+	err = UnmarshalWithParams(attrs, &w2, "")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if !bytes.Equal(w2.Cert.Raw, v.Cert.Raw) {
+		t.Error("certs not equal")
+		return
+	}
 }
 
 func TestMarshalZeroValues(t *testing.T) {
@@ -838,6 +850,18 @@ func TestMarshalStrings(t *testing.T) {
 			t.Errorf("wrong tag at %d: found %d", i, value.Tag)
 			return
 		}
+	}
+
+	strangs2 := VariousStrings{}
+	err = UnmarshalWithParams(attrs, &strangs2, "")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if !reflect.DeepEqual(strangs, strangs2) {
+		fmt.Printf("%+v\n", strangs2)
+		t.Error("non-identical decoding")
+		return
 	}
 }
 
