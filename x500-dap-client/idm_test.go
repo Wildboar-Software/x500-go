@@ -1790,12 +1790,17 @@ func TestInterfaceImplementation(t *testing.T) {
 	})
 	_, ok1 := idm.(RemoteOperationServiceElement)
 	_, ok2 := idm.(DirectoryAccessClient)
+	_, ok3 := idm.(DirectoryGroupClient)
 	if !ok1 {
 		t.Error("IDM does not implement RemoteOperationServiceElement")
 		return
 	}
 	if !ok2 {
 		t.Error("IDM does not implement DirectoryAccessClient")
+		return
+	}
+	if !ok3 {
+		t.Error("IDM does not implement DirectoryGroupClient")
 		return
 	}
 }

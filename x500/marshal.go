@@ -520,9 +520,6 @@ func MarshalWithParams(val any, lang string) (attrs []Attribute, err error) {
 	return
 }
 
-// TODO: Encoding for pkix.DistinguishedName
-// TODO: Encoding for pkix.RelativeDistinguishedName
-
 // Might already be done.
 // TODO: Encoding for pkix.Extension
 // TODO: Encoding for pkix.AlgorithmIdentifier

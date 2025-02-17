@@ -45,12 +45,10 @@ update with tags, text, keywords, etc.
 ### MVP
 
 - [ ] Even higher-level API
-- [x] Change `int32` to `int`
 - [ ] Use `X500OperationError` (I might not do this...)
-- [x] Fix ambiguous parsing in `SchemaAdministration` caused by `UnboundedDirectoryString`
 - [ ] Fill in critical extensions appropriately
 - [ ] Documentation
-- [ ] Reflection API (See Below)
+- [x] Reflection API (See Below)
 
 ### Future
 
@@ -61,10 +59,10 @@ update with tags, text, keywords, etc.
   - [ ] `EXTERNAL`
   - [ ] `ANONYMOUS`
   - [ ] `OTP`
-- [ ] Support more `DSAInfo` attributes
 
 ## Reflection API
 
 ### Marshalling Structs to Attributes
 
 - Empty strings, zero-length object identifiers, and nil pointers never get marshalled to attribute values.
+- Contexts are basically not supported.
