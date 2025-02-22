@@ -185,3 +185,4 @@ func (it *SearchResultIterator) Next() (*SearchResultData_searchInfo, *SIGNED, e
 	}
 	return nil, nil, nil
 }
+

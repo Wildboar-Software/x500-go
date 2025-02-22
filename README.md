@@ -60,9 +60,3 @@ update with tags, text, keywords, etc.
   - [ ] `ANONYMOUS`
   - [ ] `OTP`
 
-## Reflection API
-
-### Marshalling Structs to Attributes
-
-- Empty strings, zero-length object identifiers, and nil pointers never get marshalled to attribute values.
-- Contexts are basically not supported.
