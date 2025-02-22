@@ -127,9 +127,6 @@ func parseFieldParameters(str string) (ret fieldParameters, err error) {
 			ret.tag = asn1.TagBMPString
 		case part == "univstr":
 			ret.tag = tagUniversalString
-		case part == "null":
-			// TODO: implement
-			ret.tag = asn1.TagNull
 		case part == "date":
 			ret.tag = tagDate
 		case part == "tod":
@@ -158,6 +155,10 @@ func parseFieldParameters(str string) (ret fieldParameters, err error) {
 func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, err error) {
 	var bytes []byte
 	tag := 0
+
+  if params.tag == asn1.TagNull && !v.IsZero() {
+    return asn1.NullRawValue, nil
+  }
 
 	if !v.IsValid() {
 		// I don't know how or where this would happen, but we handle it here.
@@ -216,6 +217,7 @@ func marshalValue(v reflect.Value, params fieldParameters) (ret asn1.RawValue, e
 			ret.FullBytes, _ = asn1.Marshal(ret)
 			return ret, nil
 		}
+    // TODO: Do you need to handle utc here?
 		bytes, err = asn1.MarshalWithParams(timeValue, "generalized")
 		_, _ = asn1.Unmarshal(bytes, &ret)
 		return ret, err
@@ -475,6 +477,7 @@ func marshalField(v reflect.Value, params fieldParameters) (attr Attribute, err 
 	return attr, nil
 }
 
+// See the documentation for Marshal.
 func MarshalWithParams(val any, lang string) (attrs []Attribute, err error) {
 	v := reflect.ValueOf(val)
 	if v.Kind() != reflect.Struct {
@@ -520,6 +523,73 @@ func MarshalWithParams(val any, lang string) (attrs []Attribute, err error) {
 	return
 }
 
+// Serialize a struct into attributes using the x500 tag.
+// This can ONLY serialize a struct.
+// Struct members MUST be annotated with an "x500:" tag.
+// This tag's parameters MUST include an "oid:" parameter.
+// It MAY also have these parameters, with their meanings
+// described as such:
+//
+//  oid:1.2.3.4: The OID to use for the attribute. Obviously, replace 1.2.3.4 with the right one.
+//  must:        The value MUST be present when unmarshaling. When marshaling, pointers must not be nil.
+//  time:        Encode as an ASN.1 TIME string. (Defined in newer versions of ASN.1. Universal Tag 14.)
+//  printable:   Encode as a PrintableString
+//  ia5:         Encode as an IA5String
+//  num:         Encode as a NumericString
+//  utf8:        Encode as a UTF8String
+//  t61:         Encode as a TeletexString / T.61 String
+//  videotex:    Encode as a VideotexString
+//  graphic:     Encode as a GraphicString
+//  visible:     Encode as a VisibleString
+//  general:     Encode as a GeneralString
+//  bmp:         Encode as a BMPString
+//  univstr:     Encode as a UniversalString
+//  date:        Encode as a DATE (Defined in newer versions of ASN.1.)
+//  tod:         Encode as a TIME-OF-DAY (Defined in newer versions of ASN.1.)
+//  set:         Encode as a SET instead of a SEQUENCE
+//  datetime:    Encode as a DATE-TIME (Defined in newer versions of ASN.1.)
+//  duration:    Encode as a DURATION (Defined in newer versions of ASN.1.)
+//  oidiri:      Encode as a an OID-IRI (Defined in newer versions of ASN.1.)
+//  roidiri:     Encode as a RELATIVE-OID-IRI (Defined in newer versions of ASN.1.)
+//  uselang:     If a "lang" parameter is present on this field, or supplied via
+//               params in MarshalWithParams, use its value to create values with
+//               contexts using the languageContext defined in ITU-T Recommendation
+//               X.520 (2019).
+//  omitempty:   Struct members tagged with this will not produce an attribute
+//               if they are zero-valued.
+//  list:        Slice-typed struct members tagged with this will not use the
+//               slice to produce multiple values, but instead produce a
+//               single value that is a SEQUENCE OF (or SET OF if the "set"
+//               tag is used). This is useful for producing values of type
+//               PostalAddress using []string, for instance.
+//  lang:en      TODO: Document the meaning of this
+//
+// Aside from the effects of the tags listed above, the following struct member
+// types are serialized into attribute values as follows (in no particular order):
+//
+//  string:                   By default, whatever Golang's asn1.Marshal() does. Use tags.
+//  integer types:            INTEGER
+//  bool:                     BOOLEAN
+//  []byte:                   OCTET STRING
+//  other slice types:        Multiple values in the attribute, unless the "list" tag is used.
+//  asn1.Enumerated:          ENUMERATED
+//  time.Duration:            DURATION
+//  asn1.BitString:           BIT STRING
+//  time.Time:                GeneralizedTime; or DATE or TIME-OF-DAY depending on tags
+//  asn1.ObjectIdentifier:    OBJECT IDENTIFIER
+//  *big.Int:                 INTEGER
+//  x509.Certificate:         Certificate
+//  x509.RevocationList:      CertificateList
+//  x509.CertificateRequest:  PKCS#10 CertificationRequest
+//  DistinguishedName:        pkix.RDNSequence
+//  
+// All other types are serialized as expected. As with Golang's asn1 module, if
+// the structs first member is of type asn1.RawContent, that will be used to
+// marshal the value.
+func Marshal(val any) (attrs []Attribute, err error) {
+  return MarshalWithParams(val, "")
+}
+
 // Might already be done.
 // TODO: Encoding for pkix.Extension
 // TODO: Encoding for pkix.AlgorithmIdentifier
@@ -545,3 +615,4 @@ func MarshalWithParams(val any, lang string) (attrs []Attribute, err error) {
 // TODO: NameAndString
 // TODO: Crypto
 // TODO: Does this work with just plain asn1.RawValue?
+

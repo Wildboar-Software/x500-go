@@ -44,7 +44,7 @@ update with tags, text, keywords, etc.
 
 ### MVP
 
-- [ ] Even higher-level API
+- [x] Even higher-level API
 - [ ] Use `X500OperationError` (I might not do this...)
 - [ ] Fill in critical extensions appropriately
 - [ ] Documentation

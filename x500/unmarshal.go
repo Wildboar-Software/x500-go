@@ -369,6 +369,7 @@ func unmarshalStruct(v reflect.Value, attrs map[string]Attribute, _ fieldParamet
 	return nil
 }
 
+// See the documentation for Marshal.
 func UnmarshalWithParams(attrs []Attribute, val any, params string) error {
 	p, err := parseFieldParameters(params)
 	if err != nil {
@@ -388,3 +389,9 @@ func UnmarshalWithParams(attrs []Attribute, val any, params string) error {
 	}
 	return nil
 }
+
+// See the documentation for Marshal.
+func Unmarshal(attrs []Attribute, val any) error {
+  return UnmarshalWithParams(attrs, val, "")
+}
+
