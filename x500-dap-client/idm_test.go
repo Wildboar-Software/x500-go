@@ -319,7 +319,7 @@ func TestReadAnEntry(t *testing.T) {
 		return
 	}
 	if len(rest) > 0 {
-		t.Error(err.Error())
+		t.Error(err)
 		return
 	}
 	for _, info := range result.Entry.Information {
@@ -1790,7 +1790,8 @@ func TestInterfaceImplementation(t *testing.T) {
 	})
 	_, ok1 := idm.(RemoteOperationServiceElement)
 	_, ok2 := idm.(DirectoryAccessClient)
-	_, ok3 := idm.(DirectoryGroupClient)
+	_, ok3 := idm.(SimpleDirectoryAccessClient)
+	_, ok4 := idm.(DirectoryGroupClient)
 	if !ok1 {
 		t.Error("IDM does not implement RemoteOperationServiceElement")
 		return
@@ -1800,6 +1801,10 @@ func TestInterfaceImplementation(t *testing.T) {
 		return
 	}
 	if !ok3 {
+		t.Error("IDM does not implement SimpleDirectoryAccessClient")
+		return
+	}
+	if !ok4 {
 		t.Error("IDM does not implement DirectoryGroupClient")
 		return
 	}

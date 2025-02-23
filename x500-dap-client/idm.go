@@ -15,7 +15,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math"
 	"net"
 	"os"
 	"runtime"
@@ -28,7 +27,17 @@ import (
 const BIND_RESPONSE_RECEIVE_BUFFER_SIZE = 4096
 const SIZE_OF_IDMV1_FRAME = uint32(6)
 const SIZE_OF_IDMV2_FRAME = uint32(8)
+const DEFAULT_MAX_FRAME = uint(10_000_000) // 10 megabytes
+const DEFAULT_MAX_PDU = uint(10_000_000)   // 10 megabytes
+const DEFAULT_MAX_FRAMES = uint(10)
 
+var FULL_IDMV1_START_TLS_PDU = [...]byte{1, 1, 0, 0, 0, 4, 0xA9, 2, 5, 0}
+var FULL_IDMV2_START_TLS_PDU = [...]byte{2, 1, 0, 0, 0, 0, 0, 4, 0xA9, 2, 5, 0}
+
+var FULL_IDMV1_UNBIND_PDU = [...]byte{1, 1, 0, 0, 0, 4, 0xA7, 2, 5, 0}
+var FULL_IDMV2_UNBIND_PDU = [...]byte{2, 1, 0, 0, 0, 0, 0, 4, 0xA7, 2, 5, 0}
+
+// Produce IDM Frame header given a payload and version.
 func GetIdmFrame(payload []byte, version int) []byte {
 	var idm_prefix []byte
 	if version <= 1 {
@@ -68,53 +77,191 @@ const (
 	StartTLSNever StartTLSChoice = iota
 )
 
+// Internet Directly-Mapped (IDM) Protocol Stack for providing the IDM services
+// described in ITU-T Recommendation X.519 (2019).
+// Only used for X.500 directories, as far as I know.
 type IDMProtocolStack struct {
-	socket            Socket
-	idmVersion        int
-	startTLSResponse  chan StartTLSOutcome
-	pendingOperations map[int]chan X500OpOutcome
-	mutex             sync.Mutex
-	nextInvokeId      int
-	receivedData      []byte
-	bound             bool
-	bindOutcome       chan X500AssociateOutcome
-	SigningKey        *crypto.Signer
-	SigningCert       *x500.CertificationPath
-	ResultsSigning    x500.ProtectionRequest
-	ErrorSigning      x500.ErrorProtectionRequest
-	TlsConfig         *tls.Config
-	StartTLSPolicy    StartTLSChoice
-	derAccepted       bool // TODO: Remove?
-	readerSpawned     bool
 
-	// Channel where errors can be returned to the main thread.
+	// The underlying TCP or TLS socket.
+	socket Socket
+
+	// IDM Protocol Version in Use.
+	idmVersion int
+
+	// Channel for the StartTLS response.
+	// This is separate from the pendingOperations map because the StartTLS
+	// operation does not have an invocation ID.
+	startTLSResponse chan StartTLSOutcome
+
+	// Map of pending operations by their invocation ID.
+	pendingOperations map[int]chan X500OpOutcome
+
+	// Mutex for locking operations on the IDM stack (this).
+	mutex sync.Mutex
+
+	// Next Invocation ID.
+	// To obtain the next invocation ID, use GetNextInvokeId().
+	nextInvokeId int
+
+	// Buffer of received bytes.
+	receivedData []byte
+
+	// Whether a bind operation succeeded and we are now bound at the ROSE layer.
+	bound bool
+
+	// Channel for receiving the bind outcome.
+	// This is separate from the pendingOperations map because the bind
+	// operation does not have an invocation ID.
+	bindOutcome chan X500AssociateOutcome
+
+	// Request signing key
+	SigningKey *crypto.Signer
+
+	// Request signing certificate
+	SigningCert *x500.CertificationPath
+
+	// Used to request result signing.
+	// Set to ProtectionRequest_Signed if you want signed results.
+	// Note that directories do not have to honor this request.
+	ResultsSigning x500.ProtectionRequest
+
+	// Used to request error signing.
+	// Set to ErrorProtectionRequest_Signed if you want signed errors.
+	// Note that directories do not have to honor this request.
+	ErrorSigning x500.ErrorProtectionRequest
+
+	// TLS configuration used if performing StartTLS.
+	TlsConfig *tls.Config
+
+	// Policy towards StartTLS: Do you _require_ it, merely _prefer_ it, or
+	// do not want it at all?
+	//
+	//   StartTLSDemand: If TLS is not already used, REQUIRE StartTLS to succeed,
+	//                   returning an error if it does not. (The default.)
+	//   StartTLSPrefer: If TLS is not already used, attempt StartTLS, but
+	//                   continue to bind to the directory if that fails.
+	//   StartTLSNever:  Do not attempt StartTLS.
+	//
+	StartTLSPolicy StartTLSChoice
+
+	// Whether the reader thread has been spawned yet
+	readerSpawned bool
+
+	// Maximum IDM Frame Size. By default, 10 megabytes, which is huge, but
+	// probably big enough to accomodate a large search result.
+	MaxFrameSize uint
+
+	// Maximum IDM PDU Size. By default, 10 megabytes, which is huge, but
+	// probably big enough to accomodate a large search result.
+	MaxPDUSize uint
+
+	// Maximum IDM Frames per PDU. IDM PDUs can be split across frames.
+	// This limit prevents malicious directories from supplying an infinitely
+	// large number of IDM frames and exhausting your machine's memory or
+	// requiring an outrageously computationally expensive concatenation of
+	// multiple large frames in memory.
+	// Set to 10 by default.
+	MaxFramesPerPDU uint
+
+	// A channel where errors are sent. This library avoids doing any logging
+	// to the console when there are errors. Instead, you pass in an error
+	// channel, and you listen on that error channel for errors, which you can
+	// then do whatever you want with (usually logging).
+	// If you do not supply this, errors will be logged to the stderr console.
 	ErrorChannel chan error
 }
 
+// Configuration to create an [IDMProtocolStack].
 type IDMClientConfig struct {
-	ResultSigning  x500.ProtectionRequest
-	ErrorSigning   x500.ErrorProtectionRequest
-	TlsConfig      *tls.Config
-	SigningKey     *crypto.Signer
-	SigningCert    *x500.CertificationPath
+	// Used to request result signing.
+	// Set to ProtectionRequest_Signed if you want signed results.
+	// Note that directories do not have to honor this request.
+	ResultSigning x500.ProtectionRequest
+
+	// Used to request error signing.
+	// Set to ErrorProtectionRequest_Signed if you want signed errors.
+	// Note that directories do not have to honor this request.
+	ErrorSigning x500.ErrorProtectionRequest
+
+	// TLS configuration used if performing StartTLS.
+	TlsConfig *tls.Config
+
+	// Request signing key
+	SigningKey *crypto.Signer
+
+	// Request signing certificate
+	SigningCert *x500.CertificationPath
+
+	// Policy towards StartTLS: Do you _require_ it, merely _prefer_ it, or
+	// do not want it at all?
+	//
+	//   [StartTLSDemand]: If TLS is not already used, REQUIRE StartTLS to succeed,
+	//                     returning an error if it does not. (The default.)
+	//   [StartTLSPrefer]: If TLS is not already used, attempt StartTLS, but
+	//                     continue to bind to the directory if that fails.
+	//   [StartTLSNever]:  Do not attempt StartTLS.
+	//
 	StartTLSPolicy StartTLSChoice
-	UseIDMv1       bool
-	Errchan        chan error
+
+	// Use Internet Directly-Mapped (IDM) Protocol version 1.
+	// Version 2 is preferred by default, because we can request that the
+	// directory return all data encoded using the Distinguished Encoding Rules
+	// (DER), which is what Go, and hence this library, supports.
+	// Future versions of this library may support BER, so this may become
+	// obsolete. Still, there's virtually no reason to use version 1, except
+	// saving two bytes per frame.
+	UseIDMv1 bool
+
+	// A channel where errors are sent. This library avoids doing any logging
+	// to the console when there are errors. Instead, you pass in an error
+	// channel, and you listen on that error channel for errors, which you can
+	// then do whatever you want with (usually logging).
+	// If you do not supply this, errors will be logged to the stderr console.
+	Errchan chan error
+
+	// Maximum IDM Frame Size. By default, 10 megabytes, which is huge, but
+	// probably big enough to accomodate a large search result.
+	MaxFrameSize uint
+
+	// Maximum IDM PDU Size. By default, 10 megabytes, which is huge, but
+	// probably big enough to accomodate a large search result.
+	MaxPDUSize uint
+
+	// Maximum IDM Frames per PDU. IDM PDUs can be split across frames.
+	// This limit prevents malicious directories from supplying an infinitely
+	// large number of IDM frames and exhausting your machine's memory or
+	// requiring an outrageously computationally expensive concatenation of
+	// multiple large frames in memory.
+	// Set to 10 by default.
+	MaxFramesPerPDU uint
 }
 
+// Create an [IDMProtocolStack]
 func IDMClient(socket Socket, options *IDMClientConfig) *IDMProtocolStack {
 	if options == nil {
 		errchan := make(chan error)
 		options = &IDMClientConfig{
-			ResultSigning:  x500.ProtectionRequest_None,
-			ErrorSigning:   x500.ProtectionRequest_None,
-			TlsConfig:      nil,
-			SigningKey:     nil,
-			SigningCert:    nil,
-			StartTLSPolicy: StartTLSDemand,
-			UseIDMv1:       false, // Prefer IDMv2: we can request DER encoding.
-			Errchan:        errchan,
+			ResultSigning:   x500.ProtectionRequest_None,
+			ErrorSigning:    x500.ProtectionRequest_None,
+			TlsConfig:       nil,
+			SigningKey:      nil,
+			SigningCert:     nil,
+			StartTLSPolicy:  StartTLSDemand,
+			UseIDMv1:        false, // Prefer IDMv2: we can request DER encoding.
+			Errchan:         errchan,
+			MaxFrameSize:    DEFAULT_MAX_FRAME,  // 10 megabytes
+			MaxPDUSize:      DEFAULT_MAX_PDU,    // 10 megabytes
+			MaxFramesPerPDU: DEFAULT_MAX_FRAMES, // 10
 		}
+	}
+	if options.MaxFrameSize == 0 {
+		options.MaxFrameSize = DEFAULT_MAX_FRAME
+	}
+	if options.MaxPDUSize == 0 {
+		options.MaxPDUSize = DEFAULT_MAX_PDU
+	}
+	if options.MaxFramesPerPDU == 0 {
+		options.MaxFramesPerPDU = DEFAULT_MAX_FRAMES
 	}
 	return &IDMProtocolStack{
 		socket:            socket,
@@ -132,6 +279,9 @@ func IDMClient(socket Socket, options *IDMClientConfig) *IDMProtocolStack {
 		ErrorChannel:      options.Errchan,
 		StartTLSPolicy:    options.StartTLSPolicy,
 		TlsConfig:         options.TlsConfig,
+		MaxFrameSize:      options.MaxFrameSize,
+		MaxPDUSize:        options.MaxPDUSize,
+		MaxFramesPerPDU:   options.MaxFramesPerPDU,
 	}
 }
 
@@ -147,6 +297,7 @@ func (stack *IDMProtocolStack) dispatchError(err error) {
 	}
 }
 
+// Get the Next Invoke ID
 func (stack *IDMProtocolStack) GetNextInvokeId() int {
 	stack.mutex.Lock()
 	ret := stack.nextInvokeId
@@ -155,6 +306,8 @@ func (stack *IDMProtocolStack) GetNextInvokeId() int {
 	return ret
 }
 
+// Close the underlying transport: in the case of IDM, the underlying TCP or
+// TLS socket.
 func (stack *IDMProtocolStack) CloseTransport() error {
 	stack.mutex.Lock()
 	defer stack.mutex.Unlock()
@@ -166,7 +319,8 @@ func (stack *IDMProtocolStack) CloseTransport() error {
 	return err
 }
 
-func ConvertX500AssociateToIdmBind(arg X500AssociateArgument) (req x500.IdmBind, err error) {
+// Conver the abstract X.500 Associate argument into an IDM Bind parameter.
+func convertX500AssociateToIdmBind(arg X500AssociateArgument) (req x500.IdmBind, err error) {
 	bitLength := 0
 	var versions_byte byte = 0
 	if arg.V2 {
@@ -228,7 +382,10 @@ func (stack *IDMProtocolStack) readIDMv1Frame(startIndex uint32, frame *IDMFrame
 	}
 	lengthOfDataField := binary.BigEndian.Uint32(stack.receivedData[startIndex+2 : startIndex+SIZE_OF_IDMV1_FRAME])
 	lengthNeeded := (startIndex + SIZE_OF_IDMV1_FRAME + lengthOfDataField)
-	// TODO: Check if it's too large.
+	if lengthOfDataField > uint32(stack.MaxFrameSize) {
+		err = fmt.Errorf("idm v1 pdu too large: length=%d", lengthOfDataField)
+		return
+	}
 	if lengthNeeded > uint32(len(stack.receivedData)) {
 		bytesRead = 0
 	} else {
@@ -253,7 +410,10 @@ func (stack *IDMProtocolStack) readIDMv2Frame(startIndex uint32, frame *IDMFrame
 	}
 	lengthOfDataField := binary.BigEndian.Uint32(stack.receivedData[startIndex+4 : startIndex+SIZE_OF_IDMV2_FRAME])
 	lengthNeeded := (startIndex + SIZE_OF_IDMV2_FRAME + lengthOfDataField)
-	// TODO: Check if it's too large.
+	if lengthOfDataField > uint32(stack.MaxFrameSize) {
+		err = fmt.Errorf("idm v2 pdu too large: length=%d", lengthOfDataField)
+		return
+	}
 	if lengthNeeded > uint32(len(stack.receivedData)) {
 		bytesRead = 0
 	} else {
@@ -268,6 +428,7 @@ func (stack *IDMProtocolStack) readIDMv2Frame(startIndex uint32, frame *IDMFrame
 func (stack *IDMProtocolStack) readPDU(pdu *x500.IDM_PDU) (bytesRead uint32, err error) {
 	var frames = make([]IDMFrame, 0)
 	var startIndex uint32 = 0
+	receiveBuffer := make([]byte, BIND_RESPONSE_RECEIVE_BUFFER_SIZE)
 	index := startIndex
 	for err == nil {
 		frame := IDMFrame{}
@@ -290,8 +451,6 @@ func (stack *IDMProtocolStack) readPDU(pdu *x500.IDM_PDU) (bytesRead uint32, err
 		   block on a read() call when there is already data in the buffer that
 		   would give us the next IDM PDU. */
 		if frameBytesRead == 0 {
-			// FIXME: Don't allocate a new buffer each time.
-			receiveBuffer := make([]byte, BIND_RESPONSE_RECEIVE_BUFFER_SIZE)
 			bytesReceived, err := stack.socket.Read(receiveBuffer)
 			if err != nil {
 				return 0, err
@@ -304,6 +463,10 @@ func (stack *IDMProtocolStack) readPDU(pdu *x500.IDM_PDU) (bytesRead uint32, err
 		if frame.Final > 0 {
 			var completeSegment []byte = make([]byte, 0)
 			for _, frame := range frames {
+				if len(completeSegment)+len(frame.Data) > int(stack.MaxPDUSize) {
+					err = errors.New("idm pdu too large")
+					return
+				}
 				completeSegment = append(completeSegment, frame.Data...)
 			}
 			completeSegment = append(completeSegment, frame.Data...)
@@ -322,14 +485,17 @@ func (stack *IDMProtocolStack) readPDU(pdu *x500.IDM_PDU) (bytesRead uint32, err
 			stack.mutex.Unlock()
 			return bytesRead, nil
 		} else {
-			// TODO: Check maximum frames
+			if len(frames)+1 > int(stack.MaxFramesPerPDU) {
+				err = errors.New("too many idm frames")
+				return
+			}
 			frames = append(frames, frame)
 		}
 	}
 	return bytesRead, nil
 }
 
-func (stack *IDMProtocolStack) handleBindPDU(pdu x500.IdmBind) {
+func (stack *IDMProtocolStack) handleBindPDU(_ x500.IdmBind) {
 	stack.dispatchError(errors.New("server sent bind"))
 }
 
@@ -374,7 +540,6 @@ func (stack *IDMProtocolStack) handleBindResultPDU(pdu x500.IdmBindResult) {
 		}
 	}
 
-	// TODO: Is there a better way?
 	// We return this value regardless of what the server responded, since we
 	// still send DER exclusively.
 	transferSyntax := asn1.ObjectIdentifier{2, 1, 2, 1} // Distinguished Encoding Rules
@@ -488,7 +653,6 @@ func (stack *IDMProtocolStack) handleBindErrorPDU(pdu x500.IdmBindError) {
 		}
 	}
 
-	// TODO: Is there a better way?
 	// We return this value regardless of what the server responded, since we
 	// still send DER exclusively.
 	transferSyntax := asn1.ObjectIdentifier{2, 1, 2, 1} // Distinguished Encoding Rules
@@ -512,7 +676,7 @@ func (stack *IDMProtocolStack) handleBindErrorPDU(pdu x500.IdmBindError) {
 	}
 }
 
-func (stack *IDMProtocolStack) handleRequestPDU(pdu x500.Request) {
+func (stack *IDMProtocolStack) handleRequestPDU(_ x500.Request) {
 	stack.dispatchError(errors.New("server sent request"))
 }
 
@@ -595,7 +759,7 @@ func (stack *IDMProtocolStack) handleRejectPDU(pdu x500.IdmReject) {
 	}
 }
 
-func (stack *IDMProtocolStack) handleUnbindPDU(pdu x500.Unbind) {
+func (stack *IDMProtocolStack) handleUnbindPDU(_ x500.Unbind) {
 	stack.dispatchError(errors.New("server sent unbind message, which is not allowed"))
 }
 
@@ -641,7 +805,7 @@ func (stack *IDMProtocolStack) handleAbortPDU(pdu x500.Abort) {
 	stack.receivedData = make([]byte, 0)
 }
 
-func (stack *IDMProtocolStack) handleStartTLSPDU(pdu x500.StartTLS) {
+func (stack *IDMProtocolStack) handleStartTLSPDU(_ x500.StartTLS) {
 	stack.dispatchError(errors.New("server sent starttls message, which is not allowed"))
 }
 
@@ -874,7 +1038,6 @@ func (stack *IDMProtocolStack) processNextPDU() (bytesRead uint32, err error) {
 		}
 		return bytesRead, err
 	}
-	// TODO: Under what circumstances will this happen?
 	if bytesRead == 0 {
 		return bytesRead, err
 	}
@@ -884,7 +1047,7 @@ func (stack *IDMProtocolStack) processNextPDU() (bytesRead uint32, err error) {
 }
 
 func (stack *IDMProtocolStack) processReceivedPDUs() (err error) {
-	for err == nil {
+	for {
 		_, err := stack.processNextPDU()
 		if err != nil {
 			break
@@ -903,19 +1066,17 @@ func (stack *IDMProtocolStack) BindAnonymously(ctx context.Context) (response X5
 
 func (stack *IDMProtocolStack) startTLS(ctx context.Context) (response StartTLSOutcome, err error) {
 	go stack.processNextPDU() // Listen for a single StartTLS response PDU.
-	// TODO: This entire PDU has predictable form. Just use one write.
-	idm_payload := []byte{0xA9, 2, 5, 0} // This is the entire startTLS [9] EXPLICIT NULL
-	frame := GetIdmFrame(idm_payload, stack.idmVersion)
+	// Because this entire PDU has a predictable form, we can just write the whole IDM frame in a single write() call.
 	stack.mutex.Lock()
-	_, err = stack.socket.Write(frame)
-	if err != nil {
-		return StartTLSOutcome{}, err
-	}
-	_, err = stack.socket.Write(idm_payload)
-	if err != nil {
-		return StartTLSOutcome{}, err
+	if stack.idmVersion <= 1 {
+		_, err = stack.socket.Write(FULL_IDMV1_START_TLS_PDU[:])
+	} else {
+		_, err = stack.socket.Write(FULL_IDMV2_START_TLS_PDU[:])
 	}
 	stack.mutex.Unlock()
+	if err != nil {
+		return StartTLSOutcome{}, err
+	}
 
 	select {
 	case response = <-stack.startTLSResponse:
@@ -963,11 +1124,11 @@ func (stack *IDMProtocolStack) Bind(ctx context.Context, arg X500AssociateArgume
 	}
 	// There should only ever be one of these goroutines spawned per client.
 	// These are terminated when the socket is closed.
-	if stack.readerSpawned == false {
+	if !stack.readerSpawned {
 		stack.readerSpawned = true
 		go stack.processReceivedPDUs()
 	}
-	bind_arg, err := ConvertX500AssociateToIdmBind(arg)
+	bind_arg, err := convertX500AssociateToIdmBind(arg)
 	if err != nil {
 		return X500AssociateOutcome{}, err
 	}
@@ -997,11 +1158,10 @@ func (stack *IDMProtocolStack) Bind(ctx context.Context, arg X500AssociateArgume
 		frame[2] = 0b1000_0000
 	}
 	stack.mutex.Lock()
-	if stack.bound == true {
+	if stack.bound {
 		stack.mutex.Unlock()
 		return X500AssociateOutcome{}, errors.New("already bound")
 	}
-	// TODO: If bind is anonymous, send a single write.
 	_, err = stack.socket.Write(frame)
 	if err != nil {
 		stack.mutex.Unlock()
@@ -1062,7 +1222,7 @@ func (stack *IDMProtocolStack) Request(ctx context.Context, req X500Request) (re
 	op := make(chan X500OpOutcome)
 	frame := GetIdmFrame(pduBytes, stack.idmVersion)
 	stack.mutex.Lock()
-	if stack.bound == false {
+	if !stack.bound {
 		stack.mutex.Unlock()
 		return X500OpOutcome{}, errors.New("request sent while not bound")
 	}
@@ -1090,9 +1250,6 @@ func (stack *IDMProtocolStack) Request(ctx context.Context, req X500Request) (re
 	stack.mutex.Lock()
 	delete(stack.pendingOperations, invokeId)
 	stack.mutex.Unlock()
-	if err != nil {
-		return X500OpOutcome{}, err
-	}
 	if response.OutcomeType == OP_OUTCOME_FAILURE {
 		return response, response.err
 	}
@@ -1100,33 +1257,19 @@ func (stack *IDMProtocolStack) Request(ctx context.Context, req X500Request) (re
 }
 
 func (stack *IDMProtocolStack) Unbind(_ context.Context, req X500UnbindRequest) (response X500UnbindOutcome, err error) {
-	// TODO: This entire PDU has predictable form. Send this in a single write.
-	op_element := asn1.RawValue{
-		Class:      asn1.ClassContextSpecific,
-		Tag:        7,
-		IsCompound: true,
-		Bytes:      asn1.NullBytes,
-	}
-	idm_payload, err := asn1.Marshal(op_element)
-	if err != nil {
-		return X500UnbindOutcome{}, err
-	}
-	frame := GetIdmFrame(idm_payload, stack.idmVersion)
 	stack.mutex.Lock()
-	defer stack.mutex.Unlock()
-	if stack.bound == false {
+	if !stack.bound {
 		return X500UnbindOutcome{}, nil
 	}
+	// Because this PDU has predictable form, we can just write the whole IDM frame in a single write() call.
+	if stack.idmVersion <= 1 {
+		_, err = stack.socket.Write(FULL_IDMV1_UNBIND_PDU[:])
+	} else {
+		_, err = stack.socket.Write(FULL_IDMV2_UNBIND_PDU[:])
+	}
 	stack.bound = false
-	_, err = stack.socket.Write(frame)
-	if err != nil {
-		return X500UnbindOutcome{}, err
-	}
-	_, err = stack.socket.Write(idm_payload)
-	if err != nil {
-		return X500UnbindOutcome{}, err
-	}
-	return X500UnbindOutcome{}, nil
+	stack.mutex.Unlock()
+	return X500UnbindOutcome{}, err
 }
 
 func HashAlgFromHash(h crypto.Hash) (alg pkix.AlgorithmIdentifier, err error) {
@@ -1451,8 +1594,8 @@ func configureServiceControls(ctx context.Context, sc *x500.ServiceControls) {
 	if sc.TimeLimit == 0 {
 		deadline, has_deadline := ctx.Deadline()
 		if has_deadline {
-			timeLeft := int(math.Floor(deadline.Sub(time.Now()).Seconds()))
-			sc.TimeLimit = timeLeft
+			timeLeft := time.Until(deadline)
+			sc.TimeLimit = int(timeLeft.Seconds())
 		}
 	}
 	/* We want to set size default size limits so the directory does not hose
@@ -1479,6 +1622,7 @@ func configureServiceControls(ctx context.Context, sc *x500.ServiceControls) {
 	}
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) read operation.
 func (stack *IDMProtocolStack) Read(ctx context.Context, arg_data x500.ReadArgumentData) (response X500OpOutcome, result *x500.ReadResultData, err error) {
 	opCode := localOpCode(1) // Read operation
 	invokeId := stack.GetNextInvokeId()
@@ -1566,6 +1710,7 @@ func (stack *IDMProtocolStack) Read(ctx context.Context, arg_data x500.ReadArgum
 	}
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) compare operation.
 func (stack *IDMProtocolStack) Compare(ctx context.Context, arg_data x500.CompareArgumentData) (resp X500OpOutcome, result *x500.CompareResultData, err error) {
 	opCode := localOpCode(2) // Compare operation
 	invokeId := stack.GetNextInvokeId()
@@ -1653,6 +1798,7 @@ func (stack *IDMProtocolStack) Compare(ctx context.Context, arg_data x500.Compar
 	}
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) abandon operation.
 func (stack *IDMProtocolStack) Abandon(ctx context.Context, arg_data x500.AbandonArgumentData) (resp X500OpOutcome, result *x500.AbandonResultData, err error) {
 	opCode := localOpCode(3) // Abandon operation
 	invokeId := stack.GetNextInvokeId()
@@ -1699,6 +1845,7 @@ func (stack *IDMProtocolStack) Abandon(ctx context.Context, arg_data x500.Abando
 	return getDataFromNullOrOptProtSeq[x500.AbandonResultData](outcome)
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) list operation.
 func (stack *IDMProtocolStack) List(ctx context.Context, arg_data x500.ListArgumentData) (resp X500OpOutcome, info *x500.ListResultData_listInfo, err error) {
 	opCode := localOpCode(4) // List operation
 	invokeId := stack.GetNextInvokeId()
@@ -1794,6 +1941,7 @@ func (stack *IDMProtocolStack) List(ctx context.Context, arg_data x500.ListArgum
 	return outcome, info, nil
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) search operation.
 func (stack *IDMProtocolStack) Search(ctx context.Context, arg_data x500.SearchArgumentData) (resp X500OpOutcome, info *x500.SearchResultData_searchInfo, err error) {
 	opCode := localOpCode(5) // Search operation
 	invokeId := stack.GetNextInvokeId()
@@ -1895,6 +2043,7 @@ func (stack *IDMProtocolStack) Search(ctx context.Context, arg_data x500.SearchA
 	return outcome, info, nil
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) addEntry operation.
 func (stack *IDMProtocolStack) AddEntry(ctx context.Context, arg_data x500.AddEntryArgumentData) (resp X500OpOutcome, result *x500.AddEntryResultData, err error) {
 	opCode := localOpCode(6) // AddEntry operation
 	invokeId := stack.GetNextInvokeId()
@@ -1956,6 +2105,7 @@ func (stack *IDMProtocolStack) AddEntry(ctx context.Context, arg_data x500.AddEn
 	return getDataFromNullOrOptProtSeq[x500.AddEntryResultData](outcome)
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) removeEntry operation.
 func (stack *IDMProtocolStack) RemoveEntry(ctx context.Context, arg_data x500.RemoveEntryArgumentData) (resp X500OpOutcome, result *x500.RemoveEntryResultData, err error) {
 	opCode := localOpCode(7) // RemoveEntry operation
 	invokeId := stack.GetNextInvokeId()
@@ -2017,6 +2167,7 @@ func (stack *IDMProtocolStack) RemoveEntry(ctx context.Context, arg_data x500.Re
 	return getDataFromNullOrOptProtSeq[x500.RemoveEntryResultData](outcome)
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) modifyEntry operation.
 func (stack *IDMProtocolStack) ModifyEntry(ctx context.Context, arg_data x500.ModifyEntryArgumentData) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
 	opCode := localOpCode(8) // ModifyEntry operation
 	invokeId := stack.GetNextInvokeId()
@@ -2078,6 +2229,7 @@ func (stack *IDMProtocolStack) ModifyEntry(ctx context.Context, arg_data x500.Mo
 	return getDataFromNullOrOptProtSeq[x500.ModifyEntryResultData](outcome)
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) modifyDN operation.
 func (stack *IDMProtocolStack) ModifyDN(ctx context.Context, arg_data x500.ModifyDNArgumentData) (resp X500OpOutcome, result *x500.ModifyDNResultData, err error) {
 	opCode := localOpCode(9) // ModifyDN operation
 	invokeId := stack.GetNextInvokeId()
@@ -2134,6 +2286,7 @@ func (stack *IDMProtocolStack) ModifyDN(ctx context.Context, arg_data x500.Modif
 	return getDataFromNullOrOptProtSeq[x500.ModifyDNResultData](outcome)
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) changePassword operation.
 func (stack *IDMProtocolStack) ChangePassword(ctx context.Context, arg_data x500.ChangePasswordArgumentData) (resp X500OpOutcome, result *x500.ChangePasswordResultData, err error) {
 	opCode := localOpCode(10) // ChangePassword operation
 	invokeId := stack.GetNextInvokeId()
@@ -2182,6 +2335,7 @@ func (stack *IDMProtocolStack) ChangePassword(ctx context.Context, arg_data x500
 	return getDataFromNullOrOptProtSeq[x500.ChangePasswordResultData](outcome)
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) administerPassword operation.
 func (stack *IDMProtocolStack) AdministerPassword(ctx context.Context, arg_data x500.AdministerPasswordArgumentData) (resp X500OpOutcome, result *x500.AdministerPasswordResultData, err error) {
 	opCode := localOpCode(11) // AdministerPassword operation
 	invokeId := stack.GetNextInvokeId()
@@ -2229,6 +2383,8 @@ func (stack *IDMProtocolStack) AdministerPassword(ctx context.Context, arg_data 
 	return getDataFromNullOrOptProtSeq[x500.AdministerPasswordResultData](outcome)
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) bind operation using simple
+// authentication (the use of a distinguished name and a password).
 func (stack *IDMProtocolStack) BindSimply(ctx context.Context, dn x500.DistinguishedName, password string) (resp X500AssociateOutcome, err error) {
 	unprotected := asn1.RawValue{
 		Class:      asn1.ClassUniversal,
@@ -2242,9 +2398,7 @@ func (stack *IDMProtocolStack) BindSimply(ctx context.Context, dn x500.Distingui
 	}
 	simpleCreds := x500.SimpleCredentials{
 		Name:     dn,
-		Validity: x500.SimpleCredentials_validity{
-			// TODO:
-		},
+		Validity: x500.SimpleCredentials_validity{},
 		Password: asn1.RawValue{
 			Class:      asn1.ClassContextSpecific,
 			Tag:        2,
@@ -2279,6 +2433,9 @@ func (stack *IDMProtocolStack) BindSimply(ctx context.Context, dn x500.Distingui
 	return stack.Bind(ctx, arg)
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) bind operation using strong
+// authentication (the use of cryptographic signatures / PKI to sign a
+// verifiable token for the server).
 func (stack *IDMProtocolStack) BindStrongly(ctx context.Context, requesterDN x500.DistinguishedName, recipientDN x500.DistinguishedName, acPath *x500.AttributeCertificationPath) (resp X500AssociateOutcome, err error) {
 	if stack.SigningKey == nil {
 		return X500AssociateOutcome{}, errors.New("no signing key configured")
@@ -2345,16 +2502,6 @@ func (stack *IDMProtocolStack) BindStrongly(ctx context.Context, requesterDN x50
 	if err != nil {
 		return X500AssociateOutcome{}, err
 	}
-	// creds := asn1.RawValue{
-	// 	Class:      asn1.ClassContextSpecific,
-	// 	Tag:        1,
-	// 	IsCompound: true,
-	// 	Bytes:      strongCredsBytes,
-	// }
-	// credsBytes, err := asn1.Marshal(creds)
-	// if err != nil {
-	// 	return X500AssociateOutcome{}, err
-	// }
 	arg := X500AssociateArgument{
 		V1: true,
 		V2: true,
@@ -2377,6 +2524,8 @@ func containsNullChar(s string) bool {
 	return false
 }
 
+// Perform an X.500 Directory Access Protocol (DAP) bind operation using the
+// PLAIN SASL method (which takes a username and password).
 func (stack *IDMProtocolStack) BindPlainly(ctx context.Context, username string, password string) (resp X500AssociateOutcome, err error) {
 	if containsNullChar(username) {
 		return X500AssociateOutcome{}, errors.New("username contains null character")
@@ -2424,6 +2573,12 @@ func (stack *IDMProtocolStack) BindPlainly(ctx context.Context, username string,
 	return stack.Bind(ctx, arg)
 }
 
+// Simplified API for performing an X.500 Directory Access Protocol (DAP) read
+// operation when the target entry is targeted by its distinguished name (DN)
+// and when you only need to query user attributes.
+// If len(userAttributes) == 0, all user attributes will be selected.
+//
+// If you need to request modify rights, you'll need to use the [Read] function.
 func (stack *IDMProtocolStack) ReadSimple(ctx context.Context, dn x500.DistinguishedName, userAttributes []asn1.ObjectIdentifier) (response X500OpOutcome, result *x500.ReadResultData, err error) {
 	name_bytes, err := asn1.Marshal(dn)
 	if err != nil {
@@ -2443,6 +2598,8 @@ func (stack *IDMProtocolStack) ReadSimple(ctx context.Context, dn x500.Distingui
 	return stack.Read(ctx, read_arg)
 }
 
+// Simplified API for performing an X.500 Directory Access Protocol (DAP)
+// compare operation. It just takes an entry name and an assertion.
 func (stack *IDMProtocolStack) CompareSimple(ctx context.Context, dn DN, ava x500.AttributeValueAssertion) (resp X500OpOutcome, result *x500.CompareResultData, err error) {
 	name_bytes, err := asn1.Marshal(dn)
 	if err != nil {
@@ -2460,6 +2617,8 @@ func (stack *IDMProtocolStack) CompareSimple(ctx context.Context, dn DN, ava x50
 	return stack.Compare(ctx, arg)
 }
 
+// Simplified API for performing an X.500 Directory Access Protocol (DAP)
+// removeEntry operation. It just takes an entry's distinguished name.
 func (stack *IDMProtocolStack) RemoveEntryByDN(ctx context.Context, dn x500.DistinguishedName) (resp X500OpOutcome, result *x500.RemoveEntryResultData, err error) {
 	name_bytes, err := asn1.Marshal(dn)
 	if err != nil {
@@ -2476,6 +2635,8 @@ func (stack *IDMProtocolStack) RemoveEntryByDN(ctx context.Context, dn x500.Dist
 	return stack.RemoveEntry(ctx, arg)
 }
 
+// Simplified API for performing an X.500 Directory Access Protocol (DAP)
+// abandon operation. It just takes an invocation ID.
 func (stack *IDMProtocolStack) AbandonById(ctx context.Context, invokeId int) (resp X500OpOutcome, result *x500.AbandonResultData, err error) {
 	iidBytes, err := asn1.Marshal(invokeId)
 	if err != nil {
@@ -2492,6 +2653,9 @@ func (stack *IDMProtocolStack) AbandonById(ctx context.Context, invokeId int) (r
 	return stack.Abandon(ctx, arg)
 }
 
+// Simplified API for performing an X.500 Directory Access Protocol (DAP)
+// list operation. It just takes an entry's distinguished name and a limit of
+// entries to return beneath it. `limit` will be unset if it is 0.
 func (stack *IDMProtocolStack) ListByDN(ctx context.Context, dn x500.DistinguishedName, limit int) (resp X500OpOutcome, info *x500.ListResultData_listInfo, err error) {
 	name_bytes, err := asn1.Marshal(dn)
 	if err != nil {
@@ -2511,6 +2675,11 @@ func (stack *IDMProtocolStack) ListByDN(ctx context.Context, dn x500.Distinguish
 	return stack.List(ctx, arg)
 }
 
+// Simplified API for performing an X.500 Directory Access Protocol (DAP)
+// addEntry operation. It just takes an entry's distinguished name and its
+// attributes.
+// If you need to use the `targetSystem` parameter to create a new hierarchical
+// operational binding (HOB), you will have to use [AddEntry] instead.
 func (stack *IDMProtocolStack) AddEntrySimple(ctx context.Context, dn x500.DistinguishedName, attrs []x500.Attribute) (resp X500OpOutcome, result *x500.AddEntryResultData, err error) {
 	name_bytes, err := asn1.Marshal(dn)
 	if err != nil {
@@ -2528,6 +2697,9 @@ func (stack *IDMProtocolStack) AddEntrySimple(ctx context.Context, dn x500.Disti
 	return stack.AddEntry(ctx, arg)
 }
 
+// Simplified API for performing an X.500 Directory Access Protocol (DAP)
+// changePassword operation. It just takes an entry's distinguished name and its
+// old and new passwords.
 func (stack *IDMProtocolStack) ChangePasswordSimple(ctx context.Context, dn x500.DistinguishedName, old string, new string) (resp X500OpOutcome, result *x500.ChangePasswordResultData, err error) {
 	oldstr, err := asn1.MarshalWithParams(old, "utf8")
 	if err != nil {
@@ -2557,6 +2729,9 @@ func (stack *IDMProtocolStack) ChangePasswordSimple(ctx context.Context, dn x500
 	return stack.ChangePassword(ctx, arg)
 }
 
+// Simplified API for performing an X.500 Directory Access Protocol (DAP)
+// changePassword operation. It just takes an entry's distinguished name and its
+// new password.
 func (stack *IDMProtocolStack) AdministerPasswordSimple(ctx context.Context, dn x500.DistinguishedName, new string) (resp X500OpOutcome, result *x500.AdministerPasswordResultData, err error) {
 	newstr, err := asn1.MarshalWithParams(new, "utf8")
 	if err != nil {
@@ -2605,22 +2780,32 @@ func singleModification[A any](stack *IDMProtocolStack, ctx context.Context, dn 
 	return stack.ModifyEntry(ctx, arg_data)
 }
 
+// Add a new attribute to an entry, returning an X.500 attribute error if
+// the attribute already exists.
 func (stack *IDMProtocolStack) AddAttribute(ctx context.Context, dn DN, attr x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
 	return singleModification(stack, ctx, dn, attr, 0)
 }
 
+// Remove an attribute from an entry entirely, returning an X.500 attribute
+// error if the attribute does not exist.
 func (stack *IDMProtocolStack) RemoveAttribute(ctx context.Context, dn DN, attr x500.AttributeType) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
 	return singleModification(stack, ctx, dn, attr, 1)
 }
 
+// Add new values to an entry, creating the attribute if it does not exist.
+// If the values already exist, a directory error is returned.
 func (stack *IDMProtocolStack) AddValues(ctx context.Context, dn DN, values x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
 	return singleModification(stack, ctx, dn, values, 2)
 }
 
+// Remove values from an entry, returning an error if one or more do not
+// exist. If the last value is removed, the whole attribute is removed.
 func (stack *IDMProtocolStack) RemoveValues(ctx context.Context, dn DN, values x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
 	return singleModification(stack, ctx, dn, values, 3)
 }
 
+// Add `addend` to the values of the attribute type. `addend` could be
+// negative, which would result in subtraction.
 func (stack *IDMProtocolStack) AlterValues(ctx context.Context, dn DN, attrtype x500.AttributeType, addend int) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
 	addendBytes, err := asn1.Marshal(addend)
 	if err != nil {
@@ -2633,10 +2818,14 @@ func (stack *IDMProtocolStack) AlterValues(ctx context.Context, dn DN, attrtype 
 	return singleModification(stack, ctx, dn, atav, 4)
 }
 
+// Remove all values that have contexts for which fallback is FALSE.
 func (stack *IDMProtocolStack) ResetValue(ctx context.Context, dn DN, attr x500.AttributeType) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
 	return singleModification(stack, ctx, dn, attr, 5)
 }
 
+// Replace an attribute entirely. If the supplied attribute is empty, the
+// existing attribute is deleted, if it exists, but no error is returned if
+// it does not.
 func (stack *IDMProtocolStack) ReplaceValues(ctx context.Context, dn DN, attr x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error) {
 	return singleModification(stack, ctx, dn, attr, 6)
 }

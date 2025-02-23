@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/asn1"
 	"math/big"
-	"time"
 
 	"github.com/Wildboar-Software/x500-go/x500"
 )
@@ -181,7 +180,6 @@ type X500OpOutcome struct {
 	err           error         // Only set if OutcomeType == OPERATION_OUTCOME_TYPE_FAILURE
 }
 
-// TODO: Rename to generalize over ROSE instead of X.500
 // A Remote Operation Service Element (ROSE) unbind request
 type X500UnbindRequest struct {
 	PresentationContextIdentifier x500.Presentation_context_identifier
@@ -228,6 +226,7 @@ type RemoteOperationServiceElement interface {
 	CloseTransport() (err error)
 }
 
+// X.500 Directory Access Protocol (DAP) Client
 type DirectoryAccessClient interface {
 	RemoteOperationServiceElement
 
@@ -265,8 +264,12 @@ type DirectoryAccessClient interface {
 
 	// Perform the `administerPassword` Directory Access Protocol (DAP) operation. The `result` returned may be `nil`.
 	AdministerPassword(ctx context.Context, arg_data x500.AdministerPasswordArgumentData) (resp X500OpOutcome, result *x500.AdministerPasswordResultData, err error)
+}
 
-	// Higher-Level DAP API
+// X.500 Directory Access Protocol (DAP) Client with convenience functions that
+// provide a simpler interface.
+type SimpleDirectoryAccessClient interface {
+	DirectoryAccessClient
 
 	// Bind using simple authentication: your distinguished name and password
 	BindSimply(ctx context.Context, dn DN, password string) (resp X500AssociateOutcome, err error)
@@ -314,106 +317,52 @@ type DirectoryAccessClient interface {
 
 	// Entry Modifications
 
+	// Add a new attribute to an entry, returning an X.500 attribute error if
+	// the attribute already exists.
 	AddAttribute(ctx context.Context, dn DN, attr x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+
+	// Remove an attribute from an entry entirely, returning an X.500 attribute
+	// error if the attribute does not exist.
 	RemoveAttribute(ctx context.Context, dn DN, attr x500.AttributeType) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+
+	// Add new values to an entry, creating the attribute if it does not exist.
+	// If the values already exist, a directory error is returned.
 	AddValues(ctx context.Context, dn DN, values x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+
+	// Remove values from an entry, returning an error if one or more do not
+	// exist. If the last value is removed, the whole attribute is removed.
 	RemoveValues(ctx context.Context, dn DN, values x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+
+	// Add `addend` to the values of the attribute type. `addend` could be
+	// negative, which would result in subtraction.
 	AlterValues(ctx context.Context, dn DN, attrtype x500.AttributeType, addend int) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+
+	// Remove all values that have contexts for which fallback is FALSE.
 	ResetValue(ctx context.Context, dn DN, attr x500.AttributeType) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+
+	// Replace an attribute entirely. If the supplied attribute is empty, the
+	// existing attribute is deleted, if it exists, but no error is returned if
+	// it does not.
 	ReplaceValues(ctx context.Context, dn DN, attr x500.Attribute) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
 }
 
 type DN = x500.DistinguishedName
 
-type Subschema struct {
-	AttributeTypes   *[]x500.AttributeTypeDescription
-	ObjectClasses    *[]x500.ObjectClassDescription
-	NameForms        *[]x500.NameFormDescription
-	StructureRules   *[]x500.DITStructureRuleDescription
-	ContentRules     *[]x500.DITContentRuleDescription
-	Friendships      *[]x500.FriendsDescription
-	MatchingRules    *[]x500.MatchingRuleDescription
-	MatchingRuleUses *[]x500.MatchingRuleUseDescription
-	SyntaxNames      *[]x500.LdapSyntaxDescription
-	ContextUses      *[]x500.DITContextUseDescription
-	ContextTypes     *[]x500.ContextDescription
-}
-
-type DSAInfo struct {
-	VendorName              string
-	VendorVersion           string
-	FullVendorVersion       string
-	MyAccessPoint           x500.AccessPoint
-	SuperiorKnowledge       []x500.AccessPoint
-	DITBridgeKnowledge      []x500.DitBridgeKnowledge
-	SubschemaSubentry       x500.DistinguishedName
-	SupportedControls       []asn1.ObjectIdentifier
-	SupportedExtensions     []asn1.ObjectIdentifier
-	SupportedFeatures       []asn1.ObjectIdentifier
-	SupportedLDAPVersion    int
-	DynamicSubtrees         []x500.DistinguishedName
-	AltServers              []string
-	SupportedSASLMechanisms []string
-	NamingContexts          []x500.DistinguishedName
-
-	// A catch-all, which includes all attributes (user and operational)
-	RootDSEAttributes []x500.Attribute
-}
-
+// Client for managing groups: X.500 directory entries of object class
+// `groupOfNames` (`2.5.6.9`), `groupOfUniqueNames` (`2.5.6.17`), or any other
+// object class that takes values of type `member` (`2.5.4.31`) or
+// `uniqueMember` (`2.5.4.50`).
 type DirectoryGroupClient interface {
+
+	// Add a group member. If `uid` is `nil`, the `member` attribute is used,
+	// otherwise, the `uniqueMember` attribute is used.
 	GroupAdd(ctx context.Context, group, member DN, uid *asn1.BitString) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+
+	// Remove a group member. If `uid` is `nil`, the `member` attribute is used,
+	// otherwise, the `uniqueMember` attribute is used.
 	GroupRemove(ctx context.Context, group, member DN, uid *asn1.BitString) (resp X500OpOutcome, result *x500.ModifyEntryResultData, err error)
+
+	// Check for the presence of a member in a group. If `uid` is `nil`, the
+	// `member` attribute is used, otherwise, the `uniqueMember` attribute is used.
 	GroupCheckMember(ctx context.Context, group, member DN, uid *asn1.BitString) (resp X500OpOutcome, result *x500.CompareResultData, err error)
-}
-
-type CommonArgumentsInterface interface {
-	GetServiceControls() x500.ServiceControls
-	GetSecurityParameters() x500.SecurityParameters
-	GetRequestor() DN
-	GetOperationProgress() x500.OperationProgress
-	GetAliasedRDNs() int
-	GetCriticalExtensions() asn1.BitString
-	GetReferenceType() x500.ReferenceType
-	GetEntryOnly() bool
-	GetExclusions() x500.Exclusions
-	GetNameResolveOnMaster() bool
-	GetOperationContexts() x500.ContextSelection
-	GetFamilyGrouping() x500.FamilyGrouping
-}
-
-type CommonResultsInterface interface {
-	GetSecurityParameters() *x500.SecurityParameters
-	GetPerformer() *DN
-	GetAliasDereferenced() bool
-	GetNotification() []x500.Attribute
-}
-
-type AccessPointInterface interface {
-	GetAETitle() x500.Name
-	GetAddress() x500.PresentationAddress
-	GetProtocolInformation() []x500.ProtocolInformation
-}
-
-type AVMPcommonComponentsInterface interface {
-	GetVersion() x500.AVMPversion
-	GetTimestamp() time.Time
-	GetAVMPSequence() x500.AVMPsequence
-}
-
-type SchemaElement interface {
-	GetName() string
-	GetDescription() string
-	GetObsolete() bool
-}
-
-type ObjectIdentifierIdentified interface {
-	GetOIDIdentifier() asn1.ObjectIdentifier
-}
-
-type DirectoryStringIdentified interface {
-	GetStringIdentifier() asn1.RawValue
-}
-
-type IntIdentified interface {
-	GetIntIdentifier() int
 }
