@@ -1,4 +1,6 @@
 github.com/Wildboar-Software/x500-go/teletex v0.0.0-20250111193719-bd783c5d75c1 h1:tZWx+aEdhvKBeKu/tyFQ4VZPm8INv9zxrOTwHU5lvSY=
 github.com/Wildboar-Software/x500-go/teletex v0.0.0-20250111193719-bd783c5d75c1/go.mod h1:t6u26EHjID3Hfv5L/u9DWPElmrLb4Z7l2l/cWLkBGro=
+github.com/Wildboar-Software/x500-go/teletex v1.0.0 h1:UOaT6ofiKdBR37+wEeOi7nFPtXg/U4Z79XWBKy/LNNg=
+github.com/Wildboar-Software/x500-go/teletex v1.0.0/go.mod h1:t6u26EHjID3Hfv5L/u9DWPElmrLb4Z7l2l/cWLkBGro=
 github.com/sosodev/duration v1.3.1 h1:qtHBDMQ6lvMQsL15g4aopM4HEfOaYuhWBw3NPTtlqq4=
 github.com/sosodev/duration v1.3.1/go.mod h1:RQIBBX0+fMLc/D9+Jb/fwvVmo0eZvDDEERAikUR6SDg=

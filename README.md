@@ -51,7 +51,7 @@ update with tags, text, keywords, etc.
 - [x] Even higher-level API
 - [ ] Use `X500OperationError` (I might not do this...)
 - [ ] Fill in critical extensions appropriately
-- [ ] Documentation
+- [x] Documentation
 - [x] Reflection API (See Below)
 
 ### Future
