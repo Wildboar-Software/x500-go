@@ -3,6 +3,7 @@
 [![teletex Go Reference](https://pkg.go.dev/badge/github.com/Wildboar-Software/x500-go/teletex.svg)](https://pkg.go.dev/github.com/Wildboar-Software/x500-go/teletex)
 [![nsap_address Go Reference](https://pkg.go.dev/badge/github.com/Wildboar-Software/x500-go/nsap-address.svg)](https://pkg.go.dev/github.com/Wildboar-Software/x500-go/nsap-address)
 [![x500 Go Reference](https://pkg.go.dev/badge/github.com/Wildboar-Software/x500-go/x500.svg)](https://pkg.go.dev/github.com/Wildboar-Software/x500-go/x500)
+[![x500-dap-client Go Reference](https://pkg.go.dev/badge/github.com/Wildboar-Software/x500-go/x500-dap-client.svg)](https://pkg.go.dev/github.com/Wildboar-Software/x500-go/x500-dap-client)
 
 This is a workspace for several X.500-directory and X.509 PKI-related
 libraries (and perhaps even tools, one day) written in Go. They are:
