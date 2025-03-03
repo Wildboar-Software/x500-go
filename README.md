@@ -45,17 +45,7 @@ update with tags, text, keywords, etc.
 `SEQUENCE OF SET` = Not supported by Golang. See: https://github.com/golang/go/issues/27426
 `SET OF SET` = I am not sure what to do here.
 
-## TODO
-
-### MVP
-
-- [x] Even higher-level API
-- [ ] Use `X500OperationError` (I might not do this...)
-- [ ] Fill in critical extensions appropriately
-- [x] Documentation
-- [x] Reflection API (See Below)
-
-### Future
+### To Do
 
 - [ ] Complete NSAP library
 - [ ] Add types defined in newer X.500 specifications

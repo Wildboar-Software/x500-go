@@ -17,6 +17,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"reflect"
 	"runtime"
 	"sync"
 	"time"
@@ -1612,6 +1613,7 @@ func configureServiceControls(ctx context.Context, sc *x500.ServiceControls) {
 		} else {
 			sc.AttributeSizeLimit = NORMAL_ATTR_SIZE_LIMIT
 		}
+
 	}
 	if sc.SizeLimit == 0 {
 		if isSmallHost {
@@ -1619,6 +1621,66 @@ func configureServiceControls(ctx context.Context, sc *x500.ServiceControls) {
 		} else {
 			sc.SizeLimit = NORMAL_SIZE_LIMIT
 		}
+	}
+}
+
+func setSecurityParamsCritExtBits(critex *asn1.BitString, sp *x500.SecurityParameters) {
+	if sp.OperationCode.Tag > 0 || len(sp.OperationCode.FullBytes) > 0 {
+		setCritExtBit(critex, CRIT_EXT_BIT_SECURITY_OPERATION_CODE)
+	}
+	// Security parameters – Attribute certification path (there is no such field)
+	if sp.ErrorProtection > 0 {
+		setCritExtBit(critex, CRIT_EXT_BIT_SECURITY_ERROR_PROTECTION)
+	}
+}
+
+func setCommonArgsCritExtBits(commonArgs x500.CommonArgumentsInterface) *asn1.BitString {
+	critex := commonArgs.GetCriticalExtensions()
+	sc := commonArgs.GetServiceControls()
+	options := sc.Options
+	sp := commonArgs.GetSecurityParameters()
+	if options.At(x500.ServiceControlOptions_DontMatchFriends) > 0 ||
+		options.At(x500.ServiceControlOptions_DontSelectFriends) > 0 {
+		setCritExtBit(&critex, CRIT_EXT_BIT_FRIEND_ATTRIBUTES)
+	}
+	if len(sc.ServiceType) > 0 || sc.UserClass > 0 {
+		setCritExtBit(&critex, CRIT_EXT_BIT_SERVICE_ADMINISTRATION)
+	}
+	setSecurityParamsCritExtBits(&critex, &sp)
+	if options.At(x500.ServiceControlOptions_PartialNameResolution) > 0 {
+		setCritExtBit(&critex, CRIT_EXT_BIT_PARTIAL_NAME_RESOLUTION)
+	}
+	opctx := commonArgs.GetOperationContexts()
+	if opctx.Tag > 0 || len(opctx.FullBytes) > 0 {
+		setCritExtBit(&critex, CRIT_EXT_BIT_USE_OF_CONTEXTS)
+	}
+	// We always set this.
+	setCritExtBit(&critex, CRIT_EXT_BIT_ATTRIBUTE_SIZE_LIMIT)
+	if options.At(x500.ServiceControlOptions_ManageDSAIT) > 0 {
+		setCritExtBit(&critex, CRIT_EXT_BIT_MANAGE_DSA_IT)
+	}
+	if options.At(x500.ServiceControlOptions_CopyShallDo) > 0 {
+		setCritExtBit(&critex, CRIT_EXT_BIT_COPY_SHALL_DO)
+	}
+	if options.At(x500.ServiceControlOptions_Subentries) > 0 {
+		setCritExtBit(&critex, CRIT_EXT_BIT_SUBENTRIES)
+	}
+	return &critex
+}
+
+func setEntryInfoSelectionCritExtBits(critex *asn1.BitString, eis *x500.EntryInformationSelection) {
+	if eis.AllOperationalAttributes.Tag > 0 ||
+		len(eis.AllOperationalAttributes.FullBytes) > 0 ||
+		len(eis.SelectOperationalAttributesSET) > 0 {
+		setCritExtBit(critex, CRIT_EXT_BIT_EXTRA_ATTRIBUTES)
+	}
+	if eis.ReturnContexts ||
+		eis.ContextSelection.Tag > 0 ||
+		len(eis.ContextSelection.FullBytes) > 0 {
+		setCritExtBit(critex, CRIT_EXT_BIT_USE_OF_CONTEXTS)
+	}
+	if eis.FamilyReturn.MemberSelect > 0 {
+		setCritExtBit(critex, CRIT_EXT_BIT_FAMILY_RETURN)
 	}
 }
 
@@ -1636,6 +1698,11 @@ func (stack *IDMProtocolStack) Read(ctx context.Context, arg_data x500.ReadArgum
 		arg_data.OperationContexts = wrapWithTag(arg_data.OperationContexts, 20)
 	}
 	configureServiceControls(ctx, &arg_data.ServiceControls)
+	if arg_data.ModifyRightsRequest {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_MODIFY_RIGHTS_REQUEST)
+	}
+	arg_data.CriticalExtensions = *setCommonArgsCritExtBits(&arg_data)
+	setEntryInfoSelectionCritExtBits(&arg_data.CriticalExtensions, &arg_data.Selection)
 	var arg_bytes []byte
 	if stack.SigningKey != nil && stack.SigningCert != nil {
 		sp, err := createSecurityParameters(
@@ -1724,6 +1791,11 @@ func (stack *IDMProtocolStack) Compare(ctx context.Context, arg_data x500.Compar
 		arg_data.OperationContexts = wrapWithTag(arg_data.OperationContexts, 20)
 	}
 	configureServiceControls(ctx, &arg_data.ServiceControls)
+	arg_data.CriticalExtensions = *setCommonArgsCritExtBits(&arg_data)
+	assctx := arg_data.Purported.AssertedContexts
+	if assctx.Tag > 0 || len(assctx.FullBytes) > 0 {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_USE_OF_CONTEXTS)
+	}
 	var arg_bytes []byte
 	if stack.SigningKey != nil && stack.SigningCert != nil {
 		sp, err := createSecurityParameters(
@@ -1862,6 +1934,19 @@ func (stack *IDMProtocolStack) List(ctx context.Context, arg_data x500.ListArgum
 		arg_data.PagedResults = wrapWithTag(arg_data.PagedResults, 1)
 	}
 	configureServiceControls(ctx, &arg_data.ServiceControls)
+	if len(arg_data.PagedResults.Bytes) > 0 {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_PAGED_RESULTS_REQUEST)
+		if arg_data.PagedResults.Tag == 0 {
+			setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_ABANDON_OF_PAGED_RESULTS)
+		}
+	}
+	if len(arg_data.PagedResults.FullBytes) > 0 {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_PAGED_RESULTS_REQUEST)
+		if arg_data.PagedResults.FullBytes[0] == 0xA9 {
+			setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_ABANDON_OF_PAGED_RESULTS)
+		}
+	}
+	arg_data.CriticalExtensions = *setCommonArgsCritExtBits(&arg_data)
 	var arg_bytes []byte
 	if stack.SigningKey != nil && stack.SigningCert != nil {
 		sp, err := createSecurityParameters(
@@ -1964,6 +2049,46 @@ func (stack *IDMProtocolStack) Search(ctx context.Context, arg_data x500.SearchA
 		arg_data.ExtendedFilter = wrapWithTag(arg_data.ExtendedFilter, 7)
 	}
 	configureServiceControls(ctx, &arg_data.ServiceControls)
+	if len(arg_data.PagedResults.Bytes) > 0 {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_PAGED_RESULTS_REQUEST)
+		if arg_data.PagedResults.Tag == 0 {
+			setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_ABANDON_OF_PAGED_RESULTS)
+		}
+	}
+	if len(arg_data.PagedResults.FullBytes) > 0 {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_PAGED_RESULTS_REQUEST)
+		if arg_data.PagedResults.FullBytes[0] == 0xA9 {
+			setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_ABANDON_OF_PAGED_RESULTS)
+		}
+	}
+	sco := arg_data.SearchControlOptions
+	if sco.At(x500.SearchControlOptions_DnAttribute) > 0 {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_DN_ATTRIBUTES)
+	}
+	setEntryInfoSelectionCritExtBits(&arg_data.CriticalExtensions, &arg_data.Selection)
+	if !reflect.ValueOf(arg_data.Relaxation).IsZero() {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_RELAXATION)
+	}
+	if arg_data.HierarchySelections.BitLength > 0 {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_HIERARCHY_SELECTIONS)
+	}
+	if sco.At(x500.SearchControlOptions_EntryCount) > 0 {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_ENTRY_COUNT)
+	}
+	if arg_data.ExtendedArea > 0 {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_RELAXATION)
+	}
+	if arg_data.CheckOverspecified || sco.At(x500.SearchControlOptions_CheckOverspecified) > 0 {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_OVERSPEC_FILTER)
+	}
+	if len(arg_data.ExtendedFilter.FullBytes) > 0 || len(arg_data.ExtendedFilter.Bytes) > 0 {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_EXTENDED_FILTER)
+	}
+	if arg_data.MatchedValuesOnly || sco.At(x500.SearchControlOptions_MatchedValuesOnly) > 0 {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_MATCHED_VALUES_ONLY)
+	}
+	// Theoretically, we could check filters for contexts, but hell no.
+	arg_data.CriticalExtensions = *setCommonArgsCritExtBits(&arg_data)
 	var arg_bytes []byte
 	if stack.SigningKey != nil && stack.SigningCert != nil {
 		sp, err := createSecurityParameters(
@@ -2057,6 +2182,17 @@ func (stack *IDMProtocolStack) AddEntry(ctx context.Context, arg_data x500.AddEn
 		arg_data.OperationContexts = wrapWithTag(arg_data.OperationContexts, 20)
 	}
 	configureServiceControls(ctx, &arg_data.ServiceControls)
+	if !reflect.ValueOf(arg_data.TargetSystem).IsZero() {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_TARGET_SYSTEM)
+	}
+	arg_data.CriticalExtensions = *setCommonArgsCritExtBits(&arg_data)
+	for _, attr := range arg_data.Entry {
+		if len(attr.ValuesWithContext) > 0 {
+			setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_USE_OF_CONTEXTS)
+			break
+		}
+	}
+	// useAliasOnUpdate is to be set by the user.
 	var arg_bytes []byte
 	if stack.SigningKey != nil && stack.SigningCert != nil {
 		sp, err := createSecurityParameters(
@@ -2119,6 +2255,7 @@ func (stack *IDMProtocolStack) RemoveEntry(ctx context.Context, arg_data x500.Re
 		arg_data.OperationContexts = wrapWithTag(arg_data.OperationContexts, 20)
 	}
 	configureServiceControls(ctx, &arg_data.ServiceControls)
+	arg_data.CriticalExtensions = *setCommonArgsCritExtBits(&arg_data)
 	var arg_bytes []byte
 	if stack.SigningKey != nil && stack.SigningCert != nil {
 		sp, err := createSecurityParameters(
@@ -2181,6 +2318,17 @@ func (stack *IDMProtocolStack) ModifyEntry(ctx context.Context, arg_data x500.Mo
 		arg_data.OperationContexts = wrapWithTag(arg_data.OperationContexts, 20)
 	}
 	configureServiceControls(ctx, &arg_data.ServiceControls)
+	if !reflect.ValueOf(arg_data.Selection).IsZero() {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_SELECTION_ON_MODIFY)
+	}
+	// Always setting this.
+	setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_USE_OF_CONTEXTS)
+	for _, mod := range arg_data.Changes {
+		if mod.Tag == 6 {
+			setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_REPLACE_VALUES)
+		}
+	}
+	arg_data.CriticalExtensions = *setCommonArgsCritExtBits(&arg_data)
 	var arg_bytes []byte
 	if stack.SigningKey != nil && stack.SigningCert != nil {
 		sp, err := createSecurityParameters(
@@ -2238,6 +2386,10 @@ func (stack *IDMProtocolStack) ModifyDN(ctx context.Context, arg_data x500.Modif
 		return X500OpOutcome{}, nil, err
 	}
 	configureServiceControls(ctx, &arg_data.ServiceControls)
+	if len(arg_data.NewSuperior) > 0 {
+		setCritExtBit(&arg_data.CriticalExtensions, CRIT_EXT_BIT_NEW_SUPERIOR)
+	}
+	arg_data.CriticalExtensions = *setCommonArgsCritExtBits(&arg_data)
 	var arg_bytes []byte
 	if stack.SigningKey != nil && stack.SigningCert != nil {
 		sp, err := createSecurityParameters(

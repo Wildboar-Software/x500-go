@@ -40,29 +40,6 @@ const (
 	REJECT_PROBLEM_MISTYPED_PARAMETER             RejectProblem = 34
 )
 
-type AttributeOrValueProblem struct {
-	Problem int // Meaningless in updateError
-	Type    asn1.ObjectIdentifier
-	Value   asn1.RawValue // Meaningless in updateError
-}
-
-// TODO: Use this?
-type X500OperationError struct {
-	ApplicationContext asn1.ObjectIdentifier
-	InvokeId           x500.InvokeId
-	Code               int
-	Problem            int                        // Present in many error types
-	MatchedObject      x500.Name                  // Used by attributeError and nameError
-	AbandonedOperation x500.InvokeId              // Used by abandoned
-	Candidate          x500.ContinuationReference // Used by referral
-	ContextPrefix      x500.DistinguishedName     // Used by dsaReferral
-	AttributeProblems  []AttributeOrValueProblem  // Used by updateError and attributeError
-	SecurityParameters x500.SecurityParameters
-	Performer          x500.DistinguishedName
-	AliasDereferenced  bool
-	Notification       []x500.Attribute
-}
-
 // The parameters of an X.500 directory bind, as well as those of the underlying
 // Remote Operation Service Element (ROSE) and Association Control Service
 // Element (ACSE), which are unused if not applicable to the underlying
@@ -365,4 +342,72 @@ type DirectoryGroupClient interface {
 	// Check for the presence of a member in a group. If `uid` is `nil`, the
 	// `member` attribute is used, otherwise, the `uniqueMember` attribute is used.
 	GroupCheckMember(ctx context.Context, group, member DN, uid *asn1.BitString) (resp X500OpOutcome, result *x500.CompareResultData, err error)
+}
+
+const (
+	CRIT_EXT_BIT_SUBENTRIES                            = 1
+	CRIT_EXT_BIT_COPY_SHALL_DO                         = 2
+	CRIT_EXT_BIT_ATTRIBUTE_SIZE_LIMIT                  = 3
+	CRIT_EXT_BIT_EXTRA_ATTRIBUTES                      = 4
+	CRIT_EXT_BIT_MODIFY_RIGHTS_REQUEST                 = 5
+	CRIT_EXT_BIT_PAGED_RESULTS_REQUEST                 = 6
+	CRIT_EXT_BIT_MATCHED_VALUES_ONLY                   = 7
+	CRIT_EXT_BIT_EXTENDED_FILTER                       = 8
+	CRIT_EXT_BIT_TARGET_SYSTEM                         = 9
+	CRIT_EXT_BIT_USE_ALIAS_ON_UPDATE                   = 10
+	CRIT_EXT_BIT_NEW_SUPERIOR                          = 11
+	CRIT_EXT_BIT_MANAGE_DSA_IT                         = 12
+	CRIT_EXT_BIT_USE_OF_CONTEXTS                       = 13
+	CRIT_EXT_BIT_PARTIAL_NAME_RESOLUTION               = 14
+	CRIT_EXT_BIT_OVERSPEC_FILTER                       = 15
+	CRIT_EXT_BIT_SELECTION_ON_MODIFY                   = 16
+	CRIT_EXT_BIT_SECURITY_OPERATION_CODE               = 18
+	CRIT_EXT_BIT_SECURITY_ATTRIBUTE_CERTIFICATION_PATH = 19
+	CRIT_EXT_BIT_SECURITY_ERROR_PROTECTION             = 20
+	CRIT_EXT_BIT_SERVICE_ADMINISTRATION                = 25
+	CRIT_EXT_BIT_ENTRY_COUNT                           = 26
+	CRIT_EXT_BIT_HIERARCHY_SELECTIONS                  = 27
+	CRIT_EXT_BIT_RELAXATION                            = 28
+	CRIT_EXT_BIT_FAMILY_GROUPING                       = 29
+	CRIT_EXT_BIT_FAMILY_RETURN                         = 30
+	CRIT_EXT_BIT_DN_ATTRIBUTES                         = 31
+	CRIT_EXT_BIT_FRIEND_ATTRIBUTES                     = 32
+	CRIT_EXT_BIT_ABANDON_OF_PAGED_RESULTS              = 33
+	CRIT_EXT_BIT_PAGED_RESULTS_ON_THE_DSP              = 34
+	CRIT_EXT_BIT_REPLACE_VALUES                        = 35
+)
+
+// SetBit modifies a bit at the given index in an ASN.1 BitString.
+// If set is true, the bit is set; if false, the bit is cleared.
+// If the index is beyond the current length, the BitString is extended.
+func setBit(bs *asn1.BitString, index int, set bool) {
+	byteIndex := index / 8
+	bitOffset := uint(7 - (index % 8))
+
+	// Extend the bytes slice if needed
+	if byteIndex >= len(bs.Bytes) {
+		newBytes := make([]byte, byteIndex+1)
+		copy(newBytes, bs.Bytes)
+		bs.Bytes = newBytes
+	}
+
+	// Set or clear the bit
+	if set {
+		bs.Bytes[byteIndex] |= (1 << bitOffset) // Set bit
+	} else {
+		bs.Bytes[byteIndex] &^= (1 << bitOffset) // Clear bit
+	}
+
+	// Update bit length if needed
+	if index+1 > bs.BitLength {
+		bs.BitLength = index + 1
+	}
+}
+
+// Set a bit in Critical Extensions
+func setCritExtBit(bs *asn1.BitString, index int) {
+	if index <= 0 {
+		return
+	}
+	setBit(bs, index-1, true)
 }
