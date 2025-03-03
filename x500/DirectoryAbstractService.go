@@ -1981,7 +1981,7 @@ type ModifyDNArgumentData struct {
 	Object              DistinguishedName         `asn1:"explicit,tag:0"`
 	NewRDN              RelativeDistinguishedName `asn1:"explicit,tag:1"`
 	DeleteOldRDN        bool                      `asn1:"optional,explicit,tag:2"`
-	NewSuperior         DistinguishedName         `asn1:"optional,explicit,tag:3"`
+	NewSuperior         DistinguishedName         `asn1:"optional,explicit,tag:3,omitempty"`
 	ServiceControls     ServiceControls           `asn1:"optional,explicit,tag:30,set"`
 	SecurityParameters  SecurityParameters        `asn1:"optional,explicit,tag:29,set"`
 	Requestor           DistinguishedName         `asn1:"optional,explicit,tag:28"`
